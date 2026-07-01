@@ -1,25 +1,6 @@
-import express from "express";
-import cors from "cors";
 import mongoose from "mongoose";
 import "dotenv/config";
-
-const app = express();
-
-app.use(
-  cors({
-    origin: [process.env.CLIENT_URL, "http://localhost:5173"],
-    credentials: true
-  })
-);
-
-app.use(express.json());
-
-app.get("/api/health", (req, res) => {
-  res.json({
-    status: "ok",
-    message: "Macro tracker API is running"
-  });
-});
+import app from "./app.js";
 
 const PORT = process.env.PORT || 5000;
 
@@ -37,6 +18,7 @@ async function startServer() {
     });
   } catch (error) {
     console.error("Startup error:", error.message);
+    process.exit(1);
   }
 }
 
