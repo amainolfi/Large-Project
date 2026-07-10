@@ -23,7 +23,17 @@ const macroGoalSchema = new mongoose.Schema(
       required: true,
       min: 0
     },
-    dailyFat: {
+    dailySaturatedFat: {
+      type: Number,
+      required: true,
+      min: 0
+    },
+    dailyTransFat: {
+      type: Number,
+      required: true,
+      min: 0
+    },
+    dailySodium: {
       type: Number,
       required: true,
       min: 0

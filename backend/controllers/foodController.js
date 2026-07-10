@@ -12,7 +12,9 @@ const foodSchema = z.object({
   calories: z.coerce.number().min(0),
   protein: z.coerce.number().min(0),
   carbs: z.coerce.number().min(0),
-  fat: z.coerce.number().min(0),
+  saturatedFat: z.coerce.number().min(0),
+  transFat: z.coerce.number().min(0),
+  sodium: z.coerce.number().min(0),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/)
 });
 
@@ -150,7 +152,7 @@ export async function getRecentFoods(req, res) {
   const uniqueEntries = [];
 
   for (const entry of recentEntries) {
-    const key = `${entry.foodName.toLowerCase()}|${entry.servingSize.toLowerCase()}|${entry.calories}|${entry.protein}|${entry.carbs}|${entry.fat}`;
+    const key = `${entry.foodName.toLowerCase()}|${entry.servingSize.toLowerCase()}|${entry.calories}|${entry.protein}|${entry.carbs}|${entry.saturatedFat}|${entry.transFat}|${entry.sodium}`;
 
     if (!seen.has(key)) {
       seen.add(key);
@@ -181,7 +183,9 @@ export async function quickAddFood(req, res) {
     calories: sourceEntry.calories,
     protein: sourceEntry.protein,
     carbs: sourceEntry.carbs,
-    fat: sourceEntry.fat,
+    saturatedFat: sourceEntry.saturatedFat,
+    transFat: sourceEntry.transFat,
+    sodium: sourceEntry.sodium,
     date: data.date
   });
 

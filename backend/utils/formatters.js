@@ -20,7 +20,9 @@ export function formatGoal(goal) {
     dailyCalories: goal.dailyCalories,
     dailyProtein: goal.dailyProtein,
     dailyCarbs: goal.dailyCarbs,
-    dailyFat: goal.dailyFat,
+    dailySaturatedFat: goal.dailySaturatedFat,
+    dailyTransFat: goal.dailyTransFat,
+    dailySodium: goal.dailySodium,
     createdAt: goal.createdAt,
     updatedAt: goal.updatedAt
   };
@@ -35,7 +37,9 @@ export function formatFoodEntry(foodEntry) {
     calories: foodEntry.calories,
     protein: foodEntry.protein,
     carbs: foodEntry.carbs,
-    fat: foodEntry.fat,
+    saturatedFat: foodEntry.saturatedFat,
+    transFat: foodEntry.transFat,
+    sodium: foodEntry.sodium,
     date: foodEntry.date,
     createdAt: foodEntry.createdAt,
     updatedAt: foodEntry.updatedAt

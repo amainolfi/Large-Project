@@ -40,7 +40,17 @@ const foodEntrySchema = new mongoose.Schema(
       required: true,
       min: 0
     },
-    fat: {
+    saturatedFat: {
+      type: Number,
+      required: true,
+      min: 0
+    },
+    transFat: {
+      type: Number,
+      required: true,
+      min: 0
+    },
+    sodium: {
       type: Number,
       required: true,
       min: 0

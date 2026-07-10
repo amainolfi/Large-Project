@@ -12,7 +12,10 @@ const app = express();
 const allowedOrigins = [
   process.env.CLIENT_URL,
   "http://localhost:5173",
-  "http://127.0.0.1:5173"
+  "http://127.0.0.1:5173",
+  // Expo web dev server for the mobile app
+  "http://localhost:8081",
+  "http://127.0.0.1:8081"
 ].filter(Boolean);
 
 app.use(
@@ -33,7 +36,7 @@ app.use(express.json());
 app.get("/api/health", (_req, res) => {
   res.json({
     status: "ok",
-    message: "Macro tracker API is running"
+    message: "MacroVanta API is running"
   });
 });
 

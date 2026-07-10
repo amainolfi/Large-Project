@@ -9,7 +9,9 @@ function emptyTotals() {
     calories: 0,
     protein: 0,
     carbs: 0,
-    fat: 0
+    saturatedFat: 0,
+    transFat: 0,
+    sodium: 0
   };
 }
 
@@ -17,7 +19,9 @@ function addEntryToTotals(totals, entry) {
   totals.calories += entry.calories;
   totals.protein += entry.protein;
   totals.carbs += entry.carbs;
-  totals.fat += entry.fat;
+  totals.saturatedFat += entry.saturatedFat;
+  totals.transFat += entry.transFat;
+  totals.sodium += entry.sodium;
 }
 
 function roundOneDecimal(value) {
@@ -29,17 +33,19 @@ function formatGoals(goal) {
     calories: goal?.dailyCalories || 0,
     protein: goal?.dailyProtein || 0,
     carbs: goal?.dailyCarbs || 0,
-    fat: goal?.dailyFat || 0
+    saturatedFat: goal?.dailySaturatedFat || 0,
+    transFat: goal?.dailyTransFat || 0,
+    sodium: goal?.dailySodium || 0
   };
 }
 
 function calculateProgress(totals, goals) {
-  return {
-    calories: goals.calories ? roundOneDecimal((totals.calories / goals.calories) * 100) : 0,
-    protein: goals.protein ? roundOneDecimal((totals.protein / goals.protein) * 100) : 0,
-    carbs: goals.carbs ? roundOneDecimal((totals.carbs / goals.carbs) * 100) : 0,
-    fat: goals.fat ? roundOneDecimal((totals.fat / goals.fat) * 100) : 0
-  };
+  return Object.fromEntries(
+    Object.keys(goals).map((key) => [
+      key,
+      goals[key] ? roundOneDecimal((totals[key] / goals[key]) * 100) : 0
+    ])
+  );
 }
 
 function getDateFromQuery(req) {

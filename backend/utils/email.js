@@ -55,9 +55,9 @@ export async function sendVerificationEmail(user, token) {
 
   return sendEmail({
     to: user.email,
-    subject: "Verify your Macro Tracker email",
+    subject: "Verify your MacroVanta email",
     text: `Verify your email here: ${verificationUrl}`,
-    html: `<p>Verify your Macro Tracker email here:</p><p><a href="${verificationUrl}">${verificationUrl}</a></p>`
+    html: `<p>Verify your MacroVanta email here:</p><p><a href="${verificationUrl}">${verificationUrl}</a></p>`
   });
 }
 
@@ -69,8 +69,8 @@ export async function sendPasswordResetEmail(user, token) {
 
   return sendEmail({
     to: user.email,
-    subject: "Reset your Macro Tracker password",
+    subject: "Reset your MacroVanta password",
     text: `Reset your password here: ${resetUrl}`,
-    html: `<p>Reset your Macro Tracker password here:</p><p><a href="${resetUrl}">${resetUrl}</a></p>`
+    html: `<p>Reset your MacroVanta password here:</p><p><a href="${resetUrl}">${resetUrl}</a></p>`
   });
 }

@@ -6,7 +6,9 @@ const goalSchema = z.object({
   dailyCalories: z.coerce.number().min(0),
   dailyProtein: z.coerce.number().min(0),
   dailyCarbs: z.coerce.number().min(0),
-  dailyFat: z.coerce.number().min(0)
+  dailySaturatedFat: z.coerce.number().min(0),
+  dailyTransFat: z.coerce.number().min(0),
+  dailySodium: z.coerce.number().min(0)
 });
 
 function parseBody(schema, body) {
