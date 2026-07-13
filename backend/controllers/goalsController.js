@@ -35,7 +35,7 @@ export async function upsertGoals(req, res) {
   const goals = await MacroGoal.findOneAndUpdate(
     { userId: req.user._id },
     { ...data, userId: req.user._id },
-    { new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true }
+    { returnDocument: "after", upsert: true, runValidators: true, setDefaultsOnInsert: true }
   );
 
   res.json({
