@@ -8,8 +8,10 @@ import { useAuth } from "../lib/auth";
 export default function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
   const [needsVerification, setNeedsVerification] = useState(false);
@@ -54,15 +56,22 @@ export default function LoginPage() {
 
   return (
     <div className="auth-shell">
-      <div className="auth-card card">
-        <span className="brand auth-brand">
-          <span className="brand-mark">MV</span>
-          MacroVanta
-        </span>
-        <h1>Welcome back</h1>
-        <p className="auth-subtitle">Log in to keep tracking your macros.</p>
+      <div className="auth-card card auth-card-enhanced">
+        <div className="auth-header">
+          <span className="brand auth-brand">
+            <span className="brand-mark">MV</span>
+            MacroVanta
+          </span>
+
+          <div className="auth-copy">
+            <h1>Welcome back</h1>
+            <p className="auth-subtitle">Log in to keep tracking your macros.</p>
+          </div>
+        </div>
+
         {error && <Message kind="error">{error}</Message>}
         {info && <Message kind="success">{info}</Message>}
+
         {needsVerification && (
           <div className="message message-info">
             Your email is not verified yet.{" "}
@@ -71,7 +80,8 @@ export default function LoginPage() {
             </button>
           </div>
         )}
-        <form onSubmit={handleSubmit}>
+
+        <form onSubmit={handleSubmit} className="auth-form">
           <div className="field">
             <label htmlFor="email">Email</label>
             <input
@@ -80,24 +90,40 @@ export default function LoginPage() {
               value={email}
               autoComplete="email"
               onChange={(event) => setEmail(event.target.value)}
+              placeholder="Enter your email"
               required
             />
           </div>
+
           <div className="field">
             <label htmlFor="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              autoComplete="current-password"
-              onChange={(event) => setPassword(event.target.value)}
-              required
-            />
+            <div className="password-field">
+              <input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                autoComplete="current-password"
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="Enter your password"
+                required
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword((current) => !current)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                aria-pressed={showPassword}
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
           </div>
-          <button type="submit" className="btn btn-block" disabled={submitting}>
-            {submitting ? "Logging in…" : "Log in"}
+
+          <button type="submit" className="btn btn-block auth-submit" disabled={submitting}>
+            {submitting ? "Logging in..." : "Log in"}
           </button>
         </form>
+
         <div className="auth-links">
           <Link to="/forgot-password">Forgot password?</Link>
           <span>
