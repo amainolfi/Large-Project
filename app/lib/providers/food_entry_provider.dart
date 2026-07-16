@@ -51,6 +51,33 @@ class FoodEntryProvider extends ChangeNotifier {
     return _run(() => _api.quickAddFood(id, date));
   }
 
+  /// Converts a consumed-food description into validated estimated entries.
+  /// Returns the saved entry count, or null on failure.
+  Future<int?> logWithAi({
+    required String text,
+    required String date,
+    required MealType mealType,
+  }) async {
+    _submitting = true;
+    _error = null;
+    notifyListeners();
+    try {
+      final entries = await _api.logFoodWithAi(
+        text: text,
+        date: date,
+        mealType: mealType,
+      );
+      _submitting = false;
+      notifyListeners();
+      return entries.length;
+    } on ApiException catch (e) {
+      _error = e.message;
+      _submitting = false;
+      notifyListeners();
+      return null;
+    }
+  }
+
   Future<bool> _run(Future<FoodEntry> Function() action) async {
     _submitting = true;
     _error = null;

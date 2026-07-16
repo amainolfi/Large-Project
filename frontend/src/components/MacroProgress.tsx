@@ -19,7 +19,7 @@ export default function MacroProgress({
   unit,
   kind
 }: MacroProgressProps) {
-  const width = Math.min(percent, 100);
+  const width = Math.max(0, Math.min(percent, 100));
 
   let fillClass = "progress-fill";
 
@@ -35,7 +35,14 @@ export default function MacroProgress({
         <span className="macro-label">{label}</span>
         <span className="macro-percent">{goal > 0 ? `${round(percent)}%` : "—"}</span>
       </div>
-      <div className="progress">
+      <div
+        className="progress"
+        role="progressbar"
+        aria-label={`${label} progress`}
+        aria-valuemin={0}
+        aria-valuemax={goal > 0 ? goal : undefined}
+        aria-valuenow={goal > 0 ? round(total) : undefined}
+      >
         <div className={fillClass} style={{ width: `${goal > 0 ? width : 0}%` }} />
       </div>
       <div className="macro-values">

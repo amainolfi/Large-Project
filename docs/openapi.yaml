@@ -1,0 +1,1694 @@
+openapi: 3.0.3
+info:
+  title: MacroVanta API
+  description: |
+    REST API for the MacroVanta app. Handles user authentication with JWT,
+    food entry logging, AI-assisted extraction, USDA food search, daily macro
+    and micronutrient goals, and nutrition summaries.
+
+    Authentication: obtain a token from `POST /api/auth/login`, then click
+    Authorize and paste the token. SwaggerHub adds the `Bearer ` prefix when
+    using the bearer auth helper.
+
+    Email verification: accounts must verify their email before logging in.
+    Unverified accounts receive a 403 from the login endpoint.
+
+    Dates: all dates are plain strings in `YYYY-MM-DD` format. Summary endpoint
+    defaults use the server's current UTC date.
+
+    Development tokens: when the server is not running in production,
+    token-generating responses include a `developmentToken` field. Registration
+    includes it after creating a verification token. Resend verification includes
+    it only when an existing unverified account receives a new verification
+    token. Forgot password includes it only when an existing account receives a
+    reset token.
+  version: 1.1.0
+  contact:
+    name: Anthony Mainolfi
+servers:
+  - url: https://dylanwexler.com
+    description: Deployed course demonstration server
+  - url: http://localhost:5000
+    description: Local development server
+
+tags:
+  - name: Health
+    description: Service status
+  - name: Auth
+    description: Registration, login, email verification, and password reset
+  - name: Foods
+    description: Food entry CRUD, AI logging, search, recents, and quick-add
+  - name: Preset Foods
+    description: Server-side search of USDA FoodData Central
+  - name: Goals
+    description: Daily macro goals
+  - name: Summary
+    description: Daily, per-meal, and weekly nutrition summaries
+  - name: Users
+    description: Profile and account management
+
+paths:
+  /api/health:
+    get:
+      tags: [Health]
+      summary: Health check
+      description: Confirms the API is up. No authentication required.
+      operationId: getHealth
+      responses:
+        "200":
+          description: API is running
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, message]
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  message:
+                    type: string
+                    example: MacroVanta API is running
+
+  /api/auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new user
+      description: |
+        Creates a user account and sends a verification email. The verification
+        token expires after 24 hours. Password must be at least 8 characters and
+        include uppercase, lowercase, a number, and a special character.
+        The email must be verified before the account can log in.
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: User created; verification email sent
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [message, user]
+                properties:
+                  message:
+                    type: string
+                    example: User registered successfully. Please verify your email.
+                  user:
+                    $ref: "#/components/schemas/User"
+                  developmentToken:
+                    type: string
+                    description: Raw verification token, returned only outside production
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          description: Email already registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                message: Email is already registered.
+
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Log in
+      description: |
+        Returns a JWT and the user profile on success. The account's email must
+        be verified. Unverified accounts receive a 403.
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [token, user]
+                properties:
+                  token:
+                    type: string
+                    description: "JWT to send as `Authorization: Bearer <token>`"
+                  user:
+                    $ref: "#/components/schemas/User"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                message: Invalid email or password.
+        "403":
+          description: Email not verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                message: Please verify your email before logging in.
+
+  /api/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Log out
+      description: Stateless acknowledgement. The client should discard its JWT. No authentication required.
+      operationId: logout
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+              example:
+                message: Logged out successfully.
+
+  /api/auth/verify-email/{token}:
+    get:
+      tags: [Auth]
+      summary: Verify email address
+      description: Consumes a verification token, valid for 24 hours, and marks the user's email as verified.
+      operationId: verifyEmail
+      parameters:
+        - name: token
+          in: path
+          required: true
+          description: Raw verification token from the email or non-production `developmentToken`
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Email verified
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [message, user]
+                properties:
+                  message:
+                    type: string
+                    example: Email verified successfully.
+                  user:
+                    $ref: "#/components/schemas/User"
+        "400":
+          description: Invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                expired:
+                  value:
+                    message: Invalid or expired verification token.
+                invalidUser:
+                  value:
+                    message: Invalid verification token.
+
+  /api/auth/resend-verification:
+    post:
+      tags: [Auth]
+      summary: Resend verification email
+      description: |
+        Accepts an email address and returns 200 for valid email-shaped requests.
+        If the account exists and is unverified, previous verification tokens are
+        invalidated and a new verification email is sent. If the account is
+        already verified, the implementation returns a distinct acknowledgement.
+      operationId: resendVerification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmailRequest"
+      responses:
+        "200":
+          description: Request acknowledged
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [message]
+                properties:
+                  message:
+                    type: string
+                  developmentToken:
+                    type: string
+                    description: Raw verification token, returned only outside production when a new token is generated
+              examples:
+                sent:
+                  value:
+                    message: Verification email sent.
+                    developmentToken: 8c4d2f0c25d8c1f0c40c6cb0e88bf3197cbf9d5a6d82ef674261ad24fd70af1a
+                unknown:
+                  value:
+                    message: If that email exists and is unverified, a verification email was sent.
+                alreadyVerified:
+                  value:
+                    message: Email is already verified.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /api/auth/forgot-password:
+    post:
+      tags: [Auth]
+      summary: Request a password reset
+      description: |
+        Returns 200 for valid email-shaped requests. If the account exists, any
+        previous reset tokens are invalidated and a new reset token, valid for
+        1 hour, is emailed.
+      operationId: forgotPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmailRequest"
+      responses:
+        "200":
+          description: Request acknowledged
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [message]
+                properties:
+                  message:
+                    type: string
+                    example: If that email exists, a password reset link was sent.
+                  developmentToken:
+                    type: string
+                    description: Raw reset token, returned only outside production when a reset token is generated
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /api/auth/reset-password/{token}:
+    post:
+      tags: [Auth]
+      summary: Reset password with a token
+      description: Consumes a reset token, valid for 1 hour, and sets a new password.
+      operationId: resetPassword
+      parameters:
+        - name: token
+          in: path
+          required: true
+          description: Raw reset token from the email or non-production `developmentToken`
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResetPasswordRequest"
+      responses:
+        "200":
+          description: Password reset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+              example:
+                message: Password reset successfully.
+        "400":
+          description: Weak password, invalid token, or expired token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                weakPassword:
+                  value:
+                    message: Password must be at least 8 characters and include uppercase, lowercase, number, and special character.
+                invalidOrExpired:
+                  value:
+                    message: Invalid or expired password reset token.
+
+  /api/auth/me:
+    get:
+      tags: [Auth]
+      summary: Get the authenticated user
+      operationId: getMe
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [user]
+                properties:
+                  user:
+                    $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/foods:
+    post:
+      tags: [Foods]
+      summary: Create a food entry
+      operationId: createFood
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FoodEntryInput"
+      responses:
+        "201":
+          description: Food entry created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FoodEntryResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    get:
+      tags: [Foods]
+      summary: List food entries
+      description: Returns the user's entries, sorted by date descending and then creation time descending. Optionally filtered to a single date.
+      operationId: getFoods
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/DateQuery"
+      responses:
+        "200":
+          description: Food entries
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FoodEntryListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/foods/search:
+    get:
+      tags: [Foods]
+      summary: Search food entries by name
+      description: Case-insensitive substring match on food name. Returns at most 50 results.
+      operationId: searchFoods
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: query
+          in: query
+          required: true
+          description: Search text matched anywhere in the food name
+          schema:
+            type: string
+          example: chicken
+        - $ref: "#/components/parameters/DateQuery"
+      responses:
+        "200":
+          description: Matching food entries, max 50
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FoodEntryListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/foods/ai-log:
+    post:
+      tags: [Foods]
+      summary: Log consumed food from plain language
+      description: |
+        Uses a narrowly scoped LLM parser with strict structured output to
+        estimate nutrition for food or drinks the authenticated user consumed.
+        Input is limited to 500 characters and eight food items. The server
+        rejects non-food content and instruction-like input, validates every
+        returned value, labels entries as AI estimates, and rate limits each
+        user. Estimates should be reviewed and edited when precision matters.
+      operationId: logFoodWithAi
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AiFoodLogRequest"
+      responses:
+        "201":
+          description: One or more estimated food entries saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiFoodLogResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "422":
+          description: Text did not describe food already consumed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Per-user AI request limit reached
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "502":
+          description: AI provider unavailable or returned invalid data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: OpenAI API key is not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/foods/recent:
+    get:
+      tags: [Foods]
+      summary: Get recent unique foods
+      description: |
+        Looks at the user's 50 most recent entries and returns up to 10 unique
+        foods, de-duplicated by name, serving size, and macros. Useful for quick
+        re-logging.
+      operationId: getRecentFoods
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Recent unique food entries, max 10
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FoodEntryListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/foods/quick-add/{id}:
+    post:
+      tags: [Foods]
+      summary: Quick-add a copy of an existing entry
+      description: |
+        Creates a new food entry by copying an existing one, using its name,
+        serving size, and macros on the supplied date. Meal type defaults to the
+        source entry's meal type unless overridden.
+      operationId: quickAddFood
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/FoodEntryId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuickAddFoodRequest"
+      responses:
+        "201":
+          description: New food entry created from the source entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FoodEntryResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/FoodNotFound"
+
+  /api/foods/{id}:
+    get:
+      tags: [Foods]
+      summary: Get a food entry by id
+      operationId: getFoodById
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/FoodEntryId"
+      responses:
+        "200":
+          description: Food entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FoodEntryResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/FoodNotFound"
+    put:
+      tags: [Foods]
+      summary: Update a food entry
+      description: Partial update. Send any subset of fields, but at least one field is required.
+      operationId: updateFood
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/FoodEntryId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FoodEntryUpdate"
+      responses:
+        "200":
+          description: Updated food entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FoodEntryResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/FoodNotFound"
+    delete:
+      tags: [Foods]
+      summary: Delete a food entry
+      operationId: deleteFood
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/FoodEntryId"
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+              example:
+                message: Food entry deleted successfully.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/FoodNotFound"
+
+  /api/preset-foods/search:
+    get:
+      tags: [Preset Foods]
+      summary: Search USDA FoodData Central
+      description: |
+        Makes a server-side search request to USDA FoodData Central and maps
+        its nutrient data into MacroVanta's food-entry shape. The USDA API key
+        stays on the server. Branded results are scaled to a labeled gram or
+        milliliter serving when possible; otherwise values remain per 100 g.
+      operationId: searchPresetFoods
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 120
+          example: greek yogurt
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 25
+      responses:
+        "200":
+          description: USDA food search results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PresetFoodSearchResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          description: User or USDA rate limit reached
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "502":
+          description: USDA service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/goals:
+    get:
+      tags: [Goals]
+      summary: Get macro goals
+      description: Returns the user's daily macro goals, or null if none have been set.
+      operationId: getGoals
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Macro goals or null
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [goals]
+                properties:
+                  goals:
+                    $ref: "#/components/schemas/MacroGoalNullable"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    put:
+      tags: [Goals]
+      summary: Create or update macro goals
+      description: Upserts the user's daily targets. Creates them on first call and replaces them on later calls.
+      operationId: upsertGoals
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MacroGoalInput"
+      responses:
+        "200":
+          description: Goals saved
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [message, goals]
+                properties:
+                  message:
+                    type: string
+                    example: Macro goals saved successfully.
+                  goals:
+                    $ref: "#/components/schemas/MacroGoal"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/summary/daily:
+    get:
+      tags: [Summary]
+      summary: Daily totals vs. goals
+      description: |
+        Totals for the given date, the user's goals, and progress toward each
+        goal as a percentage rounded to one decimal. If `date` is omitted, the
+        server defaults to the current UTC date. Progress is 0 for any goal that
+        is unset or zero.
+      operationId: getDailySummary
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/DateQuery"
+      responses:
+        "200":
+          description: Daily summary
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [date, totals, goals, progress]
+                properties:
+                  date:
+                    type: string
+                    example: "2026-07-07"
+                  totals:
+                    $ref: "#/components/schemas/MacroTotals"
+                  goals:
+                    $ref: "#/components/schemas/MacroTotals"
+                  progress:
+                    allOf:
+                      - $ref: "#/components/schemas/MacroTotals"
+                      - description: Percent of each goal reached, rounded to one decimal
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/summary/by-meal:
+    get:
+      tags: [Summary]
+      summary: Daily totals grouped by meal
+      description: |
+        Totals for each meal type on the given date. If `date` is omitted, the
+        server defaults to the current UTC date. All four meals are always
+        present.
+      operationId: getSummaryByMeal
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/DateQuery"
+      responses:
+        "200":
+          description: Per-meal summary
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [date, meals]
+                properties:
+                  date:
+                    type: string
+                    example: "2026-07-07"
+                  meals:
+                    $ref: "#/components/schemas/MealTotals"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/summary/weekly:
+    get:
+      tags: [Summary]
+      summary: Seven-day summary
+      description: |
+        Daily totals for the 7 days beginning at `startDate`. If `startDate` is
+        omitted, the server defaults to the current UTC date.
+      operationId: getWeeklySummary
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: startDate
+          in: query
+          required: false
+          description: First day of the 7-day window, in YYYY-MM-DD format. Defaults to the current UTC date.
+          schema:
+            type: string
+            pattern: '^\d{4}-\d{2}-\d{2}$'
+          example: "2026-07-01"
+      responses:
+        "200":
+          description: Weekly summary
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [startDate, endDate, days]
+                properties:
+                  startDate:
+                    type: string
+                    example: "2026-07-01"
+                  endDate:
+                    type: string
+                    example: "2026-07-07"
+                  days:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/DailyTotals"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/users/profile:
+    get:
+      tags: [Users]
+      summary: Get profile
+      operationId: getProfile
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [user]
+                properties:
+                  user:
+                    $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    put:
+      tags: [Users]
+      summary: Update profile
+      description: Send `firstName`, `lastName`, or both. At least one field is required.
+      operationId: updateProfile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileUpdateRequest"
+      responses:
+        "200":
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [message, user]
+                properties:
+                  message:
+                    type: string
+                    example: Profile updated successfully.
+                  user:
+                    $ref: "#/components/schemas/User"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/users/password:
+    put:
+      tags: [Users]
+      summary: Change password
+      description: |
+        Requires the current password. The new password must meet strength
+        requirements. Any outstanding password-reset tokens are invalidated.
+      operationId: changePassword
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangePasswordRequest"
+      responses:
+        "200":
+          description: Password changed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+              example:
+                message: Password changed successfully.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Not authenticated, invalid token, expired token, or current password incorrect
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                missingToken:
+                  value:
+                    message: Authentication token required.
+                invalidToken:
+                  value:
+                    message: Invalid or expired authentication token.
+                wrongCurrentPassword:
+                  value:
+                    message: Current password is incorrect.
+
+  /api/users/account:
+    delete:
+      tags: [Users]
+      summary: Delete account
+      description: |
+        Permanent. Deletes the user and all associated data: food entries, macro
+        goals, verification tokens, and password-reset tokens.
+      operationId: deleteAccount
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Account deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+              example:
+                message: Account deleted successfully.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT returned by `POST /api/auth/login`
+
+  parameters:
+    DateQuery:
+      name: date
+      in: query
+      required: false
+      description: Filter by date, in YYYY-MM-DD format. Summary endpoints default to the current UTC date.
+      schema:
+        type: string
+        pattern: '^\d{4}-\d{2}-\d{2}$'
+      example: "2026-07-07"
+    FoodEntryId:
+      name: id
+      in: path
+      required: true
+      description: Food entry id, stored as a MongoDB ObjectId
+      schema:
+        type: string
+      example: 665f1c2ab8e4a91d2c3f0a11
+
+  responses:
+    BadRequest:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            invalidDate:
+              value:
+                message: date must use YYYY-MM-DD format.
+            validation:
+              value:
+                message: At least one field is required.
+            weakPassword:
+              value:
+                message: Password must be at least 8 characters and include uppercase, lowercase, number, and special character.
+    Unauthorized:
+      description: Missing, invalid, or expired authentication token
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            missing:
+              value:
+                message: Authentication token required.
+            invalid:
+              value:
+                message: Invalid authentication token.
+            expired:
+              value:
+                message: Invalid or expired authentication token.
+    FoodNotFound:
+      description: Food entry not found or not owned by this user
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            message: Food entry not found.
+
+  schemas:
+    RegisterRequest:
+      type: object
+      required: [firstName, lastName, email, password]
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 50
+          example: Anthony
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 50
+          example: Mainolfi
+        email:
+          type: string
+          format: email
+          maxLength: 254
+          example: anthony@example.com
+        password:
+          type: string
+          format: password
+          minLength: 8
+          description: Must include uppercase, lowercase, a number, and a special character
+          example: Str0ng!Pass
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          example: anthony@example.com
+        password:
+          type: string
+          format: password
+          minLength: 1
+          example: Str0ng!Pass
+
+    EmailRequest:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+          example: anthony@example.com
+
+    ResetPasswordRequest:
+      type: object
+      required: [newPassword]
+      properties:
+        newPassword:
+          type: string
+          format: password
+          minLength: 8
+          description: Must include uppercase, lowercase, a number, and a special character
+          example: N3w!Passw0rd
+
+    ChangePasswordRequest:
+      type: object
+      required: [currentPassword, newPassword]
+      properties:
+        currentPassword:
+          type: string
+          format: password
+        newPassword:
+          type: string
+          format: password
+          minLength: 8
+          description: Must include uppercase, lowercase, a number, and a special character
+          example: N3w!Passw0rd
+
+    ProfileUpdateRequest:
+      type: object
+      description: At least one of `firstName` or `lastName` is required.
+      minProperties: 1
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 50
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 50
+
+    MealType:
+      type: string
+      enum: [Breakfast, Lunch, Dinner, Snack]
+      example: Lunch
+
+    DateString:
+      type: string
+      pattern: '^\d{4}-\d{2}-\d{2}$'
+      example: "2026-07-07"
+
+    NonNegativeNumberInput:
+      description: Backend coerces numeric strings to numbers; sending JSON numbers is recommended.
+      oneOf:
+        - type: number
+          minimum: 0
+        - type: string
+          pattern: '^\d+(\.\d+)?$'
+      example: 2400
+
+    User:
+      type: object
+      required: [id, firstName, lastName, email, isEmailVerified, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          example: 665f1c2ab8e4a91d2c3f0a10
+        firstName:
+          type: string
+          example: Anthony
+        lastName:
+          type: string
+          example: Mainolfi
+        email:
+          type: string
+          format: email
+          example: anthony@example.com
+        isEmailVerified:
+          type: boolean
+          example: false
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    FoodEntry:
+      type: object
+      required: [id, foodName, servingSize, mealType, calories, protein, carbs, fat, saturatedFat, transFat, fiber, sodium, potassium, calcium, iron, vitaminC, vitaminD, source, confidence, date, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          example: 665f1c2ab8e4a91d2c3f0a11
+        foodName:
+          type: string
+          example: Grilled Chicken Breast
+        servingSize:
+          type: string
+          example: 6 oz
+        mealType:
+          $ref: "#/components/schemas/MealType"
+        calories:
+          type: number
+          example: 280
+        protein:
+          type: number
+          example: 52
+        carbs:
+          type: number
+          example: 0
+        fat:
+          type: number
+          example: 6
+        saturatedFat:
+          type: number
+          example: 1.5
+        transFat:
+          type: number
+          example: 0
+        fiber:
+          type: number
+          example: 0
+        sodium:
+          type: number
+          example: 130
+        potassium:
+          type: number
+          example: 450
+        calcium:
+          type: number
+          example: 20
+        iron:
+          type: number
+          example: 1
+        vitaminC:
+          type: number
+          example: 0
+        vitaminD:
+          type: number
+          example: 0
+        source:
+          type: string
+          enum: [manual, ai, usda]
+          example: manual
+        confidence:
+          type: string
+          enum: [low, medium, high]
+          nullable: true
+          example: null
+        date:
+          $ref: "#/components/schemas/DateString"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    FoodEntryInput:
+      type: object
+      required: [foodName, servingSize, mealType, calories, protein, carbs, saturatedFat, transFat, sodium, date]
+      properties:
+        foodName:
+          type: string
+          minLength: 1
+          maxLength: 120
+          example: Grilled Chicken Breast
+        servingSize:
+          type: string
+          minLength: 1
+          maxLength: 80
+          example: 6 oz
+        mealType:
+          $ref: "#/components/schemas/MealType"
+        calories:
+          $ref: "#/components/schemas/NonNegativeNumberInput"
+        protein:
+          allOf:
+            - $ref: "#/components/schemas/NonNegativeNumberInput"
+            - description: Grams
+        carbs:
+          allOf:
+            - $ref: "#/components/schemas/NonNegativeNumberInput"
+            - description: Grams
+        fat:
+          allOf:
+            - $ref: "#/components/schemas/NonNegativeNumberInput"
+            - description: Grams; defaults to zero when omitted
+        saturatedFat:
+          allOf:
+            - $ref: "#/components/schemas/NonNegativeNumberInput"
+            - description: Grams
+        transFat:
+          allOf:
+            - $ref: "#/components/schemas/NonNegativeNumberInput"
+            - description: Grams
+        fiber:
+          allOf:
+            - $ref: "#/components/schemas/NonNegativeNumberInput"
+            - description: Grams; defaults to zero when omitted
+        sodium:
+          allOf:
+            - $ref: "#/components/schemas/NonNegativeNumberInput"
+            - description: Milligrams
+        potassium:
+          allOf:
+            - $ref: "#/components/schemas/NonNegativeNumberInput"
+            - description: Milligrams; defaults to zero when omitted
+        calcium:
+          allOf:
+            - $ref: "#/components/schemas/NonNegativeNumberInput"
+            - description: Milligrams; defaults to zero when omitted
+        iron:
+          allOf:
+            - $ref: "#/components/schemas/NonNegativeNumberInput"
+            - description: Milligrams; defaults to zero when omitted
+        vitaminC:
+          allOf:
+            - $ref: "#/components/schemas/NonNegativeNumberInput"
+            - description: Milligrams; defaults to zero when omitted
+        vitaminD:
+          allOf:
+            - $ref: "#/components/schemas/NonNegativeNumberInput"
+            - description: Micrograms; defaults to zero when omitted
+        source:
+          type: string
+          enum: [manual, usda]
+          default: manual
+        date:
+          $ref: "#/components/schemas/DateString"
+
+    FoodEntryUpdate:
+      type: object
+      description: Any subset of food entry fields. At least one field is required.
+      minProperties: 1
+      properties:
+        foodName:
+          type: string
+          minLength: 1
+          maxLength: 120
+        servingSize:
+          type: string
+          minLength: 1
+          maxLength: 80
+        mealType:
+          $ref: "#/components/schemas/MealType"
+        calories:
+          $ref: "#/components/schemas/NonNegativeNumberInput"
+        protein:
+          $ref: "#/components/schemas/NonNegativeNumberInput"
+        carbs:
+          $ref: "#/components/schemas/NonNegativeNumberInput"
+        fat:
+          $ref: "#/components/schemas/NonNegativeNumberInput"
+        saturatedFat:
+          $ref: "#/components/schemas/NonNegativeNumberInput"
+        transFat:
+          $ref: "#/components/schemas/NonNegativeNumberInput"
+        fiber:
+          $ref: "#/components/schemas/NonNegativeNumberInput"
+        sodium:
+          $ref: "#/components/schemas/NonNegativeNumberInput"
+        potassium:
+          $ref: "#/components/schemas/NonNegativeNumberInput"
+        calcium:
+          $ref: "#/components/schemas/NonNegativeNumberInput"
+        iron:
+          $ref: "#/components/schemas/NonNegativeNumberInput"
+        vitaminC:
+          $ref: "#/components/schemas/NonNegativeNumberInput"
+        vitaminD:
+          $ref: "#/components/schemas/NonNegativeNumberInput"
+        source:
+          type: string
+          enum: [manual, usda]
+        date:
+          $ref: "#/components/schemas/DateString"
+
+    QuickAddFoodRequest:
+      type: object
+      required: [date]
+      properties:
+        date:
+          $ref: "#/components/schemas/DateString"
+        mealType:
+          $ref: "#/components/schemas/MealType"
+
+    FoodEntryResponse:
+      type: object
+      required: [foodEntry]
+      properties:
+        foodEntry:
+          $ref: "#/components/schemas/FoodEntry"
+
+    FoodEntryListResponse:
+      type: object
+      required: [foodEntries]
+      properties:
+        foodEntries:
+          type: array
+          items:
+            $ref: "#/components/schemas/FoodEntry"
+
+    AiFoodLogRequest:
+      type: object
+      additionalProperties: false
+      required: [text, date]
+      properties:
+        text:
+          type: string
+          minLength: 2
+          maxLength: 500
+          example: I had one medium banana and a rice cake for lunch
+        date:
+          $ref: "#/components/schemas/DateString"
+        mealType:
+          allOf:
+            - $ref: "#/components/schemas/MealType"
+            - description: Used only when the description does not name a meal
+          default: Snack
+
+    AiFoodLogResponse:
+      type: object
+      required: [message, estimated, model, foodEntries]
+      properties:
+        message:
+          type: string
+          example: 2 estimated food entries logged.
+        estimated:
+          type: boolean
+          enum: [true]
+        model:
+          type: string
+          example: gpt-5.4-nano
+        foodEntries:
+          type: array
+          minItems: 1
+          maxItems: 8
+          items:
+            $ref: "#/components/schemas/FoodEntry"
+
+    PresetFood:
+      type: object
+      required: [fdcId, foodName, brand, dataType, servingSize, calories, protein, carbs, fat, saturatedFat, transFat, fiber, sodium, potassium, calcium, iron, vitaminC, vitaminD]
+      properties:
+        fdcId:
+          type: integer
+          example: 171077
+        foodName:
+          type: string
+          example: Chicken breast, cooked, roasted
+        brand:
+          type: string
+          nullable: true
+        dataType:
+          type: string
+          example: SR Legacy
+        servingSize:
+          type: string
+          example: 100 g
+        calories:
+          type: number
+          example: 165
+        protein:
+          type: number
+          example: 31
+        carbs:
+          type: number
+          example: 0
+        fat:
+          type: number
+          example: 3.6
+        saturatedFat:
+          type: number
+          example: 1
+        transFat:
+          type: number
+          example: 0
+        fiber:
+          type: number
+          example: 0
+        sodium:
+          type: number
+          example: 74
+        potassium:
+          type: number
+          example: 256
+        calcium:
+          type: number
+          example: 15
+        iron:
+          type: number
+          example: 1
+        vitaminC:
+          type: number
+          example: 0
+        vitaminD:
+          type: number
+          example: 0.1
+
+    PresetFoodSearchResponse:
+      type: object
+      required: [foods, page, totalPages, totalResults]
+      properties:
+        foods:
+          type: array
+          items:
+            $ref: "#/components/schemas/PresetFood"
+        page:
+          type: integer
+          example: 1
+        totalPages:
+          type: integer
+          example: 20
+        totalResults:
+          type: integer
+          example: 197
+
+    MacroGoalInput:
+      type: object
+      required: [dailyCalories, dailyProtein, dailyCarbs, dailySaturatedFat, dailyTransFat, dailySodium]
+      properties:
+        dailyCalories:
+          $ref: "#/components/schemas/NonNegativeNumberInput"
+        dailyProtein:
+          allOf:
+            - $ref: "#/components/schemas/NonNegativeNumberInput"
+            - description: Grams
+        dailyCarbs:
+          allOf:
+            - $ref: "#/components/schemas/NonNegativeNumberInput"
+            - description: Grams
+        dailyFat:
+          allOf:
+            - $ref: "#/components/schemas/NonNegativeNumberInput"
+            - description: Grams; defaults to zero when omitted
+        dailySaturatedFat:
+          allOf:
+            - $ref: "#/components/schemas/NonNegativeNumberInput"
+            - description: Grams
+        dailyTransFat:
+          allOf:
+            - $ref: "#/components/schemas/NonNegativeNumberInput"
+            - description: Grams
+        dailyFiber:
+          allOf:
+            - $ref: "#/components/schemas/NonNegativeNumberInput"
+            - description: Grams; defaults to zero when omitted
+        dailySodium:
+          allOf:
+            - $ref: "#/components/schemas/NonNegativeNumberInput"
+            - description: Milligrams
+        dailyPotassium:
+          allOf:
+            - $ref: "#/components/schemas/NonNegativeNumberInput"
+            - description: Milligrams; defaults to zero when omitted
+        dailyCalcium:
+          allOf:
+            - $ref: "#/components/schemas/NonNegativeNumberInput"
+            - description: Milligrams; defaults to zero when omitted
+        dailyIron:
+          allOf:
+            - $ref: "#/components/schemas/NonNegativeNumberInput"
+            - description: Milligrams; defaults to zero when omitted
+        dailyVitaminC:
+          allOf:
+            - $ref: "#/components/schemas/NonNegativeNumberInput"
+            - description: Milligrams; defaults to zero when omitted
+        dailyVitaminD:
+          allOf:
+            - $ref: "#/components/schemas/NonNegativeNumberInput"
+            - description: Micrograms; defaults to zero when omitted
+
+    MacroGoal:
+      type: object
+      required: [id, dailyCalories, dailyProtein, dailyCarbs, dailyFat, dailySaturatedFat, dailyTransFat, dailyFiber, dailySodium, dailyPotassium, dailyCalcium, dailyIron, dailyVitaminC, dailyVitaminD, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          example: 665f1c2ab8e4a91d2c3f0a12
+        dailyCalories:
+          type: number
+          example: 2400
+        dailyProtein:
+          type: number
+          example: 180
+        dailyCarbs:
+          type: number
+          example: 250
+        dailyFat:
+          type: number
+          example: 70
+        dailySaturatedFat:
+          type: number
+          example: 20
+        dailyTransFat:
+          type: number
+          example: 2
+        dailyFiber:
+          type: number
+          example: 28
+        dailySodium:
+          type: number
+          example: 2300
+        dailyPotassium:
+          type: number
+          example: 4700
+        dailyCalcium:
+          type: number
+          example: 1300
+        dailyIron:
+          type: number
+          example: 18
+        dailyVitaminC:
+          type: number
+          example: 90
+        dailyVitaminD:
+          type: number
+          example: 20
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    MacroGoalNullable:
+      nullable: true
+      allOf:
+        - $ref: "#/components/schemas/MacroGoal"
+      description: Null when the user has not set goals yet
+
+    MacroTotals:
+      type: object
+      required: [calories, protein, carbs, fat, saturatedFat, transFat, fiber, sodium, potassium, calcium, iron, vitaminC, vitaminD]
+      properties:
+        calories:
+          type: number
+          example: 1850
+        protein:
+          type: number
+          example: 140
+        carbs:
+          type: number
+          example: 180
+        fat:
+          type: number
+          example: 62
+        saturatedFat:
+          type: number
+          example: 16
+        transFat:
+          type: number
+          example: 1
+        fiber:
+          type: number
+          example: 24
+        sodium:
+          type: number
+          example: 1900
+        potassium:
+          type: number
+          example: 3500
+        calcium:
+          type: number
+          example: 900
+        iron:
+          type: number
+          example: 14
+        vitaminC:
+          type: number
+          example: 75
+        vitaminD:
+          type: number
+          example: 12
+
+    MealTotals:
+      type: object
+      required: [Breakfast, Lunch, Dinner, Snack]
+      properties:
+        Breakfast:
+          $ref: "#/components/schemas/MacroTotals"
+        Lunch:
+          $ref: "#/components/schemas/MacroTotals"
+        Dinner:
+          $ref: "#/components/schemas/MacroTotals"
+        Snack:
+          $ref: "#/components/schemas/MacroTotals"
+
+    DailyTotals:
+      type: object
+      required: [date, totals]
+      properties:
+        date:
+          $ref: "#/components/schemas/DateString"
+        totals:
+          $ref: "#/components/schemas/MacroTotals"
+
+    MessageResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+
+    ErrorResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+        stack:
+          type: string
+          description: Stack trace, returned only outside production

@@ -1,29 +1,57 @@
 import mongoose from "mongoose";
 import { z } from "zod";
 import FoodEntry from "../models/FoodEntry.js";
+import { isDateString } from "../utils/date.js";
 import { formatFoodEntry } from "../utils/formatters.js";
+import { NUTRIENT_FIELDS, pickNutrition } from "../utils/nutrition.js";
 
 const mealTypes = ["Breakfast", "Lunch", "Dinner", "Snack"];
+const nutrientValue = z.coerce.number().finite().min(0).max(1_000_000);
+const nutrientWithDefault = nutrientValue.default(0);
+const dateValue = z.string().refine(isDateString, {
+  message: "date must be a valid date in YYYY-MM-DD format."
+});
 
 const foodSchema = z.object({
   foodName: z.string().trim().min(1).max(120),
   servingSize: z.string().trim().min(1).max(80),
   mealType: z.enum(mealTypes),
-  calories: z.coerce.number().min(0),
-  protein: z.coerce.number().min(0),
-  carbs: z.coerce.number().min(0),
-  saturatedFat: z.coerce.number().min(0),
-  transFat: z.coerce.number().min(0),
-  sodium: z.coerce.number().min(0),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/)
+  calories: nutrientValue,
+  protein: nutrientValue,
+  carbs: nutrientValue,
+  fat: nutrientWithDefault,
+  saturatedFat: nutrientValue,
+  transFat: nutrientValue,
+  fiber: nutrientWithDefault,
+  sodium: nutrientValue,
+  potassium: nutrientWithDefault,
+  calcium: nutrientWithDefault,
+  iron: nutrientWithDefault,
+  vitaminC: nutrientWithDefault,
+  vitaminD: nutrientWithDefault,
+  source: z.enum(["manual", "usda"]).default("manual"),
+  date: dateValue
 });
 
-const updateFoodSchema = foodSchema.partial().refine((value) => Object.keys(value).length > 0, {
-  message: "At least one field is required."
-});
+const updateFoodSchema = z
+  .object({
+    ...foodSchema.shape,
+    fat: nutrientValue,
+    fiber: nutrientValue,
+    potassium: nutrientValue,
+    calcium: nutrientValue,
+    iron: nutrientValue,
+    vitaminC: nutrientValue,
+    vitaminD: nutrientValue,
+    source: z.enum(["manual", "usda"])
+  })
+  .partial()
+  .refine((value) => Object.keys(value).length > 0, {
+    message: "At least one field is required."
+  });
 
 const quickAddSchema = z.object({
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  date: dateValue,
   mealType: z.enum(mealTypes).optional()
 });
 
@@ -70,7 +98,7 @@ export async function getFoods(req, res) {
   const filter = { userId: req.user._id };
 
   if (req.query.date) {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(req.query.date)) {
+    if (!isDateString(req.query.date)) {
       return res.status(400).json({ message: "date must use YYYY-MM-DD format." });
     }
 
@@ -131,7 +159,7 @@ export async function searchFoods(req, res) {
   };
 
   if (req.query.date) {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(req.query.date)) {
+    if (!isDateString(req.query.date)) {
       return res.status(400).json({ message: "date must use YYYY-MM-DD format." });
     }
 
@@ -152,7 +180,8 @@ export async function getRecentFoods(req, res) {
   const uniqueEntries = [];
 
   for (const entry of recentEntries) {
-    const key = `${entry.foodName.toLowerCase()}|${entry.servingSize.toLowerCase()}|${entry.calories}|${entry.protein}|${entry.carbs}|${entry.saturatedFat}|${entry.transFat}|${entry.sodium}`;
+    const nutrientKey = NUTRIENT_FIELDS.map((field) => Number(entry[field]) || 0).join("|");
+    const key = `${entry.foodName.toLowerCase()}|${entry.servingSize.toLowerCase()}|${nutrientKey}`;
 
     if (!seen.has(key)) {
       seen.add(key);
@@ -180,12 +209,9 @@ export async function quickAddFood(req, res) {
     foodName: sourceEntry.foodName,
     servingSize: sourceEntry.servingSize,
     mealType: data.mealType || sourceEntry.mealType,
-    calories: sourceEntry.calories,
-    protein: sourceEntry.protein,
-    carbs: sourceEntry.carbs,
-    saturatedFat: sourceEntry.saturatedFat,
-    transFat: sourceEntry.transFat,
-    sodium: sourceEntry.sodium,
+    ...pickNutrition(sourceEntry),
+    source: sourceEntry.source || "manual",
+    confidence: sourceEntry.confidence,
     date: data.date
   });
 

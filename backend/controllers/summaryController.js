@@ -1,27 +1,20 @@
 import FoodEntry from "../models/FoodEntry.js";
 import MacroGoal from "../models/MacroGoal.js";
 import { addDays, getTodayDateString, isDateString } from "../utils/date.js";
+import {
+  GOAL_TO_NUTRIENT,
+  addNutrition,
+  emptyNutritionTotals
+} from "../utils/nutrition.js";
 
 const mealTypes = ["Breakfast", "Lunch", "Dinner", "Snack"];
 
 function emptyTotals() {
-  return {
-    calories: 0,
-    protein: 0,
-    carbs: 0,
-    saturatedFat: 0,
-    transFat: 0,
-    sodium: 0
-  };
+  return emptyNutritionTotals();
 }
 
 function addEntryToTotals(totals, entry) {
-  totals.calories += entry.calories;
-  totals.protein += entry.protein;
-  totals.carbs += entry.carbs;
-  totals.saturatedFat += entry.saturatedFat;
-  totals.transFat += entry.transFat;
-  totals.sodium += entry.sodium;
+  addNutrition(totals, entry);
 }
 
 function roundOneDecimal(value) {
@@ -29,14 +22,12 @@ function roundOneDecimal(value) {
 }
 
 function formatGoals(goal) {
-  return {
-    calories: goal?.dailyCalories || 0,
-    protein: goal?.dailyProtein || 0,
-    carbs: goal?.dailyCarbs || 0,
-    saturatedFat: goal?.dailySaturatedFat || 0,
-    transFat: goal?.dailyTransFat || 0,
-    sodium: goal?.dailySodium || 0
-  };
+  return Object.fromEntries(
+    Object.entries(GOAL_TO_NUTRIENT).map(([goalField, nutrientField]) => [
+      nutrientField,
+      Number(goal?.[goalField]) || 0
+    ])
+  );
 }
 
 function calculateProgress(totals, goals) {

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'config/app_theme.dart';
 import 'providers/auth_provider.dart';
 import 'providers/dashboard_provider.dart';
 import 'providers/food_entry_provider.dart';
 import 'providers/goals_provider.dart';
 import 'providers/history_provider.dart';
+import 'providers/theme_provider.dart';
 import 'screens/home_shell.dart';
 import 'screens/login_screen.dart';
 
@@ -26,19 +28,27 @@ class MacroVantaApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => FoodEntryProvider()),
         ChangeNotifierProvider(create: (_) => GoalsProvider()),
         ChangeNotifierProvider(create: (_) => HistoryProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()..load()),
       ],
-      child: MaterialApp(
-        title: 'MacroVanta',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFF34C759), // the green from your mockups
-            brightness: Brightness.dark,
-          ),
-          useMaterial3: true,
-        ),
-        home: const _AuthGate(),
-      ),
+      child: const _AppView(),
+    );
+  }
+}
+
+class _AppView extends StatelessWidget {
+  const _AppView();
+
+  @override
+  Widget build(BuildContext context) {
+    final themeMode = context.watch<ThemeProvider>().themeMode;
+
+    return MaterialApp(
+      title: 'MacroVanta',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: themeMode,
+      home: const _AuthGate(),
     );
   }
 }

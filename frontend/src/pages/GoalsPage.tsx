@@ -3,33 +3,87 @@ import type { FormEvent } from "react";
 import Layout from "../components/Layout";
 import Message from "../components/Message";
 import { getGoals, saveGoals } from "../lib/api";
+import type { MacroGoalInput } from "../types";
 
-interface GoalForm {
-  dailyCalories: string;
-  dailyProtein: string;
-  dailyCarbs: string;
-  dailySaturatedFat: string;
-  dailyTransFat: string;
-  dailySodium: string;
+type GoalKey = keyof MacroGoalInput;
+type GoalForm = Record<GoalKey, string>;
+
+interface GoalField {
+  key: GoalKey;
+  label: string;
+  unit: string;
+  note: string;
 }
 
 const defaultForm: GoalForm = {
   dailyCalories: "2000",
   dailyProtein: "150",
   dailyCarbs: "250",
+  dailyFat: "70",
   dailySaturatedFat: "20",
   dailyTransFat: "2",
-  dailySodium: "2300"
+  dailyFiber: "28",
+  dailySodium: "2300",
+  dailyPotassium: "4700",
+  dailyCalcium: "1300",
+  dailyIron: "18",
+  dailyVitaminC: "90",
+  dailyVitaminD: "20"
 };
 
-const fields: { key: keyof GoalForm; label: string; unit: string; note: string }[] = [
-  { key: "dailyCalories", label: "Calories", unit: "kcal", note: "Daily energy target" },
-  { key: "dailyProtein", label: "Protein", unit: "g", note: "Daily target" },
-  { key: "dailyCarbs", label: "Carbohydrates", unit: "g", note: "Daily target" },
+const primaryFields: GoalField[] = [
+  { key: "dailyCalories", label: "Calories", unit: "kcal", note: "Energy target" },
+  { key: "dailyProtein", label: "Protein", unit: "g", note: "Macro target" },
+  { key: "dailyCarbs", label: "Carbohydrates", unit: "g", note: "Macro target" },
+  { key: "dailyFat", label: "Total fat", unit: "g", note: "Macro target" },
+  { key: "dailyFiber", label: "Fiber", unit: "g", note: "Daily target" }
+];
+
+const detailFields: GoalField[] = [
   { key: "dailySaturatedFat", label: "Saturated fat", unit: "g", note: "Daily limit" },
   { key: "dailyTransFat", label: "Trans fat", unit: "g", note: "Daily limit" },
-  { key: "dailySodium", label: "Sodium", unit: "mg", note: "Daily limit" }
+  { key: "dailySodium", label: "Sodium", unit: "mg", note: "Daily limit" },
+  { key: "dailyPotassium", label: "Potassium", unit: "mg", note: "Daily target" },
+  { key: "dailyCalcium", label: "Calcium", unit: "mg", note: "Daily target" },
+  { key: "dailyIron", label: "Iron", unit: "mg", note: "Daily target" },
+  { key: "dailyVitaminC", label: "Vitamin C", unit: "mg", note: "Daily target" },
+  { key: "dailyVitaminD", label: "Vitamin D", unit: "mcg", note: "Daily target" }
 ];
+
+const allFields = [...primaryFields, ...detailFields];
+
+function GoalInputs({
+  fields,
+  form,
+  onChange
+}: {
+  fields: GoalField[];
+  form: GoalForm;
+  onChange: (key: GoalKey, value: string) => void;
+}) {
+  return (
+    <div className="goals-grid">
+      {fields.map((field) => (
+        <div key={field.key} className="field">
+          <label htmlFor={field.key}>
+            {field.label} <span className="field-unit">({field.unit})</span>
+          </label>
+          <input
+            id={field.key}
+            type="number"
+            min="0"
+            step="any"
+            inputMode="decimal"
+            value={form[field.key]}
+            onChange={(event) => onChange(field.key, event.target.value)}
+            required
+          />
+          <p className="field-hint">{field.note}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function GoalsPage() {
   const [form, setForm] = useState<GoalForm>(defaultForm);
@@ -39,23 +93,28 @@ export default function GoalsPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    let current = true;
+
     getGoals()
       .then((data) => {
-        if (data.goals) {
-          setHasGoals(true);
-          setForm({
-            dailyCalories: String(data.goals.dailyCalories),
-            dailyProtein: String(data.goals.dailyProtein),
-            dailyCarbs: String(data.goals.dailyCarbs),
-            dailySaturatedFat: String(data.goals.dailySaturatedFat),
-            dailyTransFat: String(data.goals.dailyTransFat),
-            dailySodium: String(data.goals.dailySodium)
-          });
+        if (!current || !data.goals) return;
+
+        const loaded = {} as GoalForm;
+        for (const field of allFields) {
+          loaded[field.key] = String(data.goals[field.key] ?? 0);
         }
+        setHasGoals(true);
+        setForm(loaded);
       })
-      .catch((loadError) => {
-        setError(loadError instanceof Error ? loadError.message : "Could not load goals.");
+      .catch((loadError: unknown) => {
+        if (current) {
+          setError(loadError instanceof Error ? loadError.message : "Could not load goals.");
+        }
       });
+
+    return () => {
+      current = false;
+    };
   }, []);
 
   async function handleSubmit(event: FormEvent) {
@@ -63,26 +122,23 @@ export default function GoalsPage() {
     setMessage("");
     setError("");
 
-    const values = Object.fromEntries(
-      Object.entries(form).map(([key, value]) => [key, Number(value)])
-    );
+    const values = {} as MacroGoalInput;
 
-    if (Object.values(values).some((value) => Number.isNaN(value) || value < 0)) {
-      setError("All goals must be numbers that are zero or greater.");
-      return;
+    for (const field of allFields) {
+      const value = Number(form[field.key]);
+
+      if (!Number.isFinite(value) || value < 0) {
+        setError("All goals must be numbers that are zero or greater.");
+        return;
+      }
+
+      values[field.key] = value;
     }
 
     setSaving(true);
 
     try {
-      const data = await saveGoals({
-        dailyCalories: values.dailyCalories,
-        dailyProtein: values.dailyProtein,
-        dailyCarbs: values.dailyCarbs,
-        dailySaturatedFat: values.dailySaturatedFat,
-        dailyTransFat: values.dailyTransFat,
-        dailySodium: values.dailySodium
-      });
+      const data = await saveGoals(values);
       setHasGoals(true);
       setMessage(data.message);
     } catch (saveError) {
@@ -96,11 +152,12 @@ export default function GoalsPage() {
     <Layout>
       <div className="page-head">
         <div>
+          <p className="eyebrow">Personal targets</p>
           <h1>Daily goals</h1>
           <p className="page-subtitle">
             {hasGoals
-              ? "Update your daily targets and limits."
-              : "Set your daily targets and limits to start tracking progress."}
+              ? "Update the targets and limits used on your dashboard."
+              : "Set targets and limits to start measuring daily progress."}
           </p>
         </div>
       </div>
@@ -108,34 +165,43 @@ export default function GoalsPage() {
       {message && <Message kind="success">{message}</Message>}
       {error && <Message kind="error">{error}</Message>}
 
-      <div className="card goals-card">
-        <form onSubmit={handleSubmit}>
-          <div className="goals-grid">
-            {fields.map((field) => (
-              <div key={field.key} className="field">
-                <label htmlFor={field.key}>
-                  {field.label} <span className="field-unit">({field.unit})</span>
-                </label>
-                <input
-                  id={field.key}
-                  type="number"
-                  min="0"
-                  step="any"
-                  value={form[field.key]}
-                  onChange={(event) =>
-                    setForm((previous) => ({ ...previous, [field.key]: event.target.value }))
-                  }
-                  required
-                />
-                <p className="field-hint">{field.note}</p>
-              </div>
-            ))}
+      <form onSubmit={handleSubmit}>
+        <section className="card goals-card">
+          <div className="section-heading">
+            <div>
+              <h2>Macros and fiber</h2>
+              <p className="card-note">The main goals shown at the top of your dashboard.</p>
+            </div>
           </div>
-          <button type="submit" className="btn" disabled={saving}>
-            {saving ? "Saving…" : "Save goals"}
-          </button>
-        </form>
-      </div>
+          <GoalInputs
+            fields={primaryFields}
+            form={form}
+            onChange={(key, value) => setForm((previous) => ({ ...previous, [key]: value }))}
+          />
+        </section>
+
+        <section className="card goals-card">
+          <div className="section-heading">
+            <div>
+              <h2>Micronutrients and limits</h2>
+              <p className="card-note">Track vitamins, minerals, and fat details alongside macros.</p>
+            </div>
+          </div>
+          <GoalInputs
+            fields={detailFields}
+            form={form}
+            onChange={(key, value) => setForm((previous) => ({ ...previous, [key]: value }))}
+          />
+        </section>
+
+        <p className="estimate-note goal-disclaimer">
+          Suggested starting values are general examples, not personalized medical guidance. Use
+          targets recommended by a qualified professional for your needs.
+        </p>
+        <button type="submit" className="btn" disabled={saving}>
+          {saving ? "Saving…" : "Save all goals"}
+        </button>
+      </form>
     </Layout>
   );
 }

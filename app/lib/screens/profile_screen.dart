@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
+import '../providers/theme_provider.dart';
 
 /// Full Profile screen (screenshots 8-9): edit name, change password,
 /// sign out, and delete account with a typed "DELETE" confirmation.
@@ -115,6 +116,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
     if (confirmed != true) return;
+    if (!mounted) return;
 
     setState(() => _deleting = true);
     final ok = await context.read<AuthProvider>().deleteAccount();
@@ -130,6 +132,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
+    final theme = context.watch<ThemeProvider>();
+    final colors = Theme.of(context).colorScheme;
     _prefillIfNeeded(auth);
     final user = auth.user;
 
@@ -143,7 +147,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 4),
             if (user != null)
               Text(user.email,
-                  style: TextStyle(color: Colors.white.withOpacity(0.55))),
+                  style: TextStyle(color: colors.onSurfaceVariant)),
             const SizedBox(height: 24),
 
             // ---- Your details ----
@@ -159,6 +163,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
               _text(_lastName),
               const SizedBox(height: 20),
               _button('Save changes', _savingProfile, _saveProfile),
+            ]),
+            const SizedBox(height: 16),
+
+            _card([
+              const Text('Appearance',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Dark mode'),
+                subtitle: const Text('Use the darker color palette'),
+                value: theme.isDark,
+                onChanged: (_) => context.read<ThemeProvider>().toggle(),
+              ),
             ]),
             const SizedBox(height: 16),
 
@@ -178,7 +195,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 'At least 8 characters with uppercase, lowercase, a number, '
                 'and a special character.',
                 style: TextStyle(
-                    fontSize: 13, color: Colors.white.withOpacity(0.55)),
+                    fontSize: 13, color: colors.onSurfaceVariant),
               ),
               const SizedBox(height: 16),
               _label('Confirm new password'),
@@ -219,7 +236,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Text(
                 'This permanently removes your account, food log, and goals. '
                 'This cannot be undone.',
-                style: TextStyle(color: Colors.white.withOpacity(0.55)),
+                style: TextStyle(color: colors.onSurfaceVariant),
               ),
               const SizedBox(height: 12),
               _label('Type "DELETE" to confirm'),
@@ -251,16 +268,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _card(List<Widget> children) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.03),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.06)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: children,
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: children,
+        ),
       ),
     );
   }

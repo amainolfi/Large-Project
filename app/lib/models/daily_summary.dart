@@ -1,33 +1,55 @@
-/// A set of nutrient values, matching the DEPLOYED server's shape.
-/// Keys: calories, protein, carbs, fat.
 class NutrientSet {
   final double calories;
   final double protein;
   final double carbs;
   final double fat;
+  final double saturatedFat;
+  final double transFat;
+  final double fiber;
+  final double sodium;
+  final double potassium;
+  final double calcium;
+  final double iron;
+  final double vitaminC;
+  final double vitaminD;
 
   const NutrientSet({
     required this.calories,
     required this.protein,
     required this.carbs,
     required this.fat,
+    required this.saturatedFat,
+    required this.transFat,
+    required this.fiber,
+    required this.sodium,
+    required this.potassium,
+    required this.calcium,
+    required this.iron,
+    required this.vitaminC,
+    required this.vitaminD,
   });
 
   factory NutrientSet.fromJson(Map<String, dynamic> json) {
-    double num2(dynamic v) => (v as num?)?.toDouble() ?? 0.0;
+    double number(dynamic value) => (value as num?)?.toDouble() ?? 0.0;
 
     return NutrientSet(
-      calories: num2(json['calories']),
-      protein: num2(json['protein']),
-      carbs: num2(json['carbs']),
-      fat: num2(json['fat']),
+      calories: number(json['calories']),
+      protein: number(json['protein']),
+      carbs: number(json['carbs']),
+      fat: number(json['fat']),
+      saturatedFat: number(json['saturatedFat']),
+      transFat: number(json['transFat']),
+      fiber: number(json['fiber']),
+      sodium: number(json['sodium']),
+      potassium: number(json['potassium']),
+      calcium: number(json['calcium']),
+      iron: number(json['iron']),
+      vitaminC: number(json['vitaminC']),
+      vitaminD: number(json['vitaminD']),
     );
   }
 }
 
-/// Mirrors GET /api/summary/daily response:
-/// { date, totals: {...}, goals: {...}, progress: {...} }
-/// where progress values are percentages (e.g. 41.4).
 class DailySummary {
   final String date;
   final NutrientSet totals;

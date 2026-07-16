@@ -1,10 +1,12 @@
 import type {
+  AiFoodLogResponse,
   DailySummary,
   FoodEntry,
   FoodEntryInput,
   MacroGoal,
   MacroGoalInput,
   MealType,
+  PresetFood,
   User,
   WeeklySummary
 } from "../types";
@@ -83,13 +85,7 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     body: body !== undefined ? JSON.stringify(body) : undefined
   });
 
-  let data: unknown = null;
-
-  try {
-    data = await response.json();
-  } catch {
-    data = null;
-  }
+  const data: unknown = await response.json().catch(() => null);
 
   if (!response.ok) {
     if (response.status === 401 && auth) {
@@ -210,6 +206,28 @@ export function updateFood(id: string, input: Partial<FoodEntryInput>) {
 
 export function deleteFood(id: string) {
   return request<{ message: string }>(`/api/foods/${id}`, { method: "DELETE" });
+}
+
+export function logFoodWithAi(input: { text: string; date: string; mealType: MealType }) {
+  return request<AiFoodLogResponse>("/api/foods/ai-log", {
+    method: "POST",
+    body: input
+  });
+}
+
+export function searchPresetFoods(query: string, page = 1, pageSize = 10) {
+  const params = new URLSearchParams({
+    query,
+    page: String(page),
+    pageSize: String(pageSize)
+  });
+
+  return request<{
+    foods: PresetFood[];
+    totalResults: number;
+    page: number;
+    totalPages: number;
+  }>(`/api/preset-foods/search?${params.toString()}`);
 }
 
 // ---- Goals ----

@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { FormEvent } from "react";
-import type { FoodEntry, FoodEntryInput, MealType } from "../types";
+import type { FoodEntry, FoodEntryInput, MealType, NutritionValues } from "../types";
 import { MEAL_TYPES } from "../types";
 
 interface FoodFormProps {
@@ -10,53 +10,84 @@ interface FoodFormProps {
   onCancelEdit: () => void;
 }
 
-interface FormState {
+type NumericField = keyof NutritionValues;
+
+interface FormState extends Record<NumericField, string> {
   foodName: string;
   servingSize: string;
   mealType: MealType;
-  calories: string;
-  protein: string;
-  carbs: string;
-  saturatedFat: string;
-  transFat: string;
-  sodium: string;
 }
 
-const emptyForm: FormState = {
-  foodName: "",
-  servingSize: "",
-  mealType: "Breakfast",
-  calories: "",
-  protein: "",
-  carbs: "",
-  saturatedFat: "",
-  transFat: "",
-  sodium: ""
-};
+const primaryFields: { key: NumericField; label: string; unit: string }[] = [
+  { key: "calories", label: "Calories", unit: "kcal" },
+  { key: "protein", label: "Protein", unit: "g" },
+  { key: "carbs", label: "Carbohydrates", unit: "g" },
+  { key: "fat", label: "Total fat", unit: "g" },
+  { key: "fiber", label: "Fiber", unit: "g" }
+];
+
+const micronutrientFields: { key: NumericField; label: string; unit: string }[] = [
+  { key: "saturatedFat", label: "Saturated fat", unit: "g" },
+  { key: "transFat", label: "Trans fat", unit: "g" },
+  { key: "sodium", label: "Sodium", unit: "mg" },
+  { key: "potassium", label: "Potassium", unit: "mg" },
+  { key: "calcium", label: "Calcium", unit: "mg" },
+  { key: "iron", label: "Iron", unit: "mg" },
+  { key: "vitaminC", label: "Vitamin C", unit: "mg" },
+  { key: "vitaminD", label: "Vitamin D", unit: "mcg" }
+];
+
+const nutritionKeys: NumericField[] = [
+  ...primaryFields.map((field) => field.key),
+  ...micronutrientFields.map((field) => field.key)
+];
+
+function makeInitialForm(entry: FoodEntry | null): FormState {
+  const form = {
+    foodName: entry?.foodName || "",
+    servingSize: entry?.servingSize || "",
+    mealType: entry?.mealType || "Breakfast"
+  } as FormState;
+
+  for (const key of nutritionKeys) {
+    form[key] = String(entry?.[key] ?? 0);
+  }
+
+  return form;
+}
+
+function NutritionField({
+  field,
+  value,
+  onChange
+}: {
+  field: { key: NumericField; label: string; unit: string };
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div className="field">
+      <label htmlFor={`food-${field.key}`}>
+        {field.label} <span className="field-unit">({field.unit})</span>
+      </label>
+      <input
+        id={`food-${field.key}`}
+        type="number"
+        min="0"
+        step="any"
+        inputMode="decimal"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        required
+      />
+    </div>
+  );
+}
 
 export default function FoodForm({ date, editingEntry, onSubmit, onCancelEdit }: FoodFormProps) {
-  const [form, setForm] = useState<FormState>(emptyForm);
+  const [form, setForm] = useState<FormState>(() => makeInitialForm(editingEntry));
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    if (editingEntry) {
-      setForm({
-        foodName: editingEntry.foodName,
-        servingSize: editingEntry.servingSize,
-        mealType: editingEntry.mealType,
-        calories: String(editingEntry.calories),
-        protein: String(editingEntry.protein),
-        carbs: String(editingEntry.carbs),
-        saturatedFat: String(editingEntry.saturatedFat),
-        transFat: String(editingEntry.transFat),
-        sodium: String(editingEntry.sodium)
-      });
-      setError("");
-    } else {
-      setForm(emptyForm);
-    }
-  }, [editingEntry]);
 
   function setField<K extends keyof FormState>(field: K, value: FormState[K]) {
     setForm((previous) => ({ ...previous, [field]: value }));
@@ -71,20 +102,17 @@ export default function FoodForm({ date, editingEntry, onSubmit, onCancelEdit }:
       return;
     }
 
-    const numbers = {
-      calories: Number(form.calories),
-      protein: Number(form.protein),
-      carbs: Number(form.carbs),
-      saturatedFat: Number(form.saturatedFat),
-      transFat: Number(form.transFat),
-      sodium: Number(form.sodium)
-    };
+    const nutrition = {} as NutritionValues;
 
-    for (const [key, value] of Object.entries(numbers)) {
-      if (form[key as keyof FormState] === "" || Number.isNaN(value) || value < 0) {
-        setError("All nutrition values must be zero or greater.");
+    for (const key of nutritionKeys) {
+      const value = Number(form[key]);
+
+      if (form[key] === "" || !Number.isFinite(value) || value < 0) {
+        setError("All nutrition values must be numbers that are zero or greater.");
         return;
       }
+
+      nutrition[key] = value;
     }
 
     setSaving(true);
@@ -94,10 +122,13 @@ export default function FoodForm({ date, editingEntry, onSubmit, onCancelEdit }:
         foodName: form.foodName.trim(),
         servingSize: form.servingSize.trim(),
         mealType: form.mealType,
-        ...numbers,
+        ...nutrition,
         date
       });
-      setForm(emptyForm);
+
+      if (!editingEntry) {
+        setForm(makeInitialForm(null));
+      }
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "Could not save food.");
     } finally {
@@ -114,8 +145,9 @@ export default function FoodForm({ date, editingEntry, onSubmit, onCancelEdit }:
           type="text"
           value={form.foodName}
           maxLength={120}
-          placeholder="e.g. Grilled Chicken Breast"
+          placeholder="e.g. Grilled chicken breast"
           onChange={(event) => setField("foodName", event.target.value)}
+          required
         />
       </div>
       <div className="form-row">
@@ -128,6 +160,7 @@ export default function FoodForm({ date, editingEntry, onSubmit, onCancelEdit }:
             maxLength={80}
             placeholder="e.g. 6 oz"
             onChange={(event) => setField("servingSize", event.target.value)}
+            required
           />
         </div>
         <div className="field">
@@ -145,77 +178,33 @@ export default function FoodForm({ date, editingEntry, onSubmit, onCancelEdit }:
           </select>
         </div>
       </div>
-      <div className="form-row">
-        <div className="field">
-          <label htmlFor="calories">Calories</label>
-          <input
-            id="calories"
-            type="number"
-            min="0"
-            step="any"
-            value={form.calories}
-            onChange={(event) => setField("calories", event.target.value)}
+
+      <div className="nutrition-form-grid">
+        {primaryFields.map((field) => (
+          <NutritionField
+            key={field.key}
+            field={field}
+            value={form[field.key]}
+            onChange={(value) => setField(field.key, value)}
           />
-        </div>
-        <div className="field">
-          <label htmlFor="protein">Protein (g)</label>
-          <input
-            id="protein"
-            type="number"
-            min="0"
-            step="any"
-            value={form.protein}
-            onChange={(event) => setField("protein", event.target.value)}
-          />
-        </div>
-        <div className="field">
-          <label htmlFor="carbs">Carbs (g)</label>
-          <input
-            id="carbs"
-            type="number"
-            min="0"
-            step="any"
-            value={form.carbs}
-            onChange={(event) => setField("carbs", event.target.value)}
-          />
-        </div>
+        ))}
       </div>
-      <div className="form-row">
-        <div className="field">
-          <label htmlFor="saturatedFat">Sat. fat (g)</label>
-          <input
-            id="saturatedFat"
-            type="number"
-            min="0"
-            step="any"
-            value={form.saturatedFat}
-            onChange={(event) => setField("saturatedFat", event.target.value)}
-          />
+
+      <details className="nutrition-details" open={Boolean(editingEntry)}>
+        <summary>Micronutrients and fat details</summary>
+        <div className="nutrition-form-grid nutrition-form-grid-wide">
+          {micronutrientFields.map((field) => (
+            <NutritionField
+              key={field.key}
+              field={field}
+              value={form[field.key]}
+              onChange={(value) => setField(field.key, value)}
+            />
+          ))}
         </div>
-        <div className="field">
-          <label htmlFor="transFat">Trans fat (g)</label>
-          <input
-            id="transFat"
-            type="number"
-            min="0"
-            step="any"
-            value={form.transFat}
-            onChange={(event) => setField("transFat", event.target.value)}
-          />
-        </div>
-        <div className="field">
-          <label htmlFor="sodium">Sodium (mg)</label>
-          <input
-            id="sodium"
-            type="number"
-            min="0"
-            step="any"
-            value={form.sodium}
-            onChange={(event) => setField("sodium", event.target.value)}
-          />
-        </div>
-      </div>
-      {error && <p className="form-error">{error}</p>}
+      </details>
+
+      {error && <p className="form-error" role="alert">{error}</p>}
       <div className="form-actions">
         <button type="submit" className="btn" disabled={saving}>
           {saving ? "Saving…" : editingEntry ? "Update food" : "Add food"}

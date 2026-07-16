@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { useAuth } from "../lib/auth";
+import { useAuth } from "../lib/auth-context";
 
 export default function Layout({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth();

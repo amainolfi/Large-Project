@@ -9,8 +9,15 @@ export async function protect(req, res, next) {
       return res.status(401).json({ message: "Authentication token required." });
     }
 
-    const token = authHeader.split(" ")[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const token = authHeader.slice("Bearer ".length).trim();
+
+    if (!token || !process.env.JWT_SECRET) {
+      return res.status(401).json({ message: "Invalid authentication token." });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET, {
+      algorithms: ["HS256"]
+    });
     const user = await User.findById(decoded.userId);
 
     if (!user) {

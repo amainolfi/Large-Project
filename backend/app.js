@@ -3,6 +3,7 @@ import express from "express";
 import authRoutes from "./routes/authRoutes.js";
 import foodRoutes from "./routes/foodRoutes.js";
 import goalsRoutes from "./routes/goalsRoutes.js";
+import presetFoodRoutes from "./routes/presetFoodRoutes.js";
 import summaryRoutes from "./routes/summaryRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import { errorHandler, notFound } from "./middleware/errorMiddleware.js";
@@ -13,7 +14,7 @@ const allowedOrigins = [
   process.env.CLIENT_URL,
   "http://localhost:5173",
   "http://127.0.0.1:5173",
-  // Expo web dev server for the mobile app
+  // Optional browser-based development client
   "http://localhost:8081",
   "http://127.0.0.1:8081"
 ].filter(Boolean);
@@ -31,7 +32,7 @@ app.use(
   })
 );
 
-app.use(express.json());
+app.use(express.json({ limit: "20kb" }));
 
 app.get("/api/health", (_req, res) => {
   res.json({
@@ -43,6 +44,7 @@ app.get("/api/health", (_req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/foods", foodRoutes);
 app.use("/api/goals", goalsRoutes);
+app.use("/api/preset-foods", presetFoodRoutes);
 app.use("/api/summary", summaryRoutes);
 app.use("/api/users", userRoutes);
 

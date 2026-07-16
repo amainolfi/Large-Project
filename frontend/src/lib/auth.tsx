@@ -1,7 +1,8 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 import type { User } from "../types";
+import { AuthContext } from "./auth-context";
 import {
   clearSession,
   getMe,
@@ -12,15 +13,6 @@ import {
   storeSession,
   storeUser
 } from "./api";
-
-interface AuthContextValue {
-  user: User | null;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
-  updateUser: (user: User) => void;
-}
-
-const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => getStoredUser());
@@ -62,16 +54,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       {children}
     </AuthContext.Provider>
   );
-}
-
-export function useAuth(): AuthContextValue {
-  const context = useContext(AuthContext);
-
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider.");
-  }
-
-  return context;
 }
 
 export function RequireAuth({ children }: { children: ReactNode }) {

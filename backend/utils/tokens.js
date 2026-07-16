@@ -17,6 +17,7 @@ export function createAuthToken(user) {
     },
     secret,
     {
+      algorithm: "HS256",
       expiresIn: process.env.JWT_EXPIRES_IN || DEFAULT_JWT_EXPIRES_IN
     }
   );

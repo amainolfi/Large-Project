@@ -7,13 +7,16 @@ describe("getTodayDateString", () => {
 });
 
 describe("isDateString", () => {
-  test("accepts YYYY-MM-DD strings", () => {
+  test("accepts real YYYY-MM-DD calendar dates", () => {
     expect(isDateString("2026-07-10")).toBe(true);
+    expect(isDateString("2028-02-29")).toBe(true);
   });
 
-  test("rejects other formats and types", () => {
+  test("rejects other formats, impossible dates, and non-strings", () => {
     expect(isDateString("07/10/2026")).toBe(false);
     expect(isDateString("2026-7-10")).toBe(false);
+    expect(isDateString("2026-02-29")).toBe(false);
+    expect(isDateString("2026-13-01")).toBe(false);
     expect(isDateString("")).toBe(false);
     expect(isDateString(20260710)).toBe(false);
     expect(isDateString(null)).toBe(false);

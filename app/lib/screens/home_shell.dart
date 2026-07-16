@@ -29,13 +29,11 @@ class _HomeShellState extends State<HomeShell> {
 
   @override
   Widget build(BuildContext context) {
-    const green = Color(0xFF34C759);
     return Scaffold(
       body: IndexedStack(index: _index, children: _tabs),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
         onDestinationSelected: (i) => setState(() => _index = i),
-        indicatorColor: green.withOpacity(0.15),
         destinations: const [
           NavigationDestination(
               icon: Icon(Icons.home_outlined),

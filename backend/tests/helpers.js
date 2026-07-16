@@ -38,9 +38,16 @@ export function foodPayload(overrides = {}) {
     calories: 280,
     protein: 52,
     carbs: 0,
+    fat: 6,
     saturatedFat: 1.5,
     transFat: 0,
+    fiber: 0,
     sodium: 130,
+    potassium: 450,
+    calcium: 20,
+    iron: 1,
+    vitaminC: 0,
+    vitaminD: 0,
     date: "2026-07-10",
     ...overrides
   };
@@ -51,9 +58,16 @@ export function goalsPayload(overrides = {}) {
     dailyCalories: 2000,
     dailyProtein: 150,
     dailyCarbs: 250,
+    dailyFat: 70,
     dailySaturatedFat: 20,
     dailyTransFat: 2,
+    dailyFiber: 28,
     dailySodium: 2300,
+    dailyPotassium: 4700,
+    dailyCalcium: 1300,
+    dailyIron: 18,
+    dailyVitaminC: 90,
+    dailyVitaminD: 20,
     ...overrides
   };
 }

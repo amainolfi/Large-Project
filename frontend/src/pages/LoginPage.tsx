@@ -3,7 +3,7 @@ import type { FormEvent } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import Message from "../components/Message";
 import { ApiError, getStoredToken, resendVerification } from "../lib/api";
-import { useAuth } from "../lib/auth";
+import { useAuth } from "../lib/auth-context";
 
 export default function LoginPage() {
   const { login } = useAuth();

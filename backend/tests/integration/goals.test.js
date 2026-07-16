@@ -27,7 +27,7 @@ describe("GET /api/goals", () => {
 });
 
 describe("PUT /api/goals", () => {
-  test("creates goals with all six targets and limits", async () => {
+  test("creates goals with macro and micronutrient targets and limits", async () => {
     const { token } = await registerVerifiedUser();
 
     const response = await request(app)
@@ -40,9 +40,16 @@ describe("PUT /api/goals", () => {
       dailyCalories: 2000,
       dailyProtein: 150,
       dailyCarbs: 250,
+      dailyFat: 70,
       dailySaturatedFat: 20,
       dailyTransFat: 2,
-      dailySodium: 2300
+      dailyFiber: 28,
+      dailySodium: 2300,
+      dailyPotassium: 4700,
+      dailyCalcium: 1300,
+      dailyIron: 18,
+      dailyVitaminC: 90,
+      dailyVitaminD: 20
     });
   });
 

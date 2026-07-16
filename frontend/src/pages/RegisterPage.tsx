@@ -85,7 +85,7 @@ export default function RegisterPage() {
           MacroVanta
         </span>
         <h1>Create your account</h1>
-        <p className="auth-subtitle">Track calories, macros, and sodium in one place.</p>
+        <p className="auth-subtitle">Track macros and micronutrients in one place.</p>
         {error && <Message kind="error">{error}</Message>}
         <form onSubmit={handleSubmit}>
           <div className="form-row">

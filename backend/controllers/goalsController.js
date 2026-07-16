@@ -2,13 +2,23 @@ import { z } from "zod";
 import MacroGoal from "../models/MacroGoal.js";
 import { formatGoal } from "../utils/formatters.js";
 
+const goalValue = z.coerce.number().finite().min(0).max(1_000_000);
+const goalWithDefault = goalValue.default(0);
+
 const goalSchema = z.object({
-  dailyCalories: z.coerce.number().min(0),
-  dailyProtein: z.coerce.number().min(0),
-  dailyCarbs: z.coerce.number().min(0),
-  dailySaturatedFat: z.coerce.number().min(0),
-  dailyTransFat: z.coerce.number().min(0),
-  dailySodium: z.coerce.number().min(0)
+  dailyCalories: goalValue,
+  dailyProtein: goalValue,
+  dailyCarbs: goalValue,
+  dailyFat: goalWithDefault,
+  dailySaturatedFat: goalValue,
+  dailyTransFat: goalValue,
+  dailyFiber: goalWithDefault,
+  dailySodium: goalValue,
+  dailyPotassium: goalWithDefault,
+  dailyCalcium: goalWithDefault,
+  dailyIron: goalWithDefault,
+  dailyVitaminC: goalWithDefault,
+  dailyVitaminD: goalWithDefault
 });
 
 function parseBody(schema, body) {

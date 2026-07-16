@@ -6,12 +6,6 @@ import '../models/food_entry.dart';
 import '../providers/dashboard_provider.dart';
 import '../providers/food_entry_provider.dart';
 
-/// The food entry form as a self-contained Column (no Scaffold, no scroll view
-/// of its own), so it can be embedded inside any scrolling parent — the Add
-/// Food tab or the standalone Edit screen.
-///
-/// Handles its own submit: on success it refreshes the dashboard, then either
-/// clears (add mode) or calls [onSaved] (edit mode, used to pop the route).
 class FoodEntryForm extends StatefulWidget {
   final FoodEntry? existing;
   final VoidCallback? onSaved;
@@ -26,52 +20,57 @@ class FoodEntryForm extends StatefulWidget {
 
 class _FoodEntryFormState extends State<FoodEntryForm> {
   final _formKey = GlobalKey<FormState>();
-
   late final TextEditingController _name;
   late final TextEditingController _serving;
-  late final TextEditingController _calories;
-  late final TextEditingController _protein;
-  late final TextEditingController _carbs;
-  late final TextEditingController _fat;
-
+  late final Map<String, TextEditingController> _nutrition;
   late MealType _meal;
   late String _dateApi;
 
   @override
   void initState() {
     super.initState();
-    final e = widget.existing;
-    _name = TextEditingController(text: e?.foodName ?? '');
-    _serving = TextEditingController(text: e?.servingSize ?? '');
-    _calories = TextEditingController(text: _num(e?.calories));
-    _protein = TextEditingController(text: _num(e?.protein));
-    _carbs = TextEditingController(text: _num(e?.carbs));
-    _fat = TextEditingController(text: _num(e?.fat));
-    _meal = e?.mealType ?? MealType.breakfast;
-    _dateApi = e?.date ?? context.read<DashboardProvider>().date;
+    final entry = widget.existing;
+    _name = TextEditingController(text: entry?.foodName ?? '');
+    _serving = TextEditingController(text: entry?.servingSize ?? '');
+    _nutrition = {
+      'calories': TextEditingController(text: _number(entry?.calories)),
+      'protein': TextEditingController(text: _number(entry?.protein)),
+      'carbs': TextEditingController(text: _number(entry?.carbs)),
+      'fat': TextEditingController(text: _number(entry?.fat)),
+      'fiber': TextEditingController(text: _number(entry?.fiber)),
+      'saturatedFat': TextEditingController(text: _number(entry?.saturatedFat)),
+      'transFat': TextEditingController(text: _number(entry?.transFat)),
+      'sodium': TextEditingController(text: _number(entry?.sodium)),
+      'potassium': TextEditingController(text: _number(entry?.potassium)),
+      'calcium': TextEditingController(text: _number(entry?.calcium)),
+      'iron': TextEditingController(text: _number(entry?.iron)),
+      'vitaminC': TextEditingController(text: _number(entry?.vitaminC)),
+      'vitaminD': TextEditingController(text: _number(entry?.vitaminD)),
+    };
+    _meal = entry?.mealType ?? MealType.breakfast;
+    _dateApi = entry?.date ?? context.read<DashboardProvider>().date;
   }
 
-  String _num(double? v) {
-    if (v == null) return '';
-    return v == v.roundToDouble() ? v.toInt().toString() : v.toString();
+  String _number(double? value) {
+    if (value == null) return '0';
+    return value == value.roundToDouble()
+        ? value.toInt().toString()
+        : value.toString();
   }
 
   @override
   void dispose() {
-    for (final c in [
-      _name, _serving, _calories, _protein, _carbs, _fat
-    ]) {
-      c.dispose();
+    _name.dispose();
+    _serving.dispose();
+    for (final controller in _nutrition.values) {
+      controller.dispose();
     }
     super.dispose();
   }
 
-  double _parse(TextEditingController c) {
-    final n = double.tryParse(c.text.trim());
-    // Guard against null, NaN, and infinity — always send a clean, finite
-    // number the backend will accept.
-    if (n == null || n.isNaN || n.isInfinite || n < 0) return 0;
-    return n;
+  double _value(String key) {
+    final value = double.tryParse(_nutrition[key]!.text.trim());
+    return value == null || !value.isFinite || value < 0 ? 0 : value;
   }
 
   Future<void> _submit() async {
@@ -81,32 +80,40 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
       foodName: _name.text.trim(),
       servingSize: _serving.text.trim(),
       mealType: _meal,
-      calories: _parse(_calories),
-      protein: _parse(_protein),
-      carbs: _parse(_carbs),
-      fat: _parse(_fat),
+      calories: _value('calories'),
+      protein: _value('protein'),
+      carbs: _value('carbs'),
+      fat: _value('fat'),
+      fiber: _value('fiber'),
+      saturatedFat: _value('saturatedFat'),
+      transFat: _value('transFat'),
+      sodium: _value('sodium'),
+      potassium: _value('potassium'),
+      calcium: _value('calcium'),
+      iron: _value('iron'),
+      vitaminC: _value('vitaminC'),
+      vitaminD: _value('vitaminD'),
       date: _dateApi,
     );
 
     final foods = context.read<FoodEntryProvider>();
-    final ok = widget.isEdit
+    final saved = widget.isEdit
         ? await foods.update(widget.existing!.id, input)
         : await foods.create(input);
 
     if (!mounted) return;
 
-    if (ok) {
+    if (saved) {
       await context.read<DashboardProvider>().load();
       if (!mounted) return;
 
       if (widget.isEdit) {
         widget.onSaved?.call();
       } else {
-        _formKey.currentState!.reset();
         _name.clear();
         _serving.clear();
-        for (final c in [_calories, _protein, _carbs, _fat]) {
-          c.clear();
+        for (final controller in _nutrition.values) {
+          controller.text = '0';
         }
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Food added')),
@@ -128,34 +135,89 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _label('Food name'),
-          _textField(_name, hint: 'e.g. Grilled Chicken Breast', requiredField: true),
-          const SizedBox(height: 16),
-          _label('Serving size'),
-          _textField(_serving, hint: 'e.g. 6 oz', requiredField: true),
-          const SizedBox(height: 16),
-          _label('Meal'),
-          const SizedBox(height: 8),
-          _MealSelector(
-            selected: _meal,
-            onChanged: (m) => setState(() => _meal = m),
+          TextFormField(
+            controller: _name,
+            textCapitalization: TextCapitalization.sentences,
+            decoration: const InputDecoration(
+              labelText: 'Food name',
+              hintText: 'e.g. Grilled chicken breast',
+            ),
+            validator: (value) => value == null || value.trim().isEmpty
+                ? 'Food name is required'
+                : null,
           ),
-          const SizedBox(height: 20),
-          Row(children: [
-            Expanded(child: _numberField(_calories, 'Calories')),
-            const SizedBox(width: 12),
-            Expanded(child: _numberField(_protein, 'Protein (g)')),
-          ]),
+          const SizedBox(height: 14),
+          TextFormField(
+            controller: _serving,
+            decoration: const InputDecoration(
+              labelText: 'Serving size',
+              hintText: 'e.g. 6 oz',
+            ),
+            validator: (value) => value == null || value.trim().isEmpty
+                ? 'Serving size is required'
+                : null,
+          ),
           const SizedBox(height: 16),
-          Row(children: [
-            Expanded(child: _numberField(_carbs, 'Carbs (g)')),
-            const SizedBox(width: 12),
-            Expanded(child: _numberField(_fat, 'Fat (g)')),
-          ]),
-          const SizedBox(height: 24),
+          const Text('Meal', style: TextStyle(fontWeight: FontWeight.w700)),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: MealType.values.map((meal) {
+              return ChoiceChip(
+                label: Text(meal.label),
+                selected: _meal == meal,
+                onSelected: (_) => setState(() => _meal = meal),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 18),
+          _pair(
+            _numericField('calories', 'Calories', 'kcal'),
+            _numericField('protein', 'Protein', 'g'),
+          ),
+          const SizedBox(height: 14),
+          _pair(
+            _numericField('carbs', 'Carbohydrates', 'g'),
+            _numericField('fat', 'Total fat', 'g'),
+          ),
+          const SizedBox(height: 14),
+          _numericField('fiber', 'Fiber', 'g'),
+          const SizedBox(height: 8),
+          ExpansionTile(
+            tilePadding: EdgeInsets.zero,
+            childrenPadding: const EdgeInsets.only(bottom: 12),
+            initiallyExpanded: widget.isEdit,
+            title: const Text(
+              'Micronutrients and fat details',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+            ),
+            children: [
+              _pair(
+                _numericField('saturatedFat', 'Saturated fat', 'g'),
+                _numericField('transFat', 'Trans fat', 'g'),
+              ),
+              const SizedBox(height: 14),
+              _pair(
+                _numericField('sodium', 'Sodium', 'mg'),
+                _numericField('potassium', 'Potassium', 'mg'),
+              ),
+              const SizedBox(height: 14),
+              _pair(
+                _numericField('calcium', 'Calcium', 'mg'),
+                _numericField('iron', 'Iron', 'mg'),
+              ),
+              const SizedBox(height: 14),
+              _pair(
+                _numericField('vitaminC', 'Vitamin C', 'mg'),
+                _numericField('vitaminD', 'Vitamin D', 'mcg'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
           FilledButton(
             onPressed: foods.submitting ? null : _submit,
-            style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(56)),
+            style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(54)),
             child: foods.submitting
                 ? const SizedBox(
                     height: 20,
@@ -169,89 +231,31 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
     );
   }
 
-  Widget _label(String text) => Text(
-        text,
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-      );
-
-  Widget _textField(TextEditingController c,
-      {String? hint, bool requiredField = false}) {
-    return TextFormField(
-      controller: c,
-      decoration: InputDecoration(
-        hintText: hint,
-        border: const OutlineInputBorder(),
-      ),
-      validator: requiredField
-          ? (v) => (v == null || v.trim().isEmpty) ? 'Required' : null
-          : null,
-    );
-  }
-
-  Widget _numberField(TextEditingController c, String label) {
-    return Column(
+  Widget _pair(Widget first, Widget second) {
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _label(label),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: c,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-          ],
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(),
-            hintText: '0',
-          ),
-          validator: (v) {
-            final text = v?.trim() ?? '';
-            // Blank is allowed and treated as 0 (common when logging food).
-            if (text.isEmpty) return null;
-            final n = double.tryParse(text);
-            if (n == null) return 'Enter a number';
-            if (n < 0) return 'Must be 0 or more';
-            return null;
-          },
-        ),
+        Expanded(child: first),
+        const SizedBox(width: 12),
+        Expanded(child: second),
       ],
     );
   }
-}
 
-class _MealSelector extends StatelessWidget {
-  final MealType selected;
-  final ValueChanged<MealType> onChanged;
-
-  const _MealSelector({required this.selected, required this.onChanged});
-
-  @override
-  Widget build(BuildContext context) {
-    const green = Color(0xFF34C759);
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: MealType.values.map((m) {
-        final isSelected = m == selected;
-        return GestureDetector(
-          onTap: () => onChanged(m),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            decoration: BoxDecoration(
-              color: isSelected ? green : Colors.white.withOpacity(0.05),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.white.withOpacity(0.08)),
-            ),
-            child: Text(
-              m.label,
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                color: isSelected ? Colors.black : green,
-              ),
-            ),
-          ),
-        );
-      }).toList(),
+  Widget _numericField(String key, String label, String unit) {
+    return TextFormField(
+      controller: _nutrition[key],
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
+      decoration: InputDecoration(labelText: '$label ($unit)', hintText: '0'),
+      validator: (value) {
+        final text = value?.trim() ?? '';
+        if (text.isEmpty) return null;
+        final number = double.tryParse(text);
+        if (number == null || !number.isFinite) return 'Enter a number';
+        if (number < 0) return 'Must be 0+';
+        return null;
+      },
     );
   }
 }

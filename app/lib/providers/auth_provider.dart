@@ -23,6 +23,7 @@ class AuthProvider extends ChangeNotifier {
   AuthStatus _status = AuthStatus.unknown;
   User? _user;
   String? _errorMessage;
+  int? _lastStatusCode;
   bool _busy = false;
 
   AuthProvider({ApiService? api, TokenStore? tokenStore})
@@ -32,6 +33,7 @@ class AuthProvider extends ChangeNotifier {
   AuthStatus get status => _status;
   User? get user => _user;
   String? get errorMessage => _errorMessage;
+  int? get lastStatusCode => _lastStatusCode;
   bool get busy => _busy;
 
   /// Call once at startup. If a stored token still validates, restore the
@@ -58,6 +60,7 @@ class AuthProvider extends ChangeNotifier {
   Future<bool> login(String email, String password) async {
     _busy = true;
     _errorMessage = null;
+    _lastStatusCode = null;
     notifyListeners();
     try {
       final result = await _api.login(email, password);
@@ -68,6 +71,7 @@ class AuthProvider extends ChangeNotifier {
       return true;
     } on ApiException catch (e) {
       _errorMessage = e.message;
+      _lastStatusCode = e.statusCode;
       _busy = false;
       notifyListeners();
       return false;
@@ -81,9 +85,8 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Register a new account, then automatically log in with the same
-  /// credentials (the deployed server allows unverified logins). Returns true
-  /// on success; on failure sets [errorMessage].
+  /// Register a new account. The API requires email verification before login,
+  /// so a successful registration intentionally stays unauthenticated.
   Future<bool> register({
     required String firstName,
     required String lastName,
@@ -92,6 +95,7 @@ class AuthProvider extends ChangeNotifier {
   }) async {
     _busy = true;
     _errorMessage = null;
+    _lastStatusCode = null;
     notifyListeners();
     try {
       await _api.register(
@@ -100,18 +104,35 @@ class AuthProvider extends ChangeNotifier {
         email: email,
         password: password,
       );
-      // Register returns no token, so log in to obtain one.
-      final result = await _api.login(email, password);
-      _user = result.user;
-      _status = AuthStatus.authenticated;
       _busy = false;
       notifyListeners();
       return true;
     } on ApiException catch (e) {
       _errorMessage = e.message;
+      _lastStatusCode = e.statusCode;
       _busy = false;
       notifyListeners();
       return false;
+    }
+  }
+
+  Future<String?> resendVerification(String email) async {
+    try {
+      return await _api.resendVerification(email);
+    } on ApiException catch (e) {
+      _errorMessage = e.message;
+      notifyListeners();
+      return null;
+    }
+  }
+
+  Future<String?> forgotPassword(String email) async {
+    try {
+      return await _api.forgotPassword(email);
+    } on ApiException catch (e) {
+      _errorMessage = e.message;
+      notifyListeners();
+      return null;
     }
   }
 

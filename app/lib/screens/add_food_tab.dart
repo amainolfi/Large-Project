@@ -5,11 +5,9 @@ import '../config/app_date.dart';
 import '../models/food_entry.dart';
 import '../providers/dashboard_provider.dart';
 import '../providers/food_entry_provider.dart';
+import '../widgets/ai_food_logger.dart';
 import '../widgets/food_entry_form.dart';
 
-/// The "Add Food" tab: the log-a-new-food form followed by the Recent Foods
-/// quick-add list, matching screenshots 4 and 5. Everything lives in a single
-/// scroll view (no nested scrollables).
 class AddFoodTab extends StatefulWidget {
   const AddFoodTab({super.key});
 
@@ -28,11 +26,12 @@ class _AddFoodTabState extends State<AddFoodTab> {
 
   Future<void> _quickAdd(FoodEntry entry) async {
     final foods = context.read<FoodEntryProvider>();
-    final date = context.read<DashboardProvider>().date;
-    final ok = await foods.quickAdd(entry.id, date);
+    final dashboard = context.read<DashboardProvider>();
+    final added = await foods.quickAdd(entry.id, dashboard.date);
     if (!mounted) return;
-    if (ok) {
-      await context.read<DashboardProvider>().load();
+
+    if (added) {
+      await dashboard.load();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Added ${entry.foodName}')),
@@ -47,7 +46,8 @@ class _AddFoodTabState extends State<AddFoodTab> {
   @override
   Widget build(BuildContext context) {
     final foods = context.watch<FoodEntryProvider>();
-    final dateApi = context.watch<DashboardProvider>().date;
+    final date = context.watch<DashboardProvider>().date;
+    final colors = Theme.of(context).colorScheme;
 
     return Scaffold(
       body: SafeArea(
@@ -59,13 +59,33 @@ class _AddFoodTabState extends State<AddFoodTab> {
               const Text('Add food',
                   style: TextStyle(fontSize: 34, fontWeight: FontWeight.bold)),
               const SizedBox(height: 4),
-              Text(AppDate.display(dateApi),
-                  style: TextStyle(color: Colors.white.withOpacity(0.55))),
+              Text(
+                AppDate.display(date),
+                style: TextStyle(color: colors.onSurfaceVariant),
+              ),
               const SizedBox(height: 20),
-              const FoodEntryForm(),
-              const SizedBox(height: 24),
-              Divider(color: Colors.white.withOpacity(0.08)),
+              const AiFoodLogger(),
               const SizedBox(height: 16),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Log manually',
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Enter label values and expand the micronutrient section as needed.',
+                        style: TextStyle(color: colors.onSurfaceVariant),
+                      ),
+                      const SizedBox(height: 16),
+                      const FoodEntryForm(),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
               const Text('Recent foods',
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
@@ -77,14 +97,25 @@ class _AddFoodTabState extends State<AddFoodTab> {
               else if (foods.recent.isEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: Text('No recent foods yet.',
-                      style: TextStyle(color: Colors.white.withOpacity(0.55))),
+                  child: Text(
+                    'No recent foods yet.',
+                    style: TextStyle(color: colors.onSurfaceVariant),
+                  ),
                 )
               else
-                ...foods.recent.map((e) => _RecentRow(
-                      entry: e,
-                      onAdd: () => _quickAdd(e),
-                    )),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      children: foods.recent
+                          .map((entry) => _RecentRow(
+                                entry: entry,
+                                onAdd: () => _quickAdd(entry),
+                              ))
+                          .toList(),
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
@@ -99,13 +130,13 @@ class _RecentRow extends StatelessWidget {
 
   const _RecentRow({required this.entry, required this.onAdd});
 
-  String _fmt(double n) =>
-      n == n.roundToDouble() ? n.toInt().toString() : n.toStringAsFixed(1);
+  String _format(double value) => value == value.roundToDouble()
+      ? value.toInt().toString()
+      : value.toStringAsFixed(1);
 
   @override
   Widget build(BuildContext context) {
-    const green = Color(0xFF34C759);
-    final subTextColor = Colors.white.withOpacity(0.55);
+    final colors = Theme.of(context).colorScheme;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
@@ -116,22 +147,16 @@ class _RecentRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(entry.foodName,
-                    style: const TextStyle(
-                        fontSize: 17, fontWeight: FontWeight.w600)),
+                    style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 2),
-                Text('${entry.servingSize} · ${_fmt(entry.calories)} kcal',
-                    style: TextStyle(fontSize: 14, color: subTextColor)),
+                Text(
+                  '${entry.servingSize} · ${_format(entry.calories)} kcal',
+                  style: TextStyle(fontSize: 14, color: colors.onSurfaceVariant),
+                ),
               ],
             ),
           ),
-          OutlinedButton(
-            onPressed: onAdd,
-            style: OutlinedButton.styleFrom(
-              foregroundColor: green,
-              side: BorderSide(color: green.withOpacity(0.5)),
-            ),
-            child: const Text('+ Add'),
-          ),
+          OutlinedButton(onPressed: onAdd, child: const Text('+ Add')),
         ],
       ),
     );

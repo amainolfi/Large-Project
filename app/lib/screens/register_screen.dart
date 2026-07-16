@@ -3,8 +3,8 @@ import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
 
-/// Create-account screen. On success it auto-logs-in (via AuthProvider.register)
-/// and the app routes straight to the dashboard.
+/// Create-account screen. A successful registration returns to login so the
+/// user can verify their email before obtaining a JWT.
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -51,9 +51,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
     if (!mounted) return;
     if (ok) {
-      // Auth state is now authenticated; pop this pushed route so the
-      // AuthGate's HomeShell (rendered underneath) becomes visible.
-      Navigator.of(context).pop();
+      Navigator.of(context).pop(true);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(auth.errorMessage ?? 'Registration failed')),
@@ -64,6 +62,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
+    final colors = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Create account')),
@@ -78,7 +77,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
               const SizedBox(height: 4),
               Text('Start tracking your macros.',
-                  style: TextStyle(color: Colors.white.withOpacity(0.55))),
+                  style: TextStyle(color: colors.onSurfaceVariant)),
               const SizedBox(height: 24),
               TextFormField(
                 controller: _firstName,
@@ -126,7 +125,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 'At least 8 characters with uppercase, lowercase, a number, '
                 'and a special character.',
                 style: TextStyle(
-                    fontSize: 13, color: Colors.white.withOpacity(0.55)),
+                    fontSize: 13, color: colors.onSurfaceVariant),
               ),
               const SizedBox(height: 16),
               TextFormField(

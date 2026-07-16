@@ -27,9 +27,16 @@ async function seedUserWithDay() {
         calories: 300,
         protein: 18,
         carbs: 2,
+        fat: 20,
         saturatedFat: 3,
         transFat: 0.5,
+        fiber: 1,
         sodium: 200,
+        potassium: 300,
+        calcium: 40,
+        iron: 2,
+        vitaminC: 1,
+        vitaminD: 2,
         date: DATE
       })
     );
@@ -44,9 +51,16 @@ async function seedUserWithDay() {
         calories: 500,
         protein: 40,
         carbs: 55,
+        fat: 15,
         saturatedFat: 4.5,
         transFat: 0,
+        fiber: 8,
         sodium: 800,
+        potassium: 700,
+        calcium: 80,
+        iron: 3,
+        vitaminC: 12,
+        vitaminD: 0,
         date: DATE
       })
     );
@@ -68,25 +82,46 @@ describe("GET /api/summary/daily", () => {
       calories: 800,
       protein: 58,
       carbs: 57,
+      fat: 35,
       saturatedFat: 7.5,
       transFat: 0.5,
-      sodium: 1000
+      fiber: 9,
+      sodium: 1000,
+      potassium: 1000,
+      calcium: 120,
+      iron: 5,
+      vitaminC: 13,
+      vitaminD: 2
     });
     expect(response.body.goals).toEqual({
       calories: 2000,
       protein: 150,
       carbs: 250,
+      fat: 70,
       saturatedFat: 20,
       transFat: 2,
-      sodium: 2300
+      fiber: 28,
+      sodium: 2300,
+      potassium: 4700,
+      calcium: 1300,
+      iron: 18,
+      vitaminC: 90,
+      vitaminD: 20
     });
     expect(response.body.progress).toEqual({
       calories: 40,
       protein: 38.7,
       carbs: 22.8,
+      fat: 50,
       saturatedFat: 37.5,
       transFat: 25,
-      sodium: 43.5
+      fiber: 32.1,
+      sodium: 43.5,
+      potassium: 21.3,
+      calcium: 9.2,
+      iron: 27.8,
+      vitaminC: 14.4,
+      vitaminD: 10
     });
   });
 
@@ -102,9 +137,16 @@ describe("GET /api/summary/daily", () => {
       calories: 0,
       protein: 0,
       carbs: 0,
+      fat: 0,
       saturatedFat: 0,
       transFat: 0,
-      sodium: 0
+      fiber: 0,
+      sodium: 0,
+      potassium: 0,
+      calcium: 0,
+      iron: 0,
+      vitaminC: 0,
+      vitaminD: 0
     });
   });
 

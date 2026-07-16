@@ -37,9 +37,18 @@ describe("POST /api/foods", () => {
       calories: 280,
       protein: 52,
       carbs: 0,
+      fat: 6,
       saturatedFat: 1.5,
       transFat: 0,
+      fiber: 0,
       sodium: 130,
+      potassium: 450,
+      calcium: 20,
+      iron: 1,
+      vitaminC: 0,
+      vitaminD: 0,
+      source: "manual",
+      confidence: null,
       date: "2026-07-10"
     });
     expect(response.body.foodEntry.id).toBeTruthy();
@@ -255,6 +264,8 @@ describe("POST /api/foods/quick-add/:id", () => {
     expect(response.body.foodEntry.date).toBe("2026-07-10");
     expect(response.body.foodEntry.foodName).toBe("Grilled Chicken Breast");
     expect(response.body.foodEntry.sodium).toBe(130);
+    expect(response.body.foodEntry.potassium).toBe(450);
+    expect(response.body.foodEntry.source).toBe("manual");
     expect(response.body.foodEntry.id).not.toBe(created.body.foodEntry.id);
   });
 

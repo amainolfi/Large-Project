@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import Message from "../components/Message";
 import { changePassword, clearSession, deleteAccount, updateProfile } from "../lib/api";
-import { useAuth } from "../lib/auth";
+import { useAuth } from "../lib/auth-context";
 
 const PASSWORD_HINT =
   "At least 8 characters with uppercase, lowercase, a number, and a special character.";

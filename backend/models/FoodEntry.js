@@ -40,6 +40,12 @@ const foodEntrySchema = new mongoose.Schema(
       required: true,
       min: 0
     },
+    fat: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: 0
+    },
     saturatedFat: {
       type: Number,
       required: true,
@@ -50,10 +56,56 @@ const foodEntrySchema = new mongoose.Schema(
       required: true,
       min: 0
     },
+    fiber: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: 0
+    },
     sodium: {
       type: Number,
       required: true,
       min: 0
+    },
+    potassium: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: 0
+    },
+    calcium: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: 0
+    },
+    iron: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: 0
+    },
+    vitaminC: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: 0
+    },
+    vitaminD: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: 0
+    },
+    source: {
+      type: String,
+      enum: ["manual", "ai", "usda"],
+      default: "manual"
+    },
+    confidence: {
+      type: String,
+      enum: ["low", "medium", "high"],
+      default: undefined
     },
     date: {
       type: String,

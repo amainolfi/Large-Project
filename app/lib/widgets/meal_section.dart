@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../models/food_entry.dart';
 
-/// One meal card (Breakfast / Lunch / Dinner / Snack), matching the mockups:
-/// a header with meal name + total kcal, then each entry with its serving,
-/// a compact macro line, and Edit / Delete actions.
 class MealSection extends StatelessWidget {
   final MealType meal;
   final List<FoodEntry> entries;
@@ -21,50 +18,41 @@ class MealSection extends StatelessWidget {
     required this.onDelete,
   });
 
-  String _fmt(double n) =>
-      n == n.roundToDouble() ? n.toInt().toString() : n.toStringAsFixed(1);
+  String _format(double number) => number == number.roundToDouble()
+      ? number.toInt().toString()
+      : number.toStringAsFixed(1);
 
   @override
   Widget build(BuildContext context) {
     if (entries.isEmpty) return const SizedBox.shrink();
+    final colors = Theme.of(context).colorScheme;
 
-    final subTextColor = Colors.white.withOpacity(0.55);
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.03),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.06)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                meal.label,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(meal.label,
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  Text('${_format(totalCalories)} kcal',
+                      style: TextStyle(color: colors.onSurfaceVariant)),
+                ],
               ),
-              Text(
-                '${_fmt(totalCalories)} kcal',
-                style: TextStyle(fontSize: 15, color: subTextColor),
-              ),
+              const Divider(height: 24),
+              ...entries.map((entry) => _EntryRow(
+                    entry: entry,
+                    onEdit: () => onEdit(entry),
+                    onDelete: () => onDelete(entry),
+                  )),
             ],
           ),
-          Divider(color: Colors.white.withOpacity(0.08), height: 24),
-          ...entries.map((e) => _EntryRow(
-                entry: e,
-                onEdit: () => onEdit(e),
-                onDelete: () => onDelete(e),
-              )),
-        ],
+        ),
       ),
     );
   }
@@ -81,61 +69,88 @@ class _EntryRow extends StatelessWidget {
     required this.onDelete,
   });
 
-  String _fmt(double n) =>
-      n == n.roundToDouble() ? n.toInt().toString() : n.toStringAsFixed(1);
+  String _format(double number) => number == number.roundToDouble()
+      ? number.toInt().toString()
+      : number.toStringAsFixed(1);
 
   @override
   Widget build(BuildContext context) {
-    final subTextColor = Colors.white.withOpacity(0.55);
-    final macroLine =
-        '${_fmt(entry.calories)} kcal · P ${_fmt(entry.protein)}g · '
-        'C ${_fmt(entry.carbs)}g · F ${_fmt(entry.fat)}g';
+    final colors = Theme.of(context).colorScheme;
+    final sourceLabel = switch (entry.source) {
+      FoodSource.ai => 'AI estimate',
+      FoodSource.usda => 'USDA',
+      FoodSource.manual => null,
+    };
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  entry.foodName,
-                  style: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(entry.servingSize,
-                    style: TextStyle(fontSize: 14, color: subTextColor)),
-                const SizedBox(height: 4),
-                Text(macroLine,
-                    style: TextStyle(fontSize: 13, color: subTextColor)),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              GestureDetector(
-                onTap: onEdit,
-                child: Text('Edit',
-                    style: TextStyle(fontSize: 15, color: subTextColor)),
-              ),
-              const SizedBox(height: 8),
-              OutlinedButton(
-                onPressed: onDelete,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFFFF453A),
-                  side: BorderSide(color: Colors.white.withOpacity(0.12)),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                  minimumSize: Size.zero,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Wrap(
+                      spacing: 8,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(entry.foodName,
+                            style: const TextStyle(
+                                fontSize: 17, fontWeight: FontWeight.w600)),
+                        if (sourceLabel != null)
+                          Chip(
+                            visualDensity: VisualDensity.compact,
+                            label: Text(sourceLabel,
+                                style: const TextStyle(fontSize: 11)),
+                          ),
+                      ],
+                    ),
+                    Text(entry.servingSize,
+                        style: TextStyle(color: colors.onSurfaceVariant)),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${_format(entry.calories)} kcal · P ${_format(entry.protein)}g · '
+                      'C ${_format(entry.carbs)}g · F ${_format(entry.fat)}g · '
+                      'Fiber ${_format(entry.fiber)}g',
+                      style: TextStyle(fontSize: 13, color: colors.onSurfaceVariant),
+                    ),
+                  ],
                 ),
-                child: const Text('Delete'),
+              ),
+              PopupMenuButton<String>(
+                tooltip: 'Food actions',
+                onSelected: (action) => action == 'edit' ? onEdit() : onDelete(),
+                itemBuilder: (_) => const [
+                  PopupMenuItem(value: 'edit', child: Text('Edit')),
+                  PopupMenuItem(value: 'delete', child: Text('Delete')),
+                ],
+              ),
+            ],
+          ),
+          ExpansionTile(
+            dense: true,
+            tilePadding: EdgeInsets.zero,
+            childrenPadding: const EdgeInsets.only(bottom: 4),
+            title: Text('Micronutrients',
+                style: TextStyle(fontSize: 13, color: colors.primary)),
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Saturated fat ${_format(entry.saturatedFat)}g · '
+                  'Trans fat ${_format(entry.transFat)}g · '
+                  'Sodium ${_format(entry.sodium)}mg · '
+                  'Potassium ${_format(entry.potassium)}mg · '
+                  'Calcium ${_format(entry.calcium)}mg · '
+                  'Iron ${_format(entry.iron)}mg · '
+                  'Vitamin C ${_format(entry.vitaminC)}mg · '
+                  'Vitamin D ${_format(entry.vitaminD)}mcg',
+                  style: TextStyle(fontSize: 12, color: colors.onSurfaceVariant),
+                ),
               ),
             ],
           ),

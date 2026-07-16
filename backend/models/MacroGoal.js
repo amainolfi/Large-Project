@@ -23,6 +23,12 @@ const macroGoalSchema = new mongoose.Schema(
       required: true,
       min: 0
     },
+    dailyFat: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: 0
+    },
     dailySaturatedFat: {
       type: Number,
       required: true,
@@ -33,9 +39,45 @@ const macroGoalSchema = new mongoose.Schema(
       required: true,
       min: 0
     },
+    dailyFiber: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: 0
+    },
     dailySodium: {
       type: Number,
       required: true,
+      min: 0
+    },
+    dailyPotassium: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: 0
+    },
+    dailyCalcium: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: 0
+    },
+    dailyIron: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: 0
+    },
+    dailyVitaminC: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: 0
+    },
+    dailyVitaminD: {
+      type: Number,
+      required: true,
+      default: 0,
       min: 0
     }
   },

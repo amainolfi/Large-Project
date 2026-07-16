@@ -1,3 +1,5 @@
+import { pickNutrition } from "./nutrition.js";
+
 export function formatUser(user) {
   return {
     id: user._id.toString(),
@@ -20,9 +22,16 @@ export function formatGoal(goal) {
     dailyCalories: goal.dailyCalories,
     dailyProtein: goal.dailyProtein,
     dailyCarbs: goal.dailyCarbs,
+    dailyFat: goal.dailyFat || 0,
     dailySaturatedFat: goal.dailySaturatedFat,
     dailyTransFat: goal.dailyTransFat,
+    dailyFiber: goal.dailyFiber || 0,
     dailySodium: goal.dailySodium,
+    dailyPotassium: goal.dailyPotassium || 0,
+    dailyCalcium: goal.dailyCalcium || 0,
+    dailyIron: goal.dailyIron || 0,
+    dailyVitaminC: goal.dailyVitaminC || 0,
+    dailyVitaminD: goal.dailyVitaminD || 0,
     createdAt: goal.createdAt,
     updatedAt: goal.updatedAt
   };
@@ -34,12 +43,9 @@ export function formatFoodEntry(foodEntry) {
     foodName: foodEntry.foodName,
     servingSize: foodEntry.servingSize,
     mealType: foodEntry.mealType,
-    calories: foodEntry.calories,
-    protein: foodEntry.protein,
-    carbs: foodEntry.carbs,
-    saturatedFat: foodEntry.saturatedFat,
-    transFat: foodEntry.transFat,
-    sodium: foodEntry.sodium,
+    ...pickNutrition(foodEntry),
+    source: foodEntry.source || "manual",
+    confidence: foodEntry.confidence || null,
     date: foodEntry.date,
     createdAt: foodEntry.createdAt,
     updatedAt: foodEntry.updatedAt

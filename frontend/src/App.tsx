@@ -1,4 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import ThemeProvider from "./components/ThemeProvider";
+import ThemeToggle from "./components/ThemeToggle";
 import { AuthProvider, RequireAuth } from "./lib/auth";
 import DashboardPage from "./pages/DashboardPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
@@ -12,9 +14,11 @@ import VerifyEmailPage from "./pages/VerifyEmailPage";
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
+    <ThemeProvider>
+      <ThemeToggle />
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
           <Route path="/" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/verify-email/:token" element={<VerifyEmailPage />} />
@@ -53,9 +57,10 @@ function App() {
             }
           />
           <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

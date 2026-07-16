@@ -115,6 +115,29 @@ class ApiService {
     }
   }
 
+  Future<String> resendVerification(String email) async {
+    try {
+      final res = await _dio.post('/auth/resend-verification', data: {
+        'email': email,
+      });
+      return res.data['message'] as String? ?? 'Verification email sent.';
+    } on DioException catch (e) {
+      _rethrowAsApi(e);
+    }
+  }
+
+  Future<String> forgotPassword(String email) async {
+    try {
+      final res = await _dio.post('/auth/forgot-password', data: {
+        'email': email,
+      });
+      return res.data['message'] as String? ??
+          'If that email exists, a password reset link was sent.';
+    } on DioException catch (e) {
+      _rethrowAsApi(e);
+    }
+  }
+
   /// GET /api/auth/me -> { user }. Used on app start to restore the session.
   Future<User> getMe() async {
     try {
@@ -213,6 +236,26 @@ class ApiService {
       if (mealType != null) body['mealType'] = mealType.label;
       final res = await _dio.post('/foods/quick-add/$id', data: body);
       return FoodEntry.fromJson(res.data['foodEntry'] as Map<String, dynamic>);
+    } on DioException catch (e) {
+      _rethrowAsApi(e);
+    }
+  }
+
+  /// POST /api/foods/ai-log -> validated, estimated food entries.
+  Future<List<FoodEntry>> logFoodWithAi({
+    required String text,
+    required String date,
+    required MealType mealType,
+  }) async {
+    try {
+      final res = await _dio.post('/foods/ai-log', data: {
+        'text': text,
+        'date': date,
+        'mealType': mealType.label,
+      });
+      final list =
+          (res.data['foodEntries'] as List).cast<Map<String, dynamic>>();
+      return list.map(FoodEntry.fromJson).toList();
     } on DioException catch (e) {
       _rethrowAsApi(e);
     }
