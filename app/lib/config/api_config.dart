@@ -9,7 +9,7 @@
 /// Note: iOS blocks plain http:// by default (App Transport Security). The
 /// deployed https URL needs no exception; a local http URL would.
 class ApiConfig {
-  static const String baseUrl = 'https://macrovanta.xyz';
+  static const String baseUrl = 'https://dylanwexler.com';
 
   /// All backend routes are mounted under /api.
   static const String apiPrefix = '/api';
