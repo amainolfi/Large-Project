@@ -90,11 +90,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
         unit: 'g',
       ),
       MacroProgressBar(
-        label: 'Fat',
-        value: s.totals.fat,
-        goal: s.goals.fat,
-        percent: s.progress.fat,
+        label: 'Saturated fat',
+        value: s.totals.saturatedFat,
+        goal: s.goals.saturatedFat,
+        percent: s.progress.saturatedFat,
         unit: 'g',
+      ),
+      MacroProgressBar(
+        label: 'Trans fat',
+        value: s.totals.transFat,
+        goal: s.goals.transFat,
+        percent: s.progress.transFat,
+        unit: 'g',
+      ),
+      MacroProgressBar(
+        label: 'Sodium',
+        value: s.totals.sodium,
+        goal: s.goals.sodium,
+        percent: s.progress.sodium,
+        unit: 'mg',
       ),
     ];
     // Spacing between bars.

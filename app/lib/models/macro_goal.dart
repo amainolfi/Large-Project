@@ -1,18 +1,23 @@
-/// Mirrors the DEPLOYED backend's goal shape.
-/// { id, dailyCalories, dailyProtein, dailyCarbs, dailyFat }
+/// Mirrors the deployed backend's goal shape.
+/// { id, dailyCalories, dailyProtein, dailyCarbs, dailySaturatedFat,
+///   dailyTransFat, dailySodium }
 class MacroGoal {
   final String id;
   final double dailyCalories;
   final double dailyProtein;
   final double dailyCarbs;
-  final double dailyFat;
+  final double dailySaturatedFat;
+  final double dailyTransFat;
+  final double dailySodium;
 
   const MacroGoal({
     required this.id,
     required this.dailyCalories,
     required this.dailyProtein,
     required this.dailyCarbs,
-    required this.dailyFat,
+    required this.dailySaturatedFat,
+    required this.dailyTransFat,
+    required this.dailySodium,
   });
 
   factory MacroGoal.fromJson(Map<String, dynamic> json) {
@@ -23,7 +28,9 @@ class MacroGoal {
       dailyCalories: num2(json['dailyCalories']),
       dailyProtein: num2(json['dailyProtein']),
       dailyCarbs: num2(json['dailyCarbs']),
-      dailyFat: num2(json['dailyFat']),
+      dailySaturatedFat: num2(json['dailySaturatedFat']),
+      dailyTransFat: num2(json['dailyTransFat']),
+      dailySodium: num2(json['dailySodium']),
     );
   }
 }
@@ -33,13 +40,17 @@ class MacroGoalInput {
   final double dailyCalories;
   final double dailyProtein;
   final double dailyCarbs;
-  final double dailyFat;
+  final double dailySaturatedFat;
+  final double dailyTransFat;
+  final double dailySodium;
 
   const MacroGoalInput({
     required this.dailyCalories,
     required this.dailyProtein,
     required this.dailyCarbs,
-    required this.dailyFat,
+    required this.dailySaturatedFat,
+    required this.dailyTransFat,
+    required this.dailySodium,
   });
 
   Map<String, dynamic> toJson() {
@@ -47,7 +58,9 @@ class MacroGoalInput {
       'dailyCalories': dailyCalories,
       'dailyProtein': dailyProtein,
       'dailyCarbs': dailyCarbs,
-      'dailyFat': dailyFat,
+      'dailySaturatedFat': dailySaturatedFat,
+      'dailyTransFat': dailyTransFat,
+      'dailySodium': dailySodium,
     };
   }
 }

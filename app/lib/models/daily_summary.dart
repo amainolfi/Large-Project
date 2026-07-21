@@ -1,16 +1,20 @@
-/// A set of nutrient values, matching the DEPLOYED server's shape.
-/// Keys: calories, protein, carbs, fat.
+/// A set of nutrient values, matching the deployed server's shape.
+/// Keys: calories, protein, carbs, saturatedFat, transFat, sodium.
 class NutrientSet {
   final double calories;
   final double protein;
   final double carbs;
-  final double fat;
+  final double saturatedFat;
+  final double transFat;
+  final double sodium;
 
   const NutrientSet({
     required this.calories,
     required this.protein,
     required this.carbs,
-    required this.fat,
+    required this.saturatedFat,
+    required this.transFat,
+    required this.sodium,
   });
 
   factory NutrientSet.fromJson(Map<String, dynamic> json) {
@@ -20,7 +24,9 @@ class NutrientSet {
       calories: num2(json['calories']),
       protein: num2(json['protein']),
       carbs: num2(json['carbs']),
-      fat: num2(json['fat']),
+      saturatedFat: num2(json['saturatedFat']),
+      transFat: num2(json['transFat']),
+      sodium: num2(json['sodium']),
     );
   }
 }

@@ -6,9 +6,10 @@ import '../models/macro_goal.dart';
 import '../providers/dashboard_provider.dart';
 import '../providers/goals_provider.dart';
 
-/// Daily goals screen (screenshot 7): four numeric targets — Calories,
-/// Protein, Carbs, Fat — plus Save. Saving refreshes the Dashboard so the
-/// progress bars reflect the new targets right away.
+/// Daily goals screen (screenshot 7): six numeric targets — Calories,
+/// Protein, Carbs, Saturated Fat, Trans Fat, Sodium — plus Save. Saving
+/// refreshes the Dashboard so the progress bars reflect the new targets
+/// right away.
 class GoalsScreen extends StatefulWidget {
   const GoalsScreen({super.key});
 
@@ -22,7 +23,9 @@ class _GoalsScreenState extends State<GoalsScreen> {
   final _calories = TextEditingController();
   final _protein = TextEditingController();
   final _carbs = TextEditingController();
-  final _fat = TextEditingController();
+  final _saturatedFat = TextEditingController();
+  final _transFat = TextEditingController();
+  final _sodium = TextEditingController();
 
   bool _prefilled = false;
 
@@ -36,7 +39,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
 
   @override
   void dispose() {
-    for (final c in [_calories, _protein, _carbs, _fat]) {
+    for (final c in [_calories, _protein, _carbs, _saturatedFat, _transFat, _sodium]) {
       c.dispose();
     }
     super.dispose();
@@ -52,7 +55,9 @@ class _GoalsScreenState extends State<GoalsScreen> {
     _calories.text = _num(goals.dailyCalories);
     _protein.text = _num(goals.dailyProtein);
     _carbs.text = _num(goals.dailyCarbs);
-    _fat.text = _num(goals.dailyFat);
+    _saturatedFat.text = _num(goals.dailySaturatedFat);
+    _transFat.text = _num(goals.dailyTransFat);
+    _sodium.text = _num(goals.dailySodium);
     _prefilled = true;
   }
 
@@ -69,7 +74,9 @@ class _GoalsScreenState extends State<GoalsScreen> {
       dailyCalories: _parse(_calories),
       dailyProtein: _parse(_protein),
       dailyCarbs: _parse(_carbs),
-      dailyFat: _parse(_fat),
+      dailySaturatedFat: _parse(_saturatedFat),
+      dailyTransFat: _parse(_transFat),
+      dailySodium: _parse(_sodium),
     );
 
     final goals = context.read<GoalsProvider>();
@@ -118,7 +125,11 @@ class _GoalsScreenState extends State<GoalsScreen> {
                     const SizedBox(height: 20),
                     _field(_carbs, 'Carbohydrates (g)', 'Daily target'),
                     const SizedBox(height: 20),
-                    _field(_fat, 'Fat (g)', 'Daily target'),
+                    _field(_saturatedFat, 'Saturated fat (g)', 'Daily limit'),
+                    const SizedBox(height: 20),
+                    _field(_transFat, 'Trans fat (g)', 'Daily limit'),
+                    const SizedBox(height: 20),
+                    _field(_sodium, 'Sodium (mg)', 'Daily limit'),
                     const SizedBox(height: 28),
                     FilledButton(
                       onPressed: goals.saving ? null : _save,

@@ -1,7 +1,8 @@
 import 'daily_summary.dart';
 
 /// One day's totals within a weekly summary.
-/// Shape: { date, totals: { calories, protein, carbs, fat } }
+/// Shape: { date, totals: { calories, protein, carbs, saturatedFat,
+///   transFat, sodium } }
 class DayTotals {
   final String date;
   final NutrientSet totals;

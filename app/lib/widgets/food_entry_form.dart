@@ -32,7 +32,9 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
   late final TextEditingController _calories;
   late final TextEditingController _protein;
   late final TextEditingController _carbs;
-  late final TextEditingController _fat;
+  late final TextEditingController _saturatedFat;
+  late final TextEditingController _transFat;
+  late final TextEditingController _sodium;
 
   late MealType _meal;
   late String _dateApi;
@@ -46,7 +48,9 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
     _calories = TextEditingController(text: _num(e?.calories));
     _protein = TextEditingController(text: _num(e?.protein));
     _carbs = TextEditingController(text: _num(e?.carbs));
-    _fat = TextEditingController(text: _num(e?.fat));
+    _saturatedFat = TextEditingController(text: _num(e?.saturatedFat));
+    _transFat = TextEditingController(text: _num(e?.transFat));
+    _sodium = TextEditingController(text: _num(e?.sodium));
     _meal = e?.mealType ?? MealType.breakfast;
     _dateApi = e?.date ?? context.read<DashboardProvider>().date;
   }
@@ -59,7 +63,8 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
   @override
   void dispose() {
     for (final c in [
-      _name, _serving, _calories, _protein, _carbs, _fat
+      _name, _serving, _calories, _protein, _carbs,
+      _saturatedFat, _transFat, _sodium
     ]) {
       c.dispose();
     }
@@ -84,7 +89,9 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
       calories: _parse(_calories),
       protein: _parse(_protein),
       carbs: _parse(_carbs),
-      fat: _parse(_fat),
+      saturatedFat: _parse(_saturatedFat),
+      transFat: _parse(_transFat),
+      sodium: _parse(_sodium),
       date: _dateApi,
     );
 
@@ -105,7 +112,9 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
         _formKey.currentState!.reset();
         _name.clear();
         _serving.clear();
-        for (final c in [_calories, _protein, _carbs, _fat]) {
+        for (final c in [
+          _calories, _protein, _carbs, _saturatedFat, _transFat, _sodium
+        ]) {
           c.clear();
         }
         ScaffoldMessenger.of(context).showSnackBar(
@@ -150,7 +159,13 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
           Row(children: [
             Expanded(child: _numberField(_carbs, 'Carbs (g)')),
             const SizedBox(width: 12),
-            Expanded(child: _numberField(_fat, 'Fat (g)')),
+            Expanded(child: _numberField(_saturatedFat, 'Saturated fat (g)')),
+          ]),
+          const SizedBox(height: 16),
+          Row(children: [
+            Expanded(child: _numberField(_transFat, 'Trans fat (g)')),
+            const SizedBox(width: 12),
+            Expanded(child: _numberField(_sodium, 'Sodium (mg)')),
           ]),
           const SizedBox(height: 24),
           FilledButton(

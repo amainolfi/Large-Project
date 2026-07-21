@@ -268,7 +268,8 @@ class _DailyTotalsList extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     '${_fmt(t.calories)} kcal · P ${_fmt(t.protein)}g · '
-                    'C ${_fmt(t.carbs)}g · F ${_fmt(t.fat)}g',
+                    'C ${_fmt(t.carbs)}g · SF ${_fmt(t.saturatedFat)}g · '
+                    'TF ${_fmt(t.transFat)}g · Na ${_fmt(t.sodium)}mg',
                     style: TextStyle(fontSize: 14, color: subTextColor),
                   ),
                 ],

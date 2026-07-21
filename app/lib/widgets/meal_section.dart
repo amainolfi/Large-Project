@@ -89,7 +89,8 @@ class _EntryRow extends StatelessWidget {
     final subTextColor = Colors.white.withOpacity(0.55);
     final macroLine =
         '${_fmt(entry.calories)} kcal · P ${_fmt(entry.protein)}g · '
-        'C ${_fmt(entry.carbs)}g · F ${_fmt(entry.fat)}g';
+        'C ${_fmt(entry.carbs)}g · SF ${_fmt(entry.saturatedFat)}g · '
+        'TF ${_fmt(entry.transFat)}g · Na ${_fmt(entry.sodium)}mg';
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),

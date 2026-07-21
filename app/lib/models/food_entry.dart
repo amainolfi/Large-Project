@@ -17,13 +17,9 @@ enum MealType {
   }
 }
 
-/// Mirrors the DEPLOYED backend's food entry shape:
-/// { id, foodName, servingSize, mealType, calories, protein, carbs, fat,
-///   date, createdAt, updatedAt }
-///
-/// NOTE: The deployed server currently tracks a single `fat` field (no
-/// saturated/trans split, no sodium). The newer six-nutrient version exists
-/// in the repo but isn't deployed yet; when it is, this model expands again.
+/// Mirrors the deployed backend's food entry shape:
+/// { id, foodName, servingSize, mealType, calories, protein, carbs,
+///   saturatedFat, transFat, sodium, date, createdAt, updatedAt }
 class FoodEntry {
   final String id;
   final String foodName;
@@ -32,7 +28,9 @@ class FoodEntry {
   final double calories;
   final double protein;
   final double carbs;
-  final double fat;
+  final double saturatedFat;
+  final double transFat;
+  final double sodium;
   final String date; // "YYYY-MM-DD"
   final String? createdAt;
   final String? updatedAt;
@@ -45,7 +43,9 @@ class FoodEntry {
     required this.calories,
     required this.protein,
     required this.carbs,
-    required this.fat,
+    required this.saturatedFat,
+    required this.transFat,
+    required this.sodium,
     required this.date,
     this.createdAt,
     this.updatedAt,
@@ -62,7 +62,9 @@ class FoodEntry {
       calories: num2(json['calories']),
       protein: num2(json['protein']),
       carbs: num2(json['carbs']),
-      fat: num2(json['fat']),
+      saturatedFat: num2(json['saturatedFat']),
+      transFat: num2(json['transFat']),
+      sodium: num2(json['sodium']),
       date: json['date'] as String? ?? '',
       createdAt: json['createdAt'] as String?,
       updatedAt: json['updatedAt'] as String?,
@@ -79,7 +81,9 @@ class FoodEntryInput {
   final double calories;
   final double protein;
   final double carbs;
-  final double fat;
+  final double saturatedFat;
+  final double transFat;
+  final double sodium;
   final String date; // "YYYY-MM-DD"
 
   const FoodEntryInput({
@@ -89,7 +93,9 @@ class FoodEntryInput {
     required this.calories,
     required this.protein,
     required this.carbs,
-    required this.fat,
+    required this.saturatedFat,
+    required this.transFat,
+    required this.sodium,
     required this.date,
   });
 
@@ -101,7 +107,9 @@ class FoodEntryInput {
       'calories': calories,
       'protein': protein,
       'carbs': carbs,
-      'fat': fat,
+      'saturatedFat': saturatedFat,
+      'transFat': transFat,
+      'sodium': sodium,
       'date': date,
     };
   }
