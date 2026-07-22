@@ -11,6 +11,7 @@ import ProfilePage from "./pages/ProfilePage";
 import RegisterPage from "./pages/RegisterPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
+import WellnessPage from "./pages/WellnessPage";
 
 function App() {
   return (
@@ -45,6 +46,14 @@ function App() {
             element={
               <RequireAuth>
                 <GoalsPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/wellness"
+            element={
+              <RequireAuth>
+                <WellnessPage />
               </RequireAuth>
             }
           />

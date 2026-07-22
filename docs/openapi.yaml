@@ -4,7 +4,7 @@ info:
   description: |
     REST API for the MacroVanta app. Handles user authentication with JWT,
     food entry logging, AI-assisted extraction, USDA food search, daily macro
-    and micronutrient goals, and nutrition summaries.
+    and micronutrient goals, nutrition summaries, hydration, sleep, and cardio.
 
     Authentication: obtain a token from `POST /api/auth/login`, then click
     Authorize and paste the token. SwaggerHub adds the `Bearer ` prefix when
@@ -22,7 +22,7 @@ info:
     it only when an existing unverified account receives a new verification
     token. Forgot password includes it only when an existing account receives a
     reset token.
-  version: 1.1.0
+  version: 1.2.0
   contact:
     name: Anthony Mainolfi
 servers:
@@ -44,6 +44,8 @@ tags:
     description: Daily macro goals
   - name: Summary
     description: Daily, per-meal, and weekly nutrition summaries
+  - name: Wellness
+    description: Water, sleep, cardio, wellness goals, and progress summaries
   - name: Users
     description: Profile and account management
 
@@ -943,8 +945,9 @@ paths:
       tags: [Users]
       summary: Delete account
       description: |
-        Permanent. Deletes the user and all associated data: food entries, macro
-        goals, verification tokens, and password-reset tokens.
+        Permanent. Deletes the user and all associated data: food entries,
+        nutrition and wellness goals, water, sleep, cardio, verification tokens,
+        and password-reset tokens.
       operationId: deleteAccount
       security:
         - bearerAuth: []
@@ -959,6 +962,348 @@ paths:
                 message: Account deleted successfully.
         "401":
           $ref: "#/components/responses/Unauthorized"
+
+  /api/wellness/summary:
+    get:
+      tags: [Wellness]
+      summary: Get wellness summary
+      description: Returns daily hydration, sleep, and cardio totals plus ISO-week cardio progress.
+      operationId: getWellnessSummary
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/DateQuery"
+      responses:
+        "200":
+          description: Wellness summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WellnessSummary"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/wellness/goals:
+    get:
+      tags: [Wellness]
+      summary: Get wellness goals
+      operationId: getWellnessGoals
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Saved goals or practical defaults when goals have not been saved
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [goals]
+                properties:
+                  goals:
+                    $ref: "#/components/schemas/WellnessGoal"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    put:
+      tags: [Wellness]
+      summary: Create or update wellness goals
+      operationId: upsertWellnessGoals
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WellnessGoalInput"
+      responses:
+        "200":
+          description: Goals saved
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [message, goals]
+                properties:
+                  message:
+                    type: string
+                  goals:
+                    $ref: "#/components/schemas/WellnessGoal"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/wellness/water:
+    get:
+      tags: [Wellness]
+      summary: List water entries for a date
+      operationId: listWaterEntries
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/DateQuery"
+      responses:
+        "200":
+          description: Water entries
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WaterEntryListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: [Wellness]
+      summary: Log water
+      operationId: createWaterEntry
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WaterEntryInput"
+      responses:
+        "201":
+          description: Water entry created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WaterEntryResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/wellness/water/{id}:
+    parameters:
+      - $ref: "#/components/parameters/WellnessEntryId"
+    put:
+      tags: [Wellness]
+      summary: Update a water entry
+      operationId: updateWaterEntry
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WaterEntryUpdate"
+      responses:
+        "200":
+          description: Water entry updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WaterEntryResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/WellnessNotFound"
+    delete:
+      tags: [Wellness]
+      summary: Delete a water entry
+      operationId: deleteWaterEntry
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Water entry deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/WellnessNotFound"
+
+  /api/wellness/cardio:
+    get:
+      tags: [Wellness]
+      summary: List cardio entries for a date
+      operationId: listCardioEntries
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/DateQuery"
+      responses:
+        "200":
+          description: Cardio entries
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CardioEntryListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: [Wellness]
+      summary: Log a cardio session
+      operationId: createCardioEntry
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CardioEntryInput"
+      responses:
+        "201":
+          description: Cardio entry created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CardioEntryResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/wellness/cardio/{id}:
+    parameters:
+      - $ref: "#/components/parameters/WellnessEntryId"
+    put:
+      tags: [Wellness]
+      summary: Update a cardio session
+      operationId: updateCardioEntry
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CardioEntryUpdate"
+      responses:
+        "200":
+          description: Cardio entry updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CardioEntryResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/WellnessNotFound"
+    delete:
+      tags: [Wellness]
+      summary: Delete a cardio session
+      operationId: deleteCardioEntry
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Cardio entry deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/WellnessNotFound"
+
+  /api/wellness/sleep:
+    get:
+      tags: [Wellness]
+      summary: List sleep entries for a date
+      operationId: listSleepEntries
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/DateQuery"
+      responses:
+        "200":
+          description: Sleep entries
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SleepEntryListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: [Wellness]
+      summary: Log a sleep session
+      operationId: createSleepEntry
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SleepEntryInput"
+      responses:
+        "201":
+          description: Sleep entry created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SleepEntryResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/wellness/sleep/{id}:
+    parameters:
+      - $ref: "#/components/parameters/WellnessEntryId"
+    put:
+      tags: [Wellness]
+      summary: Update a sleep session
+      operationId: updateSleepEntry
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SleepEntryUpdate"
+      responses:
+        "200":
+          description: Sleep entry updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SleepEntryResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/WellnessNotFound"
+    delete:
+      tags: [Wellness]
+      summary: Delete a sleep session
+      operationId: deleteSleepEntry
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Sleep entry deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/WellnessNotFound"
 
 components:
   securitySchemes:
@@ -986,6 +1331,14 @@ components:
       schema:
         type: string
       example: 665f1c2ab8e4a91d2c3f0a11
+    WellnessEntryId:
+      name: id
+      in: path
+      required: true
+      description: User-owned wellness entry id, stored as a MongoDB ObjectId
+      schema:
+        type: string
+      example: 665f1c2ab8e4a91d2c3f0a21
 
   responses:
     BadRequest:
@@ -1028,6 +1381,14 @@ components:
             $ref: "#/components/schemas/ErrorResponse"
           example:
             message: Food entry not found.
+    WellnessNotFound:
+      description: Wellness entry not found or not owned by this user
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            message: Wellness entry not found.
 
   schemas:
     RegisterRequest:
@@ -1675,6 +2036,376 @@ components:
           $ref: "#/components/schemas/DateString"
         totals:
           $ref: "#/components/schemas/MacroTotals"
+
+    ActivityType:
+      type: string
+      enum: [walking, running, cycling, swimming, elliptical, rowing, sports, other]
+
+    Intensity:
+      type: string
+      enum: [low, moderate, high]
+
+    SleepQuality:
+      type: string
+      enum: [poor, fair, good, excellent]
+
+    CardioEntryInput:
+      type: object
+      additionalProperties: false
+      required: [activityType, durationMinutes, date]
+      properties:
+        activityType:
+          $ref: "#/components/schemas/ActivityType"
+        durationMinutes:
+          type: integer
+          minimum: 1
+          maximum: 1440
+          example: 30
+        distanceKm:
+          type: number
+          minimum: 0
+          maximum: 1000
+          default: 0
+          example: 5
+        caloriesBurned:
+          type: number
+          minimum: 0
+          maximum: 10000
+          default: 0
+          example: 320
+        intensity:
+          allOf:
+            - $ref: "#/components/schemas/Intensity"
+          default: moderate
+        notes:
+          type: string
+          maxLength: 500
+          default: ""
+        date:
+          $ref: "#/components/schemas/DateString"
+
+    CardioEntryUpdate:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        activityType:
+          $ref: "#/components/schemas/ActivityType"
+        durationMinutes:
+          type: integer
+          minimum: 1
+          maximum: 1440
+        distanceKm:
+          type: number
+          minimum: 0
+          maximum: 1000
+        caloriesBurned:
+          type: number
+          minimum: 0
+          maximum: 10000
+        intensity:
+          $ref: "#/components/schemas/Intensity"
+        notes:
+          type: string
+          maxLength: 500
+        date:
+          $ref: "#/components/schemas/DateString"
+
+    CardioEntry:
+      type: object
+      required:
+        [id, activityType, durationMinutes, distanceKm, caloriesBurned, intensity, notes, date, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+        activityType:
+          $ref: "#/components/schemas/ActivityType"
+        durationMinutes:
+          type: integer
+          minimum: 1
+          maximum: 1440
+        distanceKm:
+          type: number
+          minimum: 0
+          maximum: 1000
+        caloriesBurned:
+          type: number
+          minimum: 0
+          maximum: 10000
+        intensity:
+          $ref: "#/components/schemas/Intensity"
+        notes:
+          type: string
+          maxLength: 500
+        date:
+          $ref: "#/components/schemas/DateString"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CardioEntryResponse:
+      type: object
+      required: [cardioEntry]
+      properties:
+        cardioEntry:
+          $ref: "#/components/schemas/CardioEntry"
+
+    CardioEntryListResponse:
+      type: object
+      required: [cardioEntries]
+      properties:
+        cardioEntries:
+          type: array
+          items:
+            $ref: "#/components/schemas/CardioEntry"
+
+    WaterEntryInput:
+      type: object
+      additionalProperties: false
+      required: [amountMl, date]
+      properties:
+        amountMl:
+          type: integer
+          minimum: 1
+          maximum: 5000
+          example: 500
+        date:
+          $ref: "#/components/schemas/DateString"
+
+    WaterEntryUpdate:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        amountMl:
+          type: integer
+          minimum: 1
+          maximum: 5000
+        date:
+          $ref: "#/components/schemas/DateString"
+
+    WaterEntry:
+      type: object
+      required: [id, amountMl, date, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+        amountMl:
+          type: integer
+          minimum: 1
+          maximum: 5000
+        date:
+          $ref: "#/components/schemas/DateString"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    WaterEntryResponse:
+      type: object
+      required: [waterEntry]
+      properties:
+        waterEntry:
+          $ref: "#/components/schemas/WaterEntry"
+
+    WaterEntryListResponse:
+      type: object
+      required: [waterEntries]
+      properties:
+        waterEntries:
+          type: array
+          items:
+            $ref: "#/components/schemas/WaterEntry"
+
+    SleepEntryInput:
+      type: object
+      additionalProperties: false
+      required: [durationMinutes, date]
+      properties:
+        durationMinutes:
+          type: integer
+          minimum: 1
+          maximum: 1440
+          example: 480
+        quality:
+          allOf:
+            - $ref: "#/components/schemas/SleepQuality"
+          default: good
+        notes:
+          type: string
+          maxLength: 500
+          default: ""
+        date:
+          $ref: "#/components/schemas/DateString"
+
+    SleepEntryUpdate:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        durationMinutes:
+          type: integer
+          minimum: 1
+          maximum: 1440
+        quality:
+          $ref: "#/components/schemas/SleepQuality"
+        notes:
+          type: string
+          maxLength: 500
+        date:
+          $ref: "#/components/schemas/DateString"
+
+    SleepEntry:
+      type: object
+      required: [id, durationMinutes, quality, notes, date, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+        durationMinutes:
+          type: integer
+          minimum: 1
+          maximum: 1440
+        quality:
+          $ref: "#/components/schemas/SleepQuality"
+        notes:
+          type: string
+          maxLength: 500
+        date:
+          $ref: "#/components/schemas/DateString"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    SleepEntryResponse:
+      type: object
+      required: [sleepEntry]
+      properties:
+        sleepEntry:
+          $ref: "#/components/schemas/SleepEntry"
+
+    SleepEntryListResponse:
+      type: object
+      required: [sleepEntries]
+      properties:
+        sleepEntries:
+          type: array
+          items:
+            $ref: "#/components/schemas/SleepEntry"
+
+    WellnessGoalInput:
+      type: object
+      additionalProperties: false
+      required: [dailyWaterMl, nightlySleepMinutes, weeklyCardioMinutes]
+      properties:
+        dailyWaterMl:
+          type: integer
+          minimum: 0
+          maximum: 20000
+          example: 2500
+        nightlySleepMinutes:
+          type: integer
+          minimum: 0
+          maximum: 1440
+          example: 480
+        weeklyCardioMinutes:
+          type: integer
+          minimum: 0
+          maximum: 10080
+          example: 150
+
+    WellnessGoal:
+      type: object
+      required: [id, dailyWaterMl, nightlySleepMinutes, weeklyCardioMinutes, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          nullable: true
+        dailyWaterMl:
+          type: integer
+          minimum: 0
+          maximum: 20000
+        nightlySleepMinutes:
+          type: integer
+          minimum: 0
+          maximum: 1440
+        weeklyCardioMinutes:
+          type: integer
+          minimum: 0
+          maximum: 10080
+        createdAt:
+          type: string
+          format: date-time
+          nullable: true
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    WellnessTotals:
+      type: object
+      required: [waterMl, sleepMinutes, cardioMinutes, cardioCaloriesBurned]
+      properties:
+        waterMl:
+          type: integer
+          example: 1250
+        sleepMinutes:
+          type: integer
+          example: 450
+        cardioMinutes:
+          type: integer
+          example: 30
+        cardioCaloriesBurned:
+          type: number
+          example: 320
+
+    WellnessProgress:
+      type: object
+      required: [waterPercent, sleepPercent, weeklyCardioPercent]
+      properties:
+        waterPercent:
+          type: number
+          example: 50
+        sleepPercent:
+          type: number
+          example: 93.8
+        weeklyCardioPercent:
+          type: number
+          example: 50
+
+    WellnessWeek:
+      type: object
+      required: [startDate, endDate, cardioMinutes]
+      properties:
+        startDate:
+          $ref: "#/components/schemas/DateString"
+        endDate:
+          $ref: "#/components/schemas/DateString"
+        cardioMinutes:
+          type: integer
+          example: 75
+
+    WellnessSummary:
+      type: object
+      required: [date, totals, weekly, goals, progress]
+      properties:
+        date:
+          $ref: "#/components/schemas/DateString"
+        totals:
+          $ref: "#/components/schemas/WellnessTotals"
+        weekly:
+          $ref: "#/components/schemas/WellnessWeek"
+        goals:
+          $ref: "#/components/schemas/WellnessGoal"
+        progress:
+          $ref: "#/components/schemas/WellnessProgress"
 
     MessageResponse:
       type: object

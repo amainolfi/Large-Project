@@ -8,6 +8,7 @@
     "dev": "nodemon server.js",
     "start": "node server.js",
     "seed": "node scripts/seed.js",
+    "seed:demo": "node scripts/seedDemoData.js",
     "make-users": "node scripts/makeTestUsers.js"
   },
   "keywords": [],

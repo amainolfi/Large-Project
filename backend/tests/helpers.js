@@ -71,3 +71,43 @@ export function goalsPayload(overrides = {}) {
     ...overrides
   };
 }
+
+export function cardioPayload(overrides = {}) {
+  return {
+    activityType: "running",
+    durationMinutes: 30,
+    distanceKm: 5,
+    caloriesBurned: 320,
+    intensity: "high",
+    notes: "Comfortable 5K",
+    date: "2026-07-21",
+    ...overrides
+  };
+}
+
+export function waterPayload(overrides = {}) {
+  return {
+    amountMl: 500,
+    date: "2026-07-21",
+    ...overrides
+  };
+}
+
+export function sleepPayload(overrides = {}) {
+  return {
+    durationMinutes: 450,
+    quality: "good",
+    notes: "Woke up rested",
+    date: "2026-07-21",
+    ...overrides
+  };
+}
+
+export function wellnessGoalsPayload(overrides = {}) {
+  return {
+    dailyWaterMl: 2500,
+    nightlySleepMinutes: 480,
+    weeklyCardioMinutes: 150,
+    ...overrides
+  };
+}

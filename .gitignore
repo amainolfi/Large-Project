@@ -7,4 +7,5 @@ coverage
 .vscode
 .DS_Store
 npm-debug.log*
-backend/scripts/
+backend/scripts/*
+!backend/scripts/seedDemoData.js

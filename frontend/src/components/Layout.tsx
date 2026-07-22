@@ -23,6 +23,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             <NavLink to="/dashboard">Dashboard</NavLink>
             <NavLink to="/history">History</NavLink>
             <NavLink to="/goals">Goals</NavLink>
+            <NavLink to="/wellness">Wellness</NavLink>
             <NavLink to="/profile">Profile</NavLink>
           </nav>
           <div className="nav-user">

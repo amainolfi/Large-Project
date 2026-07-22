@@ -5,6 +5,7 @@ import '../models/daily_summary.dart';
 import '../models/food_entry.dart';
 import '../models/macro_goal.dart';
 import '../models/user.dart';
+import '../models/wellness.dart';
 import '../models/weekly_summary.dart';
 import 'token_store.dart';
 
@@ -165,7 +166,8 @@ class ApiService {
   Future<List<FoodEntry>> getFoods(String date) async {
     try {
       final res = await _dio.get('/foods', queryParameters: {'date': date});
-      final list = (res.data['foodEntries'] as List).cast<Map<String, dynamic>>();
+      final list =
+          (res.data['foodEntries'] as List).cast<Map<String, dynamic>>();
       return list.map(FoodEntry.fromJson).toList();
     } on DioException catch (e) {
       _rethrowAsApi(e);
@@ -204,8 +206,10 @@ class ApiService {
   /// GET /api/foods/search?query=... -> { foodEntries: [...] }
   Future<List<FoodEntry>> searchFoods(String query) async {
     try {
-      final res = await _dio.get('/foods/search', queryParameters: {'query': query});
-      final list = (res.data['foodEntries'] as List).cast<Map<String, dynamic>>();
+      final res =
+          await _dio.get('/foods/search', queryParameters: {'query': query});
+      final list =
+          (res.data['foodEntries'] as List).cast<Map<String, dynamic>>();
       return list.map(FoodEntry.fromJson).toList();
     } on DioException catch (e) {
       _rethrowAsApi(e);
@@ -216,7 +220,8 @@ class ApiService {
   Future<List<FoodEntry>> getRecentFoods() async {
     try {
       final res = await _dio.get('/foods/recent');
-      final list = (res.data['foodEntries'] as List).cast<Map<String, dynamic>>();
+      final list =
+          (res.data['foodEntries'] as List).cast<Map<String, dynamic>>();
       return list.map(FoodEntry.fromJson).toList();
     } on DioException catch (e) {
       _rethrowAsApi(e);
@@ -290,7 +295,8 @@ class ApiService {
   /// GET /api/summary/daily?date=... -> totals, goals, progress.
   Future<DailySummary> getDailySummary(String date) async {
     try {
-      final res = await _dio.get('/summary/daily', queryParameters: {'date': date});
+      final res =
+          await _dio.get('/summary/daily', queryParameters: {'date': date});
       return DailySummary.fromJson(res.data as Map<String, dynamic>);
     } on DioException catch (e) {
       _rethrowAsApi(e);
@@ -304,6 +310,120 @@ class ApiService {
       final res = await _dio
           .get('/summary/weekly', queryParameters: {'startDate': startDate});
       return WeeklySummary.fromJson(res.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      _rethrowAsApi(e);
+    }
+  }
+
+  // -------------------------------------------------------------- Wellness
+
+  Future<WellnessSummary> getWellnessSummary(String date) async {
+    try {
+      final res =
+          await _dio.get('/wellness/summary', queryParameters: {'date': date});
+      return WellnessSummary.fromJson(res.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      _rethrowAsApi(e);
+    }
+  }
+
+  Future<List<WaterEntry>> getWaterEntries(String date) async {
+    try {
+      final res =
+          await _dio.get('/wellness/water', queryParameters: {'date': date});
+      final list =
+          (res.data['waterEntries'] as List).cast<Map<String, dynamic>>();
+      return list.map(WaterEntry.fromJson).toList();
+    } on DioException catch (e) {
+      _rethrowAsApi(e);
+    }
+  }
+
+  Future<WaterEntry> createWaterEntry(int amountMl, String date) async {
+    try {
+      final res = await _dio.post('/wellness/water', data: {
+        'amountMl': amountMl,
+        'date': date,
+      });
+      return WaterEntry.fromJson(
+          res.data['waterEntry'] as Map<String, dynamic>);
+    } on DioException catch (e) {
+      _rethrowAsApi(e);
+    }
+  }
+
+  Future<void> deleteWaterEntry(String id) async {
+    try {
+      await _dio.delete('/wellness/water/$id');
+    } on DioException catch (e) {
+      _rethrowAsApi(e);
+    }
+  }
+
+  Future<List<CardioEntry>> getCardioEntries(String date) async {
+    try {
+      final res =
+          await _dio.get('/wellness/cardio', queryParameters: {'date': date});
+      final list =
+          (res.data['cardioEntries'] as List).cast<Map<String, dynamic>>();
+      return list.map(CardioEntry.fromJson).toList();
+    } on DioException catch (e) {
+      _rethrowAsApi(e);
+    }
+  }
+
+  Future<CardioEntry> createCardioEntry(CardioEntryInput input) async {
+    try {
+      final res = await _dio.post('/wellness/cardio', data: input.toJson());
+      return CardioEntry.fromJson(
+          res.data['cardioEntry'] as Map<String, dynamic>);
+    } on DioException catch (e) {
+      _rethrowAsApi(e);
+    }
+  }
+
+  Future<void> deleteCardioEntry(String id) async {
+    try {
+      await _dio.delete('/wellness/cardio/$id');
+    } on DioException catch (e) {
+      _rethrowAsApi(e);
+    }
+  }
+
+  Future<List<SleepEntry>> getSleepEntries(String date) async {
+    try {
+      final res =
+          await _dio.get('/wellness/sleep', queryParameters: {'date': date});
+      final list =
+          (res.data['sleepEntries'] as List).cast<Map<String, dynamic>>();
+      return list.map(SleepEntry.fromJson).toList();
+    } on DioException catch (e) {
+      _rethrowAsApi(e);
+    }
+  }
+
+  Future<SleepEntry> createSleepEntry(SleepEntryInput input) async {
+    try {
+      final res = await _dio.post('/wellness/sleep', data: input.toJson());
+      return SleepEntry.fromJson(
+          res.data['sleepEntry'] as Map<String, dynamic>);
+    } on DioException catch (e) {
+      _rethrowAsApi(e);
+    }
+  }
+
+  Future<void> deleteSleepEntry(String id) async {
+    try {
+      await _dio.delete('/wellness/sleep/$id');
+    } on DioException catch (e) {
+      _rethrowAsApi(e);
+    }
+  }
+
+  Future<WellnessGoal> saveWellnessGoals(WellnessGoal goals) async {
+    try {
+      final res = await _dio.put('/wellness/goals', data: goals.toJson());
+      return WellnessGoal.fromJson(res.data['goals'] as Map<String, dynamic>);
     } on DioException catch (e) {
       _rethrowAsApi(e);
     }

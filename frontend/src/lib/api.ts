@@ -1,5 +1,7 @@
 import type {
   AiFoodLogResponse,
+  CardioEntry,
+  CardioEntryInput,
   DailySummary,
   FoodEntry,
   FoodEntryInput,
@@ -7,7 +9,14 @@ import type {
   MacroGoalInput,
   MealType,
   PresetFood,
+  SleepEntry,
+  SleepEntryInput,
   User,
+  WaterEntry,
+  WaterEntryInput,
+  WellnessGoal,
+  WellnessGoalInput,
+  WellnessSummary,
   WeeklySummary
 } from "../types";
 
@@ -253,6 +262,103 @@ export function getDailySummary(date?: string) {
 export function getWeeklySummary(startDate?: string) {
   const query = startDate ? `?startDate=${encodeURIComponent(startDate)}` : "";
   return request<WeeklySummary>(`/api/summary/weekly${query}`);
+}
+
+// ---- Wellness ----
+
+export function getWellnessSummary(date: string) {
+  return request<WellnessSummary>(
+    `/api/wellness/summary?date=${encodeURIComponent(date)}`
+  );
+}
+
+export function getCardioEntries(date: string) {
+  return request<{ cardioEntries: CardioEntry[] }>(
+    `/api/wellness/cardio?date=${encodeURIComponent(date)}`
+  );
+}
+
+export function createCardioEntry(input: CardioEntryInput) {
+  return request<{ cardioEntry: CardioEntry }>("/api/wellness/cardio", {
+    method: "POST",
+    body: input
+  });
+}
+
+export function updateCardioEntry(id: string, input: Partial<CardioEntryInput>) {
+  return request<{ cardioEntry: CardioEntry }>(`/api/wellness/cardio/${id}`, {
+    method: "PUT",
+    body: input
+  });
+}
+
+export function deleteCardioEntry(id: string) {
+  return request<{ message: string }>(`/api/wellness/cardio/${id}`, {
+    method: "DELETE"
+  });
+}
+
+export function getWaterEntries(date: string) {
+  return request<{ waterEntries: WaterEntry[] }>(
+    `/api/wellness/water?date=${encodeURIComponent(date)}`
+  );
+}
+
+export function createWaterEntry(input: WaterEntryInput) {
+  return request<{ waterEntry: WaterEntry }>("/api/wellness/water", {
+    method: "POST",
+    body: input
+  });
+}
+
+export function updateWaterEntry(id: string, input: Partial<WaterEntryInput>) {
+  return request<{ waterEntry: WaterEntry }>(`/api/wellness/water/${id}`, {
+    method: "PUT",
+    body: input
+  });
+}
+
+export function deleteWaterEntry(id: string) {
+  return request<{ message: string }>(`/api/wellness/water/${id}`, {
+    method: "DELETE"
+  });
+}
+
+export function getSleepEntries(date: string) {
+  return request<{ sleepEntries: SleepEntry[] }>(
+    `/api/wellness/sleep?date=${encodeURIComponent(date)}`
+  );
+}
+
+export function createSleepEntry(input: SleepEntryInput) {
+  return request<{ sleepEntry: SleepEntry }>("/api/wellness/sleep", {
+    method: "POST",
+    body: input
+  });
+}
+
+export function updateSleepEntry(id: string, input: Partial<SleepEntryInput>) {
+  return request<{ sleepEntry: SleepEntry }>(`/api/wellness/sleep/${id}`, {
+    method: "PUT",
+    body: input
+  });
+}
+
+export function deleteSleepEntry(id: string) {
+  return request<{ message: string }>(`/api/wellness/sleep/${id}`, {
+    method: "DELETE"
+  });
+}
+
+export function getWellnessGoals() {
+  return request<{ goals: WellnessGoal }>("/api/wellness/goals");
+}
+
+export function saveWellnessGoals(input: WellnessGoalInput) {
+  return request<{ message: string; goals: WellnessGoal }>("/api/wellness/goals", {
+    method: "PUT",
+    body: input
+  });
 }
 
 // ---- Users ----

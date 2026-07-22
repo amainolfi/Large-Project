@@ -99,3 +99,101 @@ export interface AiFoodLogResponse {
   model: string;
   foodEntries: FoodEntry[];
 }
+
+export type ActivityType =
+  | "walking"
+  | "running"
+  | "cycling"
+  | "swimming"
+  | "elliptical"
+  | "rowing"
+  | "sports"
+  | "other";
+export type Intensity = "low" | "moderate" | "high";
+export type SleepQuality = "poor" | "fair" | "good" | "excellent";
+
+export const ACTIVITY_TYPES: ActivityType[] = [
+  "walking",
+  "running",
+  "cycling",
+  "swimming",
+  "elliptical",
+  "rowing",
+  "sports",
+  "other"
+];
+
+export const INTENSITY_LEVELS: Intensity[] = ["low", "moderate", "high"];
+export const SLEEP_QUALITIES: SleepQuality[] = ["poor", "fair", "good", "excellent"];
+
+export interface CardioEntry {
+  id: string;
+  activityType: ActivityType;
+  durationMinutes: number;
+  distanceKm: number;
+  caloriesBurned: number;
+  intensity: Intensity;
+  notes: string;
+  date: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type CardioEntryInput = Omit<CardioEntry, "id" | "createdAt" | "updatedAt">;
+
+export interface WaterEntry {
+  id: string;
+  amountMl: number;
+  date: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type WaterEntryInput = Pick<WaterEntry, "amountMl" | "date">;
+
+export interface SleepEntry {
+  id: string;
+  durationMinutes: number;
+  quality: SleepQuality;
+  notes: string;
+  date: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type SleepEntryInput = Omit<SleepEntry, "id" | "createdAt" | "updatedAt">;
+
+export interface WellnessGoal {
+  id: string | null;
+  dailyWaterMl: number;
+  nightlySleepMinutes: number;
+  weeklyCardioMinutes: number;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+export type WellnessGoalInput = Pick<
+  WellnessGoal,
+  "dailyWaterMl" | "nightlySleepMinutes" | "weeklyCardioMinutes"
+>;
+
+export interface WellnessSummary {
+  date: string;
+  totals: {
+    waterMl: number;
+    sleepMinutes: number;
+    cardioMinutes: number;
+    cardioCaloriesBurned: number;
+  };
+  weekly: {
+    startDate: string;
+    endDate: string;
+    cardioMinutes: number;
+  };
+  goals: WellnessGoal;
+  progress: {
+    waterPercent: number;
+    sleepPercent: number;
+    weeklyCardioPercent: number;
+  };
+}

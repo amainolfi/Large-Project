@@ -5,9 +5,10 @@ import 'dashboard_screen.dart';
 import 'goals_screen.dart';
 import 'history_screen.dart';
 import 'profile_screen.dart';
+import 'wellness_screen.dart';
 
 /// The app shell after login: a bottom tab bar matching the mockups
-/// (Dashboard / Add Food / History / Goals / Profile). All five tabs are
+/// (Dashboard / Add Food / Wellness / History / Goals / Profile). All tabs are
 /// real screens.
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
@@ -22,6 +23,7 @@ class _HomeShellState extends State<HomeShell> {
   late final List<Widget> _tabs = const [
     DashboardScreen(),
     AddFoodTab(),
+    WellnessScreen(),
     HistoryScreen(),
     GoalsScreen(),
     ProfileScreen(),
@@ -32,6 +34,7 @@ class _HomeShellState extends State<HomeShell> {
     return Scaffold(
       body: IndexedStack(index: _index, children: _tabs),
       bottomNavigationBar: NavigationBar(
+        labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
         selectedIndex: _index,
         onDestinationSelected: (i) => setState(() => _index = i),
         destinations: const [
@@ -43,6 +46,10 @@ class _HomeShellState extends State<HomeShell> {
               icon: Icon(Icons.add_circle_outline),
               selectedIcon: Icon(Icons.add_circle),
               label: 'Add Food'),
+          NavigationDestination(
+              icon: Icon(Icons.favorite_border),
+              selectedIcon: Icon(Icons.favorite),
+              label: 'Wellness'),
           NavigationDestination(
               icon: Icon(Icons.bar_chart_outlined),
               selectedIcon: Icon(Icons.bar_chart),

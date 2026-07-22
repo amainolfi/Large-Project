@@ -1,9 +1,13 @@
 import { z } from "zod";
 import FoodEntry from "../models/FoodEntry.js";
+import CardioEntry from "../models/CardioEntry.js";
 import MacroGoal from "../models/MacroGoal.js";
 import PasswordResetToken from "../models/PasswordResetToken.js";
+import SleepEntry from "../models/SleepEntry.js";
 import User from "../models/User.js";
 import VerificationToken from "../models/VerificationToken.js";
+import WaterEntry from "../models/WaterEntry.js";
+import WellnessGoal from "../models/WellnessGoal.js";
 import { formatUser } from "../utils/formatters.js";
 import {
   comparePassword,
@@ -80,8 +84,12 @@ export async function deleteAccount(req, res) {
   const userId = req.user._id;
 
   await Promise.all([
+    CardioEntry.deleteMany({ userId }),
     FoodEntry.deleteMany({ userId }),
     MacroGoal.deleteMany({ userId }),
+    SleepEntry.deleteMany({ userId }),
+    WaterEntry.deleteMany({ userId }),
+    WellnessGoal.deleteMany({ userId }),
     VerificationToken.deleteMany({ userId }),
     PasswordResetToken.deleteMany({ userId })
   ]);

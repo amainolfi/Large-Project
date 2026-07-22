@@ -6,6 +6,7 @@ import goalsRoutes from "./routes/goalsRoutes.js";
 import presetFoodRoutes from "./routes/presetFoodRoutes.js";
 import summaryRoutes from "./routes/summaryRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import wellnessRoutes from "./routes/wellnessRoutes.js";
 import { errorHandler, notFound } from "./middleware/errorMiddleware.js";
 
 const app = express();
@@ -47,6 +48,7 @@ app.use("/api/goals", goalsRoutes);
 app.use("/api/preset-foods", presetFoodRoutes);
 app.use("/api/summary", summaryRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/wellness", wellnessRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

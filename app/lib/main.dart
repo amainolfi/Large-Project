@@ -8,6 +8,7 @@ import 'providers/food_entry_provider.dart';
 import 'providers/goals_provider.dart';
 import 'providers/history_provider.dart';
 import 'providers/theme_provider.dart';
+import 'providers/wellness_provider.dart';
 import 'screens/home_shell.dart';
 import 'screens/login_screen.dart';
 
@@ -29,6 +30,7 @@ class MacroVantaApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => GoalsProvider()),
         ChangeNotifierProvider(create: (_) => HistoryProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()..load()),
+        ChangeNotifierProvider(create: (_) => WellnessProvider()),
       ],
       child: const _AppView(),
     );

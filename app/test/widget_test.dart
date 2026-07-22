@@ -4,6 +4,7 @@ import 'package:macrovanta/config/app_theme.dart';
 import 'package:macrovanta/models/daily_summary.dart';
 import 'package:macrovanta/models/food_entry.dart';
 import 'package:macrovanta/models/macro_goal.dart';
+import 'package:macrovanta/models/wellness.dart';
 import 'package:macrovanta/widgets/macro_progress_bar.dart';
 
 void main() {
@@ -68,6 +69,79 @@ void main() {
     expect(nutrients.potassium, 0);
     expect(goals.dailyFiber, 0);
     expect(goals.dailyVitaminD, 0);
+  });
+
+  group('wellness API contract', () {
+    test('parses daily and weekly wellness progress', () {
+      final summary = WellnessSummary.fromJson({
+        'date': '2026-07-21',
+        'totals': {
+          'waterMl': 1250,
+          'sleepMinutes': 450,
+          'cardioMinutes': 30,
+          'cardioCaloriesBurned': 320,
+        },
+        'weekly': {
+          'startDate': '2026-07-20',
+          'endDate': '2026-07-26',
+          'cardioMinutes': 75,
+        },
+        'goals': {
+          'dailyWaterMl': 2500,
+          'nightlySleepMinutes': 480,
+          'weeklyCardioMinutes': 150,
+        },
+        'progress': {
+          'waterPercent': 50,
+          'sleepPercent': 93.8,
+          'weeklyCardioPercent': 50,
+        },
+      });
+
+      expect(summary.waterMl, 1250);
+      expect(summary.sleepMinutes, 450);
+      expect(summary.weeklyCardioMinutes, 75);
+      expect(summary.sleepPercent, 93.8);
+      expect(summary.goals.nightlySleepMinutes, 480);
+    });
+
+    test('serializes cardio and sleep records with API enum values', () {
+      const cardio = CardioEntryInput(
+        activityType: ActivityType.running,
+        durationMinutes: 30,
+        distanceKm: 5,
+        caloriesBurned: 320,
+        intensity: Intensity.high,
+        notes: '5K',
+        date: '2026-07-21',
+      );
+      const sleep = SleepEntryInput(
+        durationMinutes: 480,
+        quality: SleepQuality.excellent,
+        date: '2026-07-21',
+      );
+
+      expect(cardio.toJson()['activityType'], 'running');
+      expect(cardio.toJson()['intensity'], 'high');
+      expect(sleep.toJson()['quality'], 'excellent');
+      expect(sleep.toJson()['durationMinutes'], 480);
+    });
+
+    test('parses water entries and serializes wellness goals', () {
+      final water = WaterEntry.fromJson({
+        'id': 'water-1',
+        'amountMl': 500,
+        'date': '2026-07-21',
+      });
+      const goals = WellnessGoal(
+        dailyWaterMl: 2500,
+        nightlySleepMinutes: 480,
+        weeklyCardioMinutes: 150,
+      );
+
+      expect(water.amountMl, 500);
+      expect(goals.toJson()['weeklyCardioMinutes'], 150);
+    });
   });
 
   testWidgets('progress component renders in both light and dark themes',

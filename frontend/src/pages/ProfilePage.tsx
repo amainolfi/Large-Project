@@ -171,7 +171,8 @@ export default function ProfilePage() {
         <div className="card danger-card">
           <h2>Delete account</h2>
           <p className="card-note">
-            This permanently removes your account, food log, and goals. This cannot be undone.
+            This permanently removes your account and all nutrition, hydration, sleep, and cardio
+            data. This cannot be undone.
           </p>
           {deleteError && <Message kind="error">{deleteError}</Message>}
           <div className="field">

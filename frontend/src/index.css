@@ -603,6 +603,7 @@ summary:focus-visible,
   color: var(--muted);
   font-size: 0.9rem;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .entry-list,
@@ -1020,6 +1021,45 @@ summary:focus-visible,
   background: var(--surface);
 }
 
+/* ---- Wellness tracking ---- */
+
+.wellness-loading {
+  color: var(--muted);
+  text-align: center;
+}
+
+.wellness-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.water-quick-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.wellness-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.cardio-form-grid {
+  grid-template-columns: repeat(5, minmax(120px, 1fr));
+}
+
+.cardio-notes-field {
+  grid-column: span 2;
+}
+
+.wellness-entry-list {
+  margin-top: 14px;
+}
+
 /* ---- Responsive ---- */
 
 @media (max-width: 900px) {
@@ -1050,6 +1090,14 @@ summary:focus-visible,
   .preset-results {
     grid-template-columns: 1fr;
   }
+
+  .wellness-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cardio-form-grid {
+    grid-template-columns: repeat(2, minmax(140px, 1fr));
+  }
 }
 
 @media (max-width: 640px) {
@@ -1061,8 +1109,18 @@ summary:focus-visible,
     padding: 10px 14px;
   }
 
+  .nav-links {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 2px;
+    overflow-x: visible;
+  }
+
   .nav-links a {
-    padding: 7px 10px;
+    min-width: 0;
+    padding: 7px 2px;
+    font-size: 0.75rem;
+    text-align: center;
   }
 
   .date-controls {
@@ -1105,5 +1163,13 @@ summary:focus-visible,
 
   .theme-toggle span:last-child {
     display: none;
+  }
+
+  .cardio-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cardio-notes-field {
+    grid-column: auto;
   }
 }
