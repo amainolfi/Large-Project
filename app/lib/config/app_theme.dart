@@ -141,6 +141,12 @@ class AppTheme {
             fontWeight: states.contains(WidgetState.selected)
                 ? FontWeight.w700
                 : FontWeight.w500,
+            // Six tabs leave each label a narrow slot; the default labelMedium
+            // (12sp, letterSpacing 0.5) makes "Dashboard" wrap its last letter.
+            // Tighten so every label stays on one line.
+            fontSize: 11.5,
+            letterSpacing: 0,
+            height: 1.0,
           );
         }),
       ),

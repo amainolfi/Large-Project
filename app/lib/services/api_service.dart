@@ -232,6 +232,9 @@ class ApiService {
           'page': page,
           'pageSize': pageSize,
         },
+        // The backend proxies USDA FoodData Central (up to ~10s) before
+        // responding, so give this call more headroom than the default 15s.
+        options: Options(receiveTimeout: const Duration(seconds: 20)),
       );
       final list = res.data['foods'] as List;
       return list
@@ -283,11 +286,19 @@ class ApiService {
     required MealType mealType,
   }) async {
     try {
-      final res = await _dio.post('/foods/ai-log', data: {
-        'text': text,
-        'date': date,
-        'mealType': mealType.label,
-      });
+      final res = await _dio.post(
+        '/foods/ai-log',
+        data: {
+          'text': text,
+          'date': date,
+          'mealType': mealType.label,
+        },
+        // The backend calls an LLM (up to ~20s) and then writes the entries
+        // before responding, so this one route needs a longer ceiling than the
+        // default 15s. Timing out early here shows a false "can't reach server"
+        // even though the food was logged, and a retry would double-log it.
+        options: Options(receiveTimeout: const Duration(seconds: 35)),
+      );
       final list =
           (res.data['foodEntries'] as List).cast<Map<String, dynamic>>();
       return list.map(FoodEntry.fromJson).toList();

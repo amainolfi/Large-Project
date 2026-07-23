@@ -153,6 +153,8 @@ class _GoalsScreenState extends State<GoalsScreen> {
             : Form(
                 key: _formKey,
                 child: ListView(
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
                   padding: const EdgeInsets.all(16),
                   children: [
                     const Text('Daily goals',
