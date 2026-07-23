@@ -67,7 +67,7 @@ class FoodEntry {
     required this.fat,
     required this.saturatedFat,
     required this.transFat,
-    required this.sugar
+    required this.sugar,
     required this.fiber,
     required this.sodium,
     required this.potassium,
