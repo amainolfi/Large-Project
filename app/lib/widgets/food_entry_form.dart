@@ -40,6 +40,7 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
       'fiber': TextEditingController(text: _number(entry?.fiber)),
       'saturatedFat': TextEditingController(text: _number(entry?.saturatedFat)),
       'transFat': TextEditingController(text: _number(entry?.transFat)),
+      'sugar': TextEditingController(text: _number(entry?.sugar)),
       'sodium': TextEditingController(text: _number(entry?.sodium)),
       'potassium': TextEditingController(text: _number(entry?.potassium)),
       'calcium': TextEditingController(text: _number(entry?.calcium)),
@@ -87,6 +88,7 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
       fiber: _value('fiber'),
       saturatedFat: _value('saturatedFat'),
       transFat: _value('transFat'),
+      sugar: _value('sugar'),
       sodium: _value('sodium'),
       potassium: _value('potassium'),
       calcium: _value('calcium'),
@@ -183,6 +185,7 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
           ),
           const SizedBox(height: 14),
           _numericField('fiber', 'Fiber', 'g'),
+          _numericField('sugar', 'Total sugar', 'g'),
           const SizedBox(height: 8),
           ExpansionTile(
             tilePadding: EdgeInsets.zero,
