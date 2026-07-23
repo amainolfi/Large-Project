@@ -39,6 +39,12 @@ const macroGoalSchema = new mongoose.Schema(
       required: true,
       min: 0
     },
+    dailySugar: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: 0
+    },
     dailyFiber: {
       type: Number,
       required: true,
