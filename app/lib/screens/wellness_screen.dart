@@ -255,6 +255,7 @@ class _WellnessScreenState extends State<WellnessScreen> {
         child: RefreshIndicator(
           onRefresh: provider.load,
           child: ListView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: const EdgeInsets.all(16),
             children: [
               const Text('Wellness',

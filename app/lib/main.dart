@@ -50,6 +50,14 @@ class _AppView extends StatelessWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: themeMode,
+      // iOS's numeric keypad has no "Done" key, so tapping outside a field is
+      // the only way to dismiss it. Wrap every screen so a tap on empty space
+      // drops focus and closes the keyboard.
+      builder: (context, child) => GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: child,
+      ),
       home: const _AuthGate(),
     );
   }

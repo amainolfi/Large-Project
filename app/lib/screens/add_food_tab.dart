@@ -53,6 +53,7 @@ class _AddFoodTabState extends State<AddFoodTab> {
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
