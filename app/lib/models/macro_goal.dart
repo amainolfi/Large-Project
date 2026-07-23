@@ -6,6 +6,7 @@ class MacroGoal {
   final double dailyFat;
   final double dailySaturatedFat;
   final double dailyTransFat;
+  final double dailySugar;
   final double dailyFiber;
   final double dailySodium;
   final double dailyPotassium;
@@ -22,6 +23,7 @@ class MacroGoal {
     required this.dailyFat,
     required this.dailySaturatedFat,
     required this.dailyTransFat,
+    required this.dailySugar,
     required this.dailyFiber,
     required this.dailySodium,
     required this.dailyPotassium,
@@ -42,6 +44,7 @@ class MacroGoal {
       dailyFat: number(json['dailyFat']),
       dailySaturatedFat: number(json['dailySaturatedFat']),
       dailyTransFat: number(json['dailyTransFat']),
+      dailySugar: number(json['dailySugar']),
       dailyFiber: number(json['dailyFiber']),
       dailySodium: number(json['dailySodium']),
       dailyPotassium: number(json['dailyPotassium']),
@@ -60,6 +63,7 @@ class MacroGoalInput {
   final double dailyFat;
   final double dailySaturatedFat;
   final double dailyTransFat;
+  final double dailySugar;
   final double dailyFiber;
   final double dailySodium;
   final double dailyPotassium;
@@ -75,6 +79,7 @@ class MacroGoalInput {
     required this.dailyFat,
     required this.dailySaturatedFat,
     required this.dailyTransFat,
+    required this.dailySugar,
     required this.dailyFiber,
     required this.dailySodium,
     required this.dailyPotassium,
@@ -92,6 +97,7 @@ class MacroGoalInput {
       'dailyFat': dailyFat,
       'dailySaturatedFat': dailySaturatedFat,
       'dailyTransFat': dailyTransFat,
+      'dailySugar': dailySugar,
       'dailyFiber': dailyFiber,
       'dailySodium': dailySodium,
       'dailyPotassium': dailyPotassium,
