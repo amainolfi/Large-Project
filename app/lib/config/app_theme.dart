@@ -33,7 +33,9 @@ class AppTheme {
       : const Color(0xFFD9F8FC);
 
   static Color aiForeground(Brightness brightness) =>
-      brightness == Brightness.dark ? const Color(0xFF67E8F9) : const Color(0xFF0E7490);
+      brightness == Brightness.dark
+          ? const Color(0xFF67E8F9)
+          : const Color(0xFF0E7490);
 
   static ThemeData _build(Brightness brightness) {
     final darkMode = brightness == Brightness.dark;
@@ -157,7 +159,8 @@ class AppTheme {
           disabledBackgroundColor: scheme.surfaceContainerHighest,
           disabledForegroundColor: scheme.onSurfaceVariant,
           minimumSize: const Size(44, 50),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(

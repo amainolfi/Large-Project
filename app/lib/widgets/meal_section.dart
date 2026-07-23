@@ -44,13 +44,14 @@ class MealSection extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(meal.label,
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold)),
                   Text('${_format(totalCalories)} kcal',
                       style: TextStyle(color: colors.onSurfaceVariant)),
                 ],
               ),
               const Divider(height: 24),
-                  ...entries.map((entry) => _EntryRow(
+              ...entries.map((entry) => _EntryRow(
                     entry: entry,
                     confirmingDelete: entry.id == pendingDeleteId,
                     onEdit: () => onEdit(entry),
@@ -144,7 +145,8 @@ class _EntryRow extends StatelessWidget {
                       '${_format(entry.calories)} kcal · P ${_format(entry.protein)}g · '
                       'C ${_format(entry.carbs)}g · F ${_format(entry.fat)}g · '
                       'Fiber ${_format(entry.fiber)}g',
-                      style: TextStyle(fontSize: 13, color: colors.onSurfaceVariant),
+                      style: TextStyle(
+                          fontSize: 13, color: colors.onSurfaceVariant),
                     ),
                   ],
                 ),
@@ -208,7 +210,8 @@ class _EntryRow extends StatelessWidget {
                   'Iron ${_format(entry.iron)}mg · '
                   'Vitamin C ${_format(entry.vitaminC)}mg · '
                   'Vitamin D ${_format(entry.vitaminD)}mcg',
-                  style: TextStyle(fontSize: 12, color: colors.onSurfaceVariant),
+                  style:
+                      TextStyle(fontSize: 12, color: colors.onSurfaceVariant),
                 ),
               ),
             ],

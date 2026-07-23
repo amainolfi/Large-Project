@@ -30,10 +30,9 @@ class HistoryProvider extends ChangeNotifier {
   bool get isCurrentWeek => _endDate == AppDate.today();
 
   /// Daily calorie goal, or null if goals unset. Used for the chart threshold.
-  double? get calorieGoal =>
-      (_goals != null && _goals!.dailyCalories > 0)
-          ? _goals!.dailyCalories
-          : null;
+  double? get calorieGoal => (_goals != null && _goals!.dailyCalories > 0)
+      ? _goals!.dailyCalories
+      : null;
 
   Future<void> load() async {
     _loading = true;

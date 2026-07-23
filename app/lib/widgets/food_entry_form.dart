@@ -217,7 +217,8 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
           const SizedBox(height: 18),
           FilledButton(
             onPressed: foods.submitting ? null : _submit,
-            style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(54)),
+            style:
+                FilledButton.styleFrom(minimumSize: const Size.fromHeight(54)),
             child: foods.submitting
                 ? const SizedBox(
                     height: 20,

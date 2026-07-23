@@ -158,7 +158,8 @@ class _GoalsScreenState extends State<GoalsScreen> {
                   padding: const EdgeInsets.all(16),
                   children: [
                     const Text('Daily goals',
-                        style: TextStyle(fontSize: 34, fontWeight: FontWeight.bold)),
+                        style: TextStyle(
+                            fontSize: 34, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 4),
                     Text(
                       'Set the targets and limits used across your dashboard.',
@@ -171,7 +172,8 @@ class _GoalsScreenState extends State<GoalsScreen> {
                     const SizedBox(height: 12),
                     Text(
                       'Starting values are general examples, not personalized medical guidance.',
-                      style: TextStyle(fontSize: 12, color: colors.onSurfaceVariant),
+                      style: TextStyle(
+                          fontSize: 12, color: colors.onSurfaceVariant),
                     ),
                     const SizedBox(height: 20),
                     FilledButton(
@@ -199,7 +201,8 @@ class _GoalsScreenState extends State<GoalsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(title,
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
             for (var index = 0; index < fields.length; index++) ...[
               _field(fields[index]),

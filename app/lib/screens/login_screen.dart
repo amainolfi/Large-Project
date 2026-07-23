@@ -45,9 +45,11 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _resendVerification() async {
     final email = _email.text.trim();
     if (email.isEmpty) return;
-    final message = await context.read<AuthProvider>().resendVerification(email);
+    final message =
+        await context.read<AuthProvider>().resendVerification(email);
     if (!mounted) return;
-    setState(() => _message = message ?? context.read<AuthProvider>().errorMessage);
+    setState(
+        () => _message = message ?? context.read<AuthProvider>().errorMessage);
   }
 
   Future<void> _openRegister() async {
@@ -90,7 +92,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 12),
                     const Text('MacroVanta',
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
+                        style: TextStyle(
+                            fontSize: 32, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 4),
                     Text('Welcome back',
                         textAlign: TextAlign.center,
@@ -102,9 +105,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       autofillHints: const [AutofillHints.email],
                       autocorrect: false,
                       decoration: const InputDecoration(labelText: 'Email'),
-                      validator: (value) => value == null || !value.contains('@')
-                          ? 'Enter a valid email'
-                          : null,
+                      validator: (value) =>
+                          value == null || !value.contains('@')
+                              ? 'Enter a valid email'
+                              : null,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -114,8 +118,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       decoration: InputDecoration(
                         labelText: 'Password',
                         suffixIcon: IconButton(
-                          onPressed: () => setState(() => _showPassword = !_showPassword),
-                          icon: Icon(_showPassword ? Icons.visibility_off : Icons.visibility),
+                          onPressed: () =>
+                              setState(() => _showPassword = !_showPassword),
+                          icon: Icon(_showPassword
+                              ? Icons.visibility_off
+                              : Icons.visibility),
                         ),
                       ),
                       validator: (value) => value == null || value.isEmpty
@@ -129,7 +136,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             ? null
                             : () => Navigator.of(context).push(
                                   MaterialPageRoute(
-                                      builder: (_) => const ForgotPasswordScreen()),
+                                      builder: (_) =>
+                                          const ForgotPasswordScreen()),
                                 ),
                         child: const Text('Forgot password?'),
                       ),
@@ -141,7 +149,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           padding: const EdgeInsets.all(12),
                           child: Column(
                             children: [
-                              const Text('Verify your email before logging in.'),
+                              const Text(
+                                  'Verify your email before logging in.'),
                               TextButton(
                                 onPressed: _resendVerification,
                                 child: const Text('Resend verification email'),
@@ -152,7 +161,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     if (_message != null) ...[
                       const SizedBox(height: 12),
-                      Text(_message!, textAlign: TextAlign.center,
+                      Text(_message!,
+                          textAlign: TextAlign.center,
                           style: TextStyle(color: colors.primary)),
                     ],
                     const SizedBox(height: 20),

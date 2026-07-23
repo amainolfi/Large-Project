@@ -87,11 +87,13 @@ class _WeekNavigation extends StatelessWidget {
         Expanded(
           child: history.isCurrentWeek
               ? FilledButton(
-                  onPressed: () => context.read<HistoryProvider>().lastSevenDays(),
+                  onPressed: () =>
+                      context.read<HistoryProvider>().lastSevenDays(),
                   child: const Text('Last 7 days'),
                 )
               : OutlinedButton(
-                  onPressed: () => context.read<HistoryProvider>().lastSevenDays(),
+                  onPressed: () =>
+                      context.read<HistoryProvider>().lastSevenDays(),
                   child: const Text('Last 7 days'),
                 ),
         ),
@@ -118,9 +120,8 @@ class _CaloriesChart extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
     final maximum = days.fold<double>(
       0,
-      (current, day) => day.totals.calories > current
-          ? day.totals.calories
-          : current,
+      (current, day) =>
+          day.totals.calories > current ? day.totals.calories : current,
     );
     final scale = goal != null && goal! > maximum
         ? goal!
@@ -168,7 +169,9 @@ class _CaloriesChart extends StatelessWidget {
                                   Container(
                                     height: constraints.maxHeight * fraction,
                                     decoration: BoxDecoration(
-                                      color: overGoal ? colors.error : colors.primary,
+                                      color: overGoal
+                                          ? colors.error
+                                          : colors.primary,
                                       borderRadius: BorderRadius.circular(6),
                                     ),
                                   ),
@@ -237,7 +240,8 @@ class _DailyTotalsList extends StatelessWidget {
                   '${_format(totals.calories)} kcal · P ${_format(totals.protein)}g · '
                   'C ${_format(totals.carbs)}g · F ${_format(totals.fat)}g · '
                   'Fiber ${_format(totals.fiber)}g',
-                  style: TextStyle(fontSize: 13, color: colors.onSurfaceVariant),
+                  style:
+                      TextStyle(fontSize: 13, color: colors.onSurfaceVariant),
                 ),
                 childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                 children: [
@@ -252,7 +256,8 @@ class _DailyTotalsList extends StatelessWidget {
                       'Iron ${_format(totals.iron)}mg · '
                       'Vitamin C ${_format(totals.vitaminC)}mg · '
                       'Vitamin D ${_format(totals.vitaminD)}mcg',
-                      style: TextStyle(fontSize: 12, color: colors.onSurfaceVariant),
+                      style: TextStyle(
+                          fontSize: 12, color: colors.onSurfaceVariant),
                     ),
                   ),
                 ],

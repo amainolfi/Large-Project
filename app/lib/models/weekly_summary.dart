@@ -35,10 +35,8 @@ class WeeklySummary {
     return WeeklySummary(
       startDate: json['startDate'] as String? ?? '',
       endDate: json['endDate'] as String? ?? '',
-      days: rawDays
-          .cast<Map<String, dynamic>>()
-          .map(DayTotals.fromJson)
-          .toList(),
+      days:
+          rawDays.cast<Map<String, dynamic>>().map(DayTotals.fromJson).toList(),
     );
   }
 }

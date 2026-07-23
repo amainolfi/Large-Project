@@ -62,13 +62,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 )
               else if (summary != null) ...[
                 const Text('Macros and fiber',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                    style:
+                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 12),
                 ..._primaryProgress(summary),
                 _micronutrientProgress(summary),
                 const SizedBox(height: 24),
                 const Text('Food log',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                    style:
+                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 12),
                 ..._mealSections(context, dashboard),
                 if (dashboard.foods.isEmpty)
@@ -91,25 +93,95 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   List<Widget> _primaryProgress(DailySummary summary) {
     final bars = [
-      MacroProgressBar(label: 'Calories', value: summary.totals.calories, goal: summary.goals.calories, percent: summary.progress.calories, unit: 'kcal'),
-      MacroProgressBar(label: 'Protein', value: summary.totals.protein, goal: summary.goals.protein, percent: summary.progress.protein, unit: 'g'),
-      MacroProgressBar(label: 'Carbohydrates', value: summary.totals.carbs, goal: summary.goals.carbs, percent: summary.progress.carbs, unit: 'g'),
-      MacroProgressBar(label: 'Total fat', value: summary.totals.fat, goal: summary.goals.fat, percent: summary.progress.fat, unit: 'g'),
-      MacroProgressBar(label: 'Fiber', value: summary.totals.fiber, goal: summary.goals.fiber, percent: summary.progress.fiber, unit: 'g'),
+      MacroProgressBar(
+          label: 'Calories',
+          value: summary.totals.calories,
+          goal: summary.goals.calories,
+          percent: summary.progress.calories,
+          unit: 'kcal'),
+      MacroProgressBar(
+          label: 'Protein',
+          value: summary.totals.protein,
+          goal: summary.goals.protein,
+          percent: summary.progress.protein,
+          unit: 'g'),
+      MacroProgressBar(
+          label: 'Carbohydrates',
+          value: summary.totals.carbs,
+          goal: summary.goals.carbs,
+          percent: summary.progress.carbs,
+          unit: 'g'),
+      MacroProgressBar(
+          label: 'Total fat',
+          value: summary.totals.fat,
+          goal: summary.goals.fat,
+          percent: summary.progress.fat,
+          unit: 'g'),
+      MacroProgressBar(
+          label: 'Fiber',
+          value: summary.totals.fiber,
+          goal: summary.goals.fiber,
+          percent: summary.progress.fiber,
+          unit: 'g'),
     ];
-    return [for (final bar in bars) ...[bar, const SizedBox(height: 10)]];
+    return [
+      for (final bar in bars) ...[bar, const SizedBox(height: 10)]
+    ];
   }
 
   Widget _micronutrientProgress(DailySummary summary) {
     final bars = [
-      MacroProgressBar(label: 'Saturated fat', value: summary.totals.saturatedFat, goal: summary.goals.saturatedFat, percent: summary.progress.saturatedFat, unit: 'g', isLimit: true),
-      MacroProgressBar(label: 'Trans fat', value: summary.totals.transFat, goal: summary.goals.transFat, percent: summary.progress.transFat, unit: 'g', isLimit: true),
-      MacroProgressBar(label: 'Sodium', value: summary.totals.sodium, goal: summary.goals.sodium, percent: summary.progress.sodium, unit: 'mg', isLimit: true),
-      MacroProgressBar(label: 'Potassium', value: summary.totals.potassium, goal: summary.goals.potassium, percent: summary.progress.potassium, unit: 'mg'),
-      MacroProgressBar(label: 'Calcium', value: summary.totals.calcium, goal: summary.goals.calcium, percent: summary.progress.calcium, unit: 'mg'),
-      MacroProgressBar(label: 'Iron', value: summary.totals.iron, goal: summary.goals.iron, percent: summary.progress.iron, unit: 'mg'),
-      MacroProgressBar(label: 'Vitamin C', value: summary.totals.vitaminC, goal: summary.goals.vitaminC, percent: summary.progress.vitaminC, unit: 'mg'),
-      MacroProgressBar(label: 'Vitamin D', value: summary.totals.vitaminD, goal: summary.goals.vitaminD, percent: summary.progress.vitaminD, unit: 'mcg'),
+      MacroProgressBar(
+          label: 'Saturated fat',
+          value: summary.totals.saturatedFat,
+          goal: summary.goals.saturatedFat,
+          percent: summary.progress.saturatedFat,
+          unit: 'g',
+          isLimit: true),
+      MacroProgressBar(
+          label: 'Trans fat',
+          value: summary.totals.transFat,
+          goal: summary.goals.transFat,
+          percent: summary.progress.transFat,
+          unit: 'g',
+          isLimit: true),
+      MacroProgressBar(
+          label: 'Sodium',
+          value: summary.totals.sodium,
+          goal: summary.goals.sodium,
+          percent: summary.progress.sodium,
+          unit: 'mg',
+          isLimit: true),
+      MacroProgressBar(
+          label: 'Potassium',
+          value: summary.totals.potassium,
+          goal: summary.goals.potassium,
+          percent: summary.progress.potassium,
+          unit: 'mg'),
+      MacroProgressBar(
+          label: 'Calcium',
+          value: summary.totals.calcium,
+          goal: summary.goals.calcium,
+          percent: summary.progress.calcium,
+          unit: 'mg'),
+      MacroProgressBar(
+          label: 'Iron',
+          value: summary.totals.iron,
+          goal: summary.goals.iron,
+          percent: summary.progress.iron,
+          unit: 'mg'),
+      MacroProgressBar(
+          label: 'Vitamin C',
+          value: summary.totals.vitaminC,
+          goal: summary.goals.vitaminC,
+          percent: summary.progress.vitaminC,
+          unit: 'mg'),
+      MacroProgressBar(
+          label: 'Vitamin D',
+          value: summary.totals.vitaminD,
+          goal: summary.goals.vitaminD,
+          percent: summary.progress.vitaminD,
+          unit: 'mcg'),
     ];
 
     return Card(
@@ -117,12 +189,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
         title: const Text('Micronutrients and limits',
             style: TextStyle(fontWeight: FontWeight.w700)),
         childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-        children: [for (final bar in bars) ...[bar, const SizedBox(height: 10)]],
+        children: [
+          for (final bar in bars) ...[bar, const SizedBox(height: 10)]
+        ],
       ),
     );
   }
 
-  List<Widget> _mealSections(BuildContext context, DashboardProvider dashboard) {
+  List<Widget> _mealSections(
+      BuildContext context, DashboardProvider dashboard) {
     return [
       for (final meal in MealType.values)
         MealSection(
@@ -133,7 +208,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
           onEdit: (entry) async {
             setState(() => _pendingDeleteId = null);
             await Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => AddEditFoodScreen(existing: entry)),
+              MaterialPageRoute(
+                  builder: (_) => AddEditFoodScreen(existing: entry)),
             );
             if (!context.mounted) return;
             await context.read<DashboardProvider>().load();
@@ -174,8 +250,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ? '${entry.foodName} deleted.'
                 : dashboard.error ?? 'Could not delete this food.',
           ),
-          backgroundColor:
-              deleted ? null : Theme.of(context).colorScheme.error,
+          backgroundColor: deleted ? null : Theme.of(context).colorScheme.error,
         ),
       );
   }

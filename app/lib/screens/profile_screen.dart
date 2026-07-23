@@ -33,8 +33,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void dispose() {
     for (final c in [
-      _firstName, _lastName, _currentPassword, _newPassword,
-      _confirmPassword, _deleteConfirm
+      _firstName,
+      _lastName,
+      _currentPassword,
+      _newPassword,
+      _confirmPassword,
+      _deleteConfirm
     ]) {
       c.dispose();
     }
@@ -49,8 +53,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _toast(String msg) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(msg)));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
   Future<void> _saveProfile() async {
@@ -156,8 +159,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             // ---- Your details ----
             _card([
               const Text('Your details',
-                  style:
-                      TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
               _label('First name'),
               _text(_firstName),
@@ -185,8 +187,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             // ---- Change password ----
             _card([
               const Text('Change password',
-                  style:
-                      TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
               _label('Current password'),
               _text(_currentPassword, obscure: true),
@@ -197,8 +198,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Text(
                 'At least 8 characters with uppercase, lowercase, a number, '
                 'and a special character.',
-                style: TextStyle(
-                    fontSize: 13, color: colors.onSurfaceVariant),
+                style: TextStyle(fontSize: 13, color: colors.onSurfaceVariant),
               ),
               const SizedBox(height: 16),
               _label('Confirm new password'),
@@ -211,8 +211,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             // ---- Sign out ----
             _card([
               const Text('Sign out',
-                  style:
-                      TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
@@ -250,8 +249,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton(
-                  onPressed:
-                      _deleting || !_canDelete ? null : _deleteAccount,
+                  onPressed: _deleting || !_canDelete ? null : _deleteAccount,
                   style: OutlinedButton.styleFrom(
                     foregroundColor: colors.error,
                     side: BorderSide(color: colors.error),
@@ -288,8 +286,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _label(String text) => Padding(
         padding: const EdgeInsets.only(bottom: 8),
         child: Text(text,
-            style:
-                const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
       );
 
   Widget _text(

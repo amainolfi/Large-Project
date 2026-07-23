@@ -213,7 +213,8 @@ void main() {
     expect(theme.colorScheme.onSurfaceVariant, AppTheme.mutedText);
   });
 
-  testWidgets('completed targets use success green while active goals use indigo',
+  testWidgets(
+      'completed targets use success green while active goals use indigo',
       (tester) async {
     Future<Color?> progressColor(double percent) async {
       await tester.pumpWidget(
@@ -230,8 +231,8 @@ void main() {
           ),
         ),
       );
-      final indicator =
-          tester.widget<LinearProgressIndicator>(find.byType(LinearProgressIndicator));
+      final indicator = tester.widget<LinearProgressIndicator>(
+          find.byType(LinearProgressIndicator));
       return indicator.valueColor!.value;
     }
 

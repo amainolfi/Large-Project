@@ -6,7 +6,7 @@ import '../services/token_store.dart';
 
 /// Where the app is in the auth lifecycle.
 enum AuthStatus {
-  unknown,        // still checking for a stored session on startup
+  unknown, // still checking for a stored session on startup
   authenticated,
   unauthenticated,
 }

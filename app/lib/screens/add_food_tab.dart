@@ -77,7 +77,8 @@ class _AddFoodTabState extends State<AddFoodTab> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text('Log manually',
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 4),
                       Text(
                         'Enter label values and expand the micronutrient section as needed.',
@@ -151,11 +152,13 @@ class _RecentRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(entry.foodName,
-                    style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+                    style: const TextStyle(
+                        fontSize: 17, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 2),
                 Text(
                   '${entry.servingSize} · ${_format(entry.calories)} kcal',
-                  style: TextStyle(fontSize: 14, color: colors.onSurfaceVariant),
+                  style:
+                      TextStyle(fontSize: 14, color: colors.onSurfaceVariant),
                 ),
               ],
             ),

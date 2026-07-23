@@ -30,9 +30,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       _message = null;
       _error = null;
     });
-    final result = await context
-        .read<AuthProvider>()
-        .forgotPassword(_email.text.trim());
+    final result =
+        await context.read<AuthProvider>().forgotPassword(_email.text.trim());
     if (!mounted) return;
     setState(() {
       _sending = false;
@@ -63,7 +62,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const Text('Forgot your password?',
-                        style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+                        style: TextStyle(
+                            fontSize: 28, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     Text(
                       'Enter your account email. If it exists, we will send a secure reset link.',

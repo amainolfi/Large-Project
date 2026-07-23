@@ -46,10 +46,12 @@ class MacroProgressBar extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(label,
-                      style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+                      style: const TextStyle(
+                          fontSize: 17, fontWeight: FontWeight.w600)),
                   Text(
                     goal > 0 ? '${_format(percent)}%' : '—',
-                    style: TextStyle(fontSize: 15, color: colors.onSurfaceVariant),
+                    style:
+                        TextStyle(fontSize: 15, color: colors.onSurfaceVariant),
                   ),
                 ],
               ),
@@ -72,7 +74,8 @@ class MacroProgressBar extends StatelessWidget {
                       style: const TextStyle(fontWeight: FontWeight.w700),
                     ),
                     TextSpan(
-                      text: goal > 0 ? ' / ${_format(goal)} $unit' : ' / no goal',
+                      text:
+                          goal > 0 ? ' / ${_format(goal)} $unit' : ' / no goal',
                       style: TextStyle(color: colors.onSurfaceVariant),
                     ),
                   ],

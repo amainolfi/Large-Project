@@ -35,7 +35,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (!RegExp(r'[a-z]').hasMatch(v)) return 'Needs a lowercase letter';
     if (!RegExp(r'[A-Z]').hasMatch(v)) return 'Needs an uppercase letter';
     if (!RegExp(r'\d').hasMatch(v)) return 'Needs a number';
-    if (!RegExp(r'[^A-Za-z0-9]').hasMatch(v)) return 'Needs a special character';
+    if (!RegExp(r'[^A-Za-z0-9]').hasMatch(v)) {
+      return 'Needs a special character';
+    }
     return null;
   }
 
@@ -73,8 +75,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             padding: const EdgeInsets.all(24),
             children: [
               const Text('Create your account',
-                  style:
-                      TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
               const SizedBox(height: 4),
               Text('Start tracking your macros.',
                   style: TextStyle(color: colors.onSurfaceVariant)),
@@ -124,8 +125,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               Text(
                 'At least 8 characters with uppercase, lowercase, a number, '
                 'and a special character.',
-                style: TextStyle(
-                    fontSize: 13, color: colors.onSurfaceVariant),
+                style: TextStyle(fontSize: 13, color: colors.onSurfaceVariant),
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -152,8 +152,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               const SizedBox(height: 12),
               TextButton(
-                onPressed:
-                    auth.busy ? null : () => Navigator.of(context).pop(),
+                onPressed: auth.busy ? null : () => Navigator.of(context).pop(),
                 child: const Text('Already have an account? Log in'),
               ),
             ],

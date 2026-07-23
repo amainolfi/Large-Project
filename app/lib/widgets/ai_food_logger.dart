@@ -98,9 +98,11 @@ class _AiFoodLoggerState extends State<AiFoodLogger> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Describe what you ate',
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold)),
                       SizedBox(height: 2),
-                      Text('Create editable nutrition estimates from plain language.'),
+                      Text(
+                          'Create editable nutrition estimates from plain language.'),
                     ],
                   ),
                 ),
