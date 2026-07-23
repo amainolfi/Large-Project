@@ -15,6 +15,7 @@ const parsedItem = {
   fat: 0.4,
   saturatedFat: 0.1,
   transFat: 0,
+  sugar: 14.4,
   fiber: 3.1,
   sodium: 1,
   potassium: 422,
