@@ -22,6 +22,7 @@ const foodSchema = z.object({
   fat: nutrientWithDefault,
   saturatedFat: nutrientValue,
   transFat: nutrientValue,
+  sugar: nutrientWithDefault,
   fiber: nutrientWithDefault,
   sodium: nutrientValue,
   potassium: nutrientWithDefault,
@@ -37,6 +38,7 @@ const updateFoodSchema = z
   .object({
     ...foodSchema.shape,
     fat: nutrientValue,
+    sugar: nutrientValue,
     fiber: nutrientValue,
     potassium: nutrientValue,
     calcium: nutrientValue,
