@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../config/app_theme.dart';
 import '../models/food_entry.dart';
 import '../providers/dashboard_provider.dart';
 import '../providers/food_entry_provider.dart';
@@ -59,6 +60,7 @@ class _AiFoodLoggerState extends State<AiFoodLogger> {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final brightness = Theme.of(context).brightness;
     final busy = context.watch<FoodEntryProvider>().submitting;
 
     return Card(
@@ -75,13 +77,16 @@ class _AiFoodLoggerState extends State<AiFoodLogger> {
                   height: 40,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: colors.primaryContainer,
+                    color: AppTheme.aiSoft(brightness),
                     borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: AppTheme.aiAccent.withValues(alpha: 0.35),
+                    ),
                   ),
                   child: Text(
                     'AI',
                     style: TextStyle(
-                      color: colors.onPrimaryContainer,
+                      color: AppTheme.aiForeground(brightness),
                       fontSize: 12,
                       fontWeight: FontWeight.w900,
                     ),

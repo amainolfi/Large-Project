@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../config/app_theme.dart';
+
 class MacroProgressBar extends StatelessWidget {
   final String label;
   final double value;
@@ -26,7 +28,11 @@ class MacroProgressBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final fillFraction = goal > 0 ? (percent / 100).clamp(0.0, 1.0) : 0.0;
-    final fillColor = isLimit && percent >= 100 ? colors.error : colors.primary;
+    final fillColor = switch ((isLimit, goal > 0 && percent >= 100)) {
+      (true, true) => colors.error,
+      (false, true) => AppTheme.success,
+      _ => colors.primary,
+    };
 
     return Semantics(
       label: '$label, ${_format(value)} $unit of ${_format(goal)} $unit',

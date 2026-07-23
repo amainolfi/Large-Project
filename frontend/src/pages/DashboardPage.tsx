@@ -29,6 +29,7 @@ export default function DashboardPage() {
   const [entries, setEntries] = useState<FoodEntry[]>([]);
   const [recent, setRecent] = useState<FoodEntry[]>([]);
   const [editingEntry, setEditingEntry] = useState<FoodEntry | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<FoodEntry[]>([]);
   const [searchPending, setSearchPending] = useState(false);
@@ -64,6 +65,7 @@ export default function DashboardPage() {
 
   function changeDate(nextDate: string) {
     setEditingEntry(null);
+    setPendingDeleteId("");
     setDate(nextDate);
   }
 
@@ -109,12 +111,11 @@ export default function DashboardPage() {
   }
 
   async function handleDelete(entry: FoodEntry) {
-    const confirmed = window.confirm(`Delete "${entry.foodName}" from ${entry.mealType}?`);
-
-    if (!confirmed) return;
+    setPageError("");
 
     try {
       await deleteFood(entry.id);
+      setPendingDeleteId("");
 
       if (editingEntry?.id === entry.id) {
         setEditingEntry(null);
@@ -217,6 +218,10 @@ export default function DashboardPage() {
         <AiFoodLogger date={date} onLogged={refresh} />
       </section>
 
+      <section className="card preset-card" aria-label="USDA food search">
+        <PresetFoodSearch date={date} onAdded={refresh} />
+      </section>
+
       <div className="dashboard-columns">
         <section className="meal-column" aria-label="Food entries by meal">
           {MEAL_TYPES.map((meal) => {
@@ -256,11 +261,28 @@ export default function DashboardPage() {
                           </details>
                         </div>
                         <div className="entry-actions">
-                          <button type="button" className="btn btn-ghost btn-sm" onClick={() => setEditingEntry(entry)}>
+                          <button
+                            type="button"
+                            className="btn btn-ghost btn-sm"
+                            onClick={() => {
+                              setPendingDeleteId("");
+                              setEditingEntry(entry);
+                            }}
+                          >
                             Edit
                           </button>
-                          <button type="button" className="btn btn-danger btn-sm" onClick={() => handleDelete(entry)}>
-                            Delete
+                          <button
+                            type="button"
+                            className="btn btn-danger btn-sm"
+                            onClick={() => {
+                              if (pendingDeleteId === entry.id) {
+                                void handleDelete(entry);
+                              } else {
+                                setPendingDeleteId(entry.id);
+                              }
+                            }}
+                          >
+                            {pendingDeleteId === entry.id ? "Confirm delete" : "Delete"}
                           </button>
                         </div>
                       </li>
@@ -345,9 +367,6 @@ export default function DashboardPage() {
         </aside>
       </div>
 
-      <section className="card preset-card" aria-label="USDA food search">
-        <PresetFoodSearch date={date} onAdded={refresh} />
-      </section>
     </Layout>
   );
 }

@@ -14,17 +14,28 @@ class FoodEntryProvider extends ChangeNotifier {
   FoodEntryProvider({ApiService? api}) : _api = api ?? ApiService();
 
   List<FoodEntry> _recent = [];
+  List<PresetFood> _presetResults = [];
   bool _loadingRecent = false;
+  bool _searchingPresets = false;
+  bool _presetSearchCompleted = false;
   bool _submitting = false;
+  int? _addingPresetId;
   String? _error;
+  String? _presetError;
 
   List<FoodEntry> get recent => _recent;
+  List<PresetFood> get presetResults => _presetResults;
   bool get loadingRecent => _loadingRecent;
+  bool get searchingPresets => _searchingPresets;
+  bool get presetSearchCompleted => _presetSearchCompleted;
   bool get submitting => _submitting;
+  int? get addingPresetId => _addingPresetId;
   String? get error => _error;
+  String? get presetError => _presetError;
 
   Future<void> loadRecent() async {
     _loadingRecent = true;
+    _error = null;
     notifyListeners();
     try {
       _recent = await _api.getRecentFoods();
@@ -32,6 +43,58 @@ class FoodEntryProvider extends ChangeNotifier {
       _error = e.message;
     } finally {
       _loadingRecent = false;
+      notifyListeners();
+    }
+  }
+
+  /// Search verified USDA foods through the authenticated Express API.
+  Future<bool> searchPresets(String query) async {
+    final trimmed = query.trim();
+    if (trimmed.isEmpty) {
+      _presetResults = [];
+      _presetError = 'Enter a food or brand to search.';
+      _presetSearchCompleted = false;
+      notifyListeners();
+      return false;
+    }
+
+    _searchingPresets = true;
+    _presetSearchCompleted = false;
+    _presetError = null;
+    notifyListeners();
+    try {
+      _presetResults = await _api.searchPresetFoods(trimmed);
+      _presetSearchCompleted = true;
+      return true;
+    } on ApiException catch (e) {
+      _presetResults = [];
+      _presetError = e.message;
+      return false;
+    } finally {
+      _searchingPresets = false;
+      notifyListeners();
+    }
+  }
+
+  /// Save one verified USDA serving to the selected meal and date.
+  Future<bool> addPreset(
+    PresetFood food, {
+    required MealType mealType,
+    required String date,
+  }) async {
+    _addingPresetId = food.fdcId;
+    _error = null;
+    notifyListeners();
+    try {
+      await _api.createFood(
+        food.toFoodEntryInput(mealType: mealType, date: date),
+      );
+      return true;
+    } on ApiException catch (e) {
+      _error = e.message;
+      return false;
+    } finally {
+      _addingPresetId = null;
       notifyListeners();
     }
   }

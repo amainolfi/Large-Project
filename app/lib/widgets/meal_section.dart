@@ -1,21 +1,26 @@
 import 'package:flutter/material.dart';
 
+import '../config/app_theme.dart';
 import '../models/food_entry.dart';
 
 class MealSection extends StatelessWidget {
   final MealType meal;
   final List<FoodEntry> entries;
   final double totalCalories;
+  final String? pendingDeleteId;
   final void Function(FoodEntry entry) onEdit;
   final void Function(FoodEntry entry) onDelete;
+  final VoidCallback onCancelDelete;
 
   const MealSection({
     super.key,
     required this.meal,
     required this.entries,
     required this.totalCalories,
+    required this.pendingDeleteId,
     required this.onEdit,
     required this.onDelete,
+    required this.onCancelDelete,
   });
 
   String _format(double number) => number == number.roundToDouble()
@@ -45,10 +50,12 @@ class MealSection extends StatelessWidget {
                 ],
               ),
               const Divider(height: 24),
-              ...entries.map((entry) => _EntryRow(
+                  ...entries.map((entry) => _EntryRow(
                     entry: entry,
+                    confirmingDelete: entry.id == pendingDeleteId,
                     onEdit: () => onEdit(entry),
                     onDelete: () => onDelete(entry),
+                    onCancelDelete: onCancelDelete,
                   )),
             ],
           ),
@@ -60,13 +67,17 @@ class MealSection extends StatelessWidget {
 
 class _EntryRow extends StatelessWidget {
   final FoodEntry entry;
+  final bool confirmingDelete;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
+  final VoidCallback onCancelDelete;
 
   const _EntryRow({
     required this.entry,
+    required this.confirmingDelete,
     required this.onEdit,
     required this.onDelete,
+    required this.onCancelDelete,
   });
 
   String _format(double number) => number == number.roundToDouble()
@@ -76,11 +87,18 @@ class _EntryRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final brightness = Theme.of(context).brightness;
     final sourceLabel = switch (entry.source) {
       FoodSource.ai => 'AI estimate',
       FoodSource.usda => 'USDA',
       FoodSource.manual => null,
     };
+    final sourceBackground = entry.source == FoodSource.ai
+        ? AppTheme.aiSoft(brightness)
+        : colors.primaryContainer;
+    final sourceForeground = entry.source == FoodSource.ai
+        ? AppTheme.aiForeground(brightness)
+        : colors.onPrimaryContainer;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
@@ -104,8 +122,18 @@ class _EntryRow extends StatelessWidget {
                         if (sourceLabel != null)
                           Chip(
                             visualDensity: VisualDensity.compact,
+                            backgroundColor: sourceBackground,
+                            side: BorderSide(
+                              color: entry.source == FoodSource.ai
+                                  ? AppTheme.aiAccent.withValues(alpha: 0.35)
+                                  : colors.primary.withValues(alpha: 0.30),
+                            ),
                             label: Text(sourceLabel,
-                                style: const TextStyle(fontSize: 11)),
+                                style: TextStyle(
+                                  color: sourceForeground,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                )),
                           ),
                       ],
                     ),
@@ -121,15 +149,46 @@ class _EntryRow extends StatelessWidget {
                   ],
                 ),
               ),
-              PopupMenuButton<String>(
-                tooltip: 'Food actions',
-                onSelected: (action) => action == 'edit' ? onEdit() : onDelete(),
-                itemBuilder: (_) => const [
-                  PopupMenuItem(value: 'edit', child: Text('Edit')),
-                  PopupMenuItem(value: 'delete', child: Text('Delete')),
-                ],
-              ),
             ],
+          ),
+          const SizedBox(height: 6),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Wrap(
+              spacing: 4,
+              runSpacing: 4,
+              children: confirmingDelete
+                  ? [
+                      TextButton(
+                        onPressed: onCancelDelete,
+                        child: const Text('Cancel'),
+                      ),
+                      OutlinedButton.icon(
+                        onPressed: onDelete,
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: colors.error,
+                          side: BorderSide(color: colors.error),
+                        ),
+                        icon: const Icon(Icons.delete_forever_outlined),
+                        label: const Text('Confirm delete'),
+                      ),
+                    ]
+                  : [
+                      TextButton.icon(
+                        onPressed: onEdit,
+                        icon: const Icon(Icons.edit_outlined),
+                        label: const Text('Edit'),
+                      ),
+                      TextButton.icon(
+                        onPressed: onDelete,
+                        style: TextButton.styleFrom(
+                          foregroundColor: colors.error,
+                        ),
+                        icon: const Icon(Icons.delete_outline),
+                        label: const Text('Delete'),
+                      ),
+                    ],
+            ),
           ),
           ExpansionTile(
             dense: true,

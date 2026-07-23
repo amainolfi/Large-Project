@@ -59,6 +59,40 @@ void main() {
       expect(input.toJson()['vitaminD'], 2);
       expect(input.toJson()['source'], 'manual');
     });
+
+    test('converts a verified USDA result into a complete food entry', () {
+      final preset = PresetFood.fromJson({
+        'fdcId': 173944,
+        'foodName': 'Banana, raw',
+        'brand': null,
+        'dataType': 'SR Legacy',
+        'servingSize': '100 g',
+        'calories': 89,
+        'protein': 1.1,
+        'carbs': 22.8,
+        'fat': 0.3,
+        'saturatedFat': 0.1,
+        'transFat': 0,
+        'fiber': 2.6,
+        'sodium': 1,
+        'potassium': 358,
+        'calcium': 5,
+        'iron': 0.3,
+        'vitaminC': 8.7,
+        'vitaminD': 0,
+      });
+      final input = preset.toFoodEntryInput(
+        mealType: MealType.lunch,
+        date: '2026-07-23',
+      );
+
+      expect(preset.fdcId, 173944);
+      expect(input.foodName, 'Banana, raw');
+      expect(input.source, FoodSource.usda);
+      expect(input.mealType, MealType.lunch);
+      expect(input.potassium, 358);
+      expect(input.toJson()['source'], 'usda');
+    });
   });
 
   test('summary and goal models default missing legacy nutrients to zero', () {
@@ -165,5 +199,43 @@ void main() {
 
     await tester.pumpWidget(app(AppTheme.dark));
     expect(find.textContaining('75 g', findRichText: true), findsOneWidget);
+  });
+
+  test('dark theme uses the shared midnight and indigo brand tokens', () {
+    final theme = AppTheme.dark;
+
+    expect(theme.scaffoldBackgroundColor, AppTheme.background);
+    expect(theme.cardTheme.color, AppTheme.card);
+    expect(theme.navigationBarTheme.backgroundColor, AppTheme.navbar);
+    expect(theme.colorScheme.primary, AppTheme.primary);
+    expect(theme.colorScheme.outline, AppTheme.border);
+    expect(theme.colorScheme.onSurface, AppTheme.primaryText);
+    expect(theme.colorScheme.onSurfaceVariant, AppTheme.mutedText);
+  });
+
+  testWidgets('completed targets use success green while active goals use indigo',
+      (tester) async {
+    Future<Color?> progressColor(double percent) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.dark,
+          home: Scaffold(
+            body: MacroProgressBar(
+              label: 'Water',
+              value: percent,
+              goal: 100,
+              percent: percent,
+              unit: 'mL',
+            ),
+          ),
+        ),
+      );
+      final indicator =
+          tester.widget<LinearProgressIndicator>(find.byType(LinearProgressIndicator));
+      return indicator.valueColor!.value;
+    }
+
+    expect(await progressColor(50), AppTheme.primary);
+    expect(await progressColor(100), AppTheme.success);
   });
 }

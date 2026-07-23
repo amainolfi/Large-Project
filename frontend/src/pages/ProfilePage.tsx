@@ -68,6 +68,18 @@ export default function ProfilePage() {
 
   async function handleDeleteAccount() {
     setDeleteError("");
+
+    if (deleteText !== "DELETE") {
+      setDeleteError('Type "DELETE" exactly before deleting your account.');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Permanently delete your MacroVanta account and all associated data? This cannot be undone."
+    );
+
+    if (!confirmed) return;
+
     setDeleting(true);
 
     try {

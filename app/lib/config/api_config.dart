@@ -2,7 +2,7 @@
 ///
 /// The deployed backend is the source of truth. If you ever need to point at a
 /// local server instead, this is the ONLY line you change:
-///   - Deployed:            https://macrovanta.xyz
+///   - Deployed:            https://dylanwexler.com
 ///   - Local (Android emu): http://10.0.2.2:5000
 ///   - Local (real iPhone): http://<your-computer-LAN-IP>:5000
 ///
@@ -14,6 +14,6 @@ class ApiConfig {
   /// All backend routes are mounted under /api.
   static const String apiPrefix = '/api';
 
-  /// Full base for API calls, e.g. https://macrovanta.xyz/api
+  /// Full base for API calls, e.g. https://dylanwexler.com/api
   static String get apiBase => '$baseUrl$apiPrefix';
 }

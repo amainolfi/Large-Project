@@ -27,6 +27,8 @@ export default function MacroProgress({
     fillClass += " progress-over";
   } else if (kind === "limit" && percent >= 85) {
     fillClass += " progress-warn";
+  } else if (kind === "target" && percent >= 100) {
+    fillClass += " progress-complete";
   }
 
   return (

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../config/app_date.dart';
+import '../config/app_theme.dart';
 import '../models/wellness.dart';
 import '../providers/wellness_provider.dart';
 
@@ -276,7 +277,6 @@ class _WellnessScreenState extends State<WellnessScreen> {
               else if (summary != null) ...[
                 _summaryCard(
                   icon: Icons.water_drop_outlined,
-                  color: Colors.lightBlue,
                   label: 'Hydration',
                   value: '${summary.waterMl} mL',
                   supporting: 'of ${summary.goals.dailyWaterMl} mL today',
@@ -285,7 +285,6 @@ class _WellnessScreenState extends State<WellnessScreen> {
                 const SizedBox(height: 10),
                 _summaryCard(
                   icon: Icons.bedtime_outlined,
-                  color: Colors.deepPurpleAccent,
                   label: 'Sleep',
                   value: _duration(summary.sleepMinutes),
                   supporting:
@@ -295,7 +294,6 @@ class _WellnessScreenState extends State<WellnessScreen> {
                 const SizedBox(height: 10),
                 _summaryCard(
                   icon: Icons.directions_run,
-                  color: Colors.deepOrangeAccent,
                   label: 'Cardio this week',
                   value: '${summary.weeklyCardioMinutes} min',
                   supporting:
@@ -378,13 +376,15 @@ class _WellnessScreenState extends State<WellnessScreen> {
 
   Widget _summaryCard({
     required IconData icon,
-    required Color color,
     required String label,
     required String value,
     required String supporting,
     required double percent,
   }) {
     final progress = (percent / 100).clamp(0.0, 1.0);
+    final color = percent >= 100
+        ? AppTheme.success
+        : Theme.of(context).colorScheme.primary;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),

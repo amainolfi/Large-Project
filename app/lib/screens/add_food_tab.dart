@@ -7,6 +7,7 @@ import '../providers/dashboard_provider.dart';
 import '../providers/food_entry_provider.dart';
 import '../widgets/ai_food_logger.dart';
 import '../widgets/food_entry_form.dart';
+import '../widgets/verified_food_search.dart';
 
 class AddFoodTab extends StatefulWidget {
   const AddFoodTab({super.key});
@@ -65,6 +66,8 @@ class _AddFoodTabState extends State<AddFoodTab> {
               ),
               const SizedBox(height: 20),
               const AiFoodLogger(),
+              const SizedBox(height: 16),
+              const VerifiedFoodSearch(),
               const SizedBox(height: 16),
               Card(
                 child: Padding(

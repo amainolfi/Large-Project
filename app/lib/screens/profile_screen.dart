@@ -28,6 +28,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _changingPassword = false;
   bool _deleting = false;
 
+  bool get _canDelete => _deleteConfirm.text == 'DELETE';
+
   @override
   void dispose() {
     for (final c in [
@@ -89,7 +91,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _deleteAccount() async {
-    if (_deleteConfirm.text.trim() != 'DELETE') {
+    if (!_canDelete) {
       _toast('Type DELETE to confirm.');
       return;
     }
@@ -99,8 +101,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       builder: (ctx) => AlertDialog(
         title: const Text('Delete account?'),
         content: const Text(
-            'This permanently removes your account, food log, and goals. '
-            'This cannot be undone.'),
+            'This permanently removes your account, nutrition history, '
+            'hydration, sleep, cardio, and goals. This cannot be undone.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -109,7 +111,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFFFF453A)),
+              foregroundColor: Theme.of(ctx).colorScheme.error,
+            ),
             child: const Text('Delete'),
           ),
         ],
@@ -216,7 +219,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: OutlinedButton(
                   onPressed: () => context.read<AuthProvider>().logout(),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF34C759),
                     minimumSize: const Size.fromHeight(52),
                   ),
                   child: const Text('Sign out'),
@@ -227,28 +229,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             // ---- Delete account ----
             _card([
-              const Text('Delete account',
+              Text('Delete account',
                   style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFFFF453A))),
+                      color: colors.error)),
               const SizedBox(height: 8),
               Text(
-                'This permanently removes your account, food log, and goals. '
-                'This cannot be undone.',
+                'This permanently removes your account, nutrition history, '
+                'hydration, sleep, cardio, and goals. This cannot be undone.',
                 style: TextStyle(color: colors.onSurfaceVariant),
               ),
               const SizedBox(height: 12),
               _label('Type "DELETE" to confirm'),
-              _text(_deleteConfirm),
+              _text(
+                _deleteConfirm,
+                onChanged: (_) => setState(() {}),
+              ),
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton(
-                  onPressed: _deleting ? null : _deleteAccount,
+                  onPressed:
+                      _deleting || !_canDelete ? null : _deleteAccount,
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFFFF453A),
-                    side: const BorderSide(color: Color(0xFFFF453A)),
+                    foregroundColor: colors.error,
+                    side: BorderSide(color: colors.error),
                     minimumSize: const Size.fromHeight(52),
                   ),
                   child: _deleting
@@ -286,10 +292,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
       );
 
-  Widget _text(TextEditingController c, {bool obscure = false}) {
+  Widget _text(
+    TextEditingController c, {
+    bool obscure = false,
+    ValueChanged<String>? onChanged,
+  }) {
     return TextField(
       controller: c,
       obscureText: obscure,
+      onChanged: onChanged,
       decoration: const InputDecoration(border: OutlineInputBorder()),
     );
   }

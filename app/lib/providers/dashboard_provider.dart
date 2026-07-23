@@ -71,13 +71,16 @@ class DashboardProvider extends ChangeNotifier {
   }
 
   /// Remove an entry, then refresh the day so totals/progress update.
-  Future<void> deleteFood(String id) async {
+  Future<bool> deleteFood(String id) async {
+    _error = null;
     try {
       await _api.deleteFood(id);
       await load();
+      return true;
     } on ApiException catch (e) {
       _error = e.message;
       notifyListeners();
+      return false;
     }
   }
 }

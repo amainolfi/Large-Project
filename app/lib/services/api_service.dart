@@ -216,6 +216,36 @@ class ApiService {
     }
   }
 
+  /// GET /api/preset-foods/search -> verified USDA FoodData Central servings.
+  /// The device calls our authenticated Express endpoint so the USDA API key,
+  /// validation, and rate limiting remain server-side.
+  Future<List<PresetFood>> searchPresetFoods(
+    String query, {
+    int page = 1,
+    int pageSize = 10,
+  }) async {
+    try {
+      final res = await _dio.get(
+        '/preset-foods/search',
+        queryParameters: {
+          'query': query,
+          'page': page,
+          'pageSize': pageSize,
+        },
+      );
+      final list = res.data['foods'] as List;
+      return list
+          .map(
+            (food) => PresetFood.fromJson(
+              Map<String, dynamic>.from(food as Map),
+            ),
+          )
+          .toList();
+    } on DioException catch (e) {
+      _rethrowAsApi(e);
+    }
+  }
+
   /// GET /api/foods/recent -> { foodEntries: [...] }
   Future<List<FoodEntry>> getRecentFoods() async {
     try {

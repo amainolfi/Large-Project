@@ -17,6 +17,8 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  String? _pendingDeleteId;
+
   @override
   void initState() {
     super.initState();
@@ -127,41 +129,55 @@ class _DashboardScreenState extends State<DashboardScreen> {
           meal: meal,
           entries: dashboard.foodsForMeal(meal),
           totalCalories: dashboard.caloriesForMeal(meal),
+          pendingDeleteId: _pendingDeleteId,
           onEdit: (entry) async {
+            setState(() => _pendingDeleteId = null);
             await Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => AddEditFoodScreen(existing: entry)),
             );
             if (!context.mounted) return;
             await context.read<DashboardProvider>().load();
           },
-          onDelete: (entry) => _confirmDelete(context, dashboard, entry),
+          onDelete: (entry) => _deleteFood(dashboard, entry),
+          onCancelDelete: () => setState(() => _pendingDeleteId = null),
         ),
     ];
   }
 
-  Future<void> _confirmDelete(
-    BuildContext context,
+  Future<void> _deleteFood(
     DashboardProvider dashboard,
     FoodEntry entry,
   ) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete entry?'),
-        content: Text('Remove "${entry.foodName}" from ${entry.mealType.label}?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Cancel'),
+    if (_pendingDeleteId != entry.id) {
+      setState(() => _pendingDeleteId = entry.id);
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(
+              'Review "${entry.foodName}", then tap Confirm delete.',
+            ),
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Delete'),
+        );
+      return;
+    }
+
+    final deleted = await dashboard.deleteFood(entry.id);
+    if (!mounted) return;
+    setState(() => _pendingDeleteId = null);
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            deleted
+                ? '${entry.foodName} deleted.'
+                : dashboard.error ?? 'Could not delete this food.',
           ),
-        ],
-      ),
-    );
-    if (confirmed == true) await dashboard.deleteFood(entry.id);
+          backgroundColor:
+              deleted ? null : Theme.of(context).colorScheme.error,
+        ),
+      );
   }
 }
 

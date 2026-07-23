@@ -99,7 +99,10 @@ function ProgressCard({
         aria-valuemax={hasGoal ? 100 : undefined}
         aria-valuenow={hasGoal ? Math.round(width) : undefined}
       >
-        <div className="progress-fill" style={{ width: `${width}%` }} />
+        <div
+          className={`progress-fill${hasGoal && percent >= 100 ? " progress-complete" : ""}`}
+          style={{ width: `${width}%` }}
+        />
       </div>
       <div className="macro-values">
         {value}
