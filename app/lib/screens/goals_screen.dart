@@ -31,6 +31,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
     'fat': TextEditingController(text: '70'),
     'saturatedFat': TextEditingController(text: '20'),
     'transFat': TextEditingController(text: '2'),
+    'sugar': TextEditingController(text: '50'),
     'fiber': TextEditingController(text: '28'),
     'sodium': TextEditingController(text: '2300'),
     'potassium': TextEditingController(text: '4700'),
@@ -45,6 +46,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
     _GoalField('protein', 'Protein (g)', 'Macro target'),
     _GoalField('carbs', 'Carbohydrates (g)', 'Macro target'),
     _GoalField('fat', 'Total fat (g)', 'Macro target'),
+    _GoalField('sugar', 'Total sugar (g)', 'Daily limit'),
     _GoalField('fiber', 'Fiber (g)', 'Daily target'),
   ];
 
@@ -89,6 +91,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
     _controllers['fat']!.text = _number(goals.dailyFat);
     _controllers['saturatedFat']!.text = _number(goals.dailySaturatedFat);
     _controllers['transFat']!.text = _number(goals.dailyTransFat);
+    _controllers['sugar']!.text = _number(goals.dailySugar);
     _controllers['fiber']!.text = _number(goals.dailyFiber);
     _controllers['sodium']!.text = _number(goals.dailySodium);
     _controllers['potassium']!.text = _number(goals.dailyPotassium);
@@ -114,6 +117,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
       dailyFat: _value('fat'),
       dailySaturatedFat: _value('saturatedFat'),
       dailyTransFat: _value('transFat'),
+      dailySugar: _value('sugar'),
       dailyFiber: _value('fiber'),
       dailySodium: _value('sodium'),
       dailyPotassium: _value('potassium'),
@@ -166,7 +170,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                       style: TextStyle(color: colors.onSurfaceVariant),
                     ),
                     const SizedBox(height: 24),
-                    _section('Macros and fiber', _primaryFields),
+                    _section('Macros, sugar, and fiber', _primaryFields),
                     const SizedBox(height: 16),
                     _section('Micronutrients and limits', _detailFields),
                     const SizedBox(height: 12),
