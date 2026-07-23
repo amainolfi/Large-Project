@@ -5,6 +5,7 @@ class NutrientSet {
   final double fat;
   final double saturatedFat;
   final double transFat;
+  final double sugar;
   final double fiber;
   final double sodium;
   final double potassium;
@@ -20,6 +21,7 @@ class NutrientSet {
     required this.fat,
     required this.saturatedFat,
     required this.transFat,
+    required this.sugar,
     required this.fiber,
     required this.sodium,
     required this.potassium,
@@ -39,6 +41,7 @@ class NutrientSet {
       fat: number(json['fat']),
       saturatedFat: number(json['saturatedFat']),
       transFat: number(json['transFat']),
+      sugar: number(json['sugar']),
       fiber: number(json['fiber']),
       sodium: number(json['sodium']),
       potassium: number(json['potassium']),
