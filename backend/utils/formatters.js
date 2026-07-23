@@ -25,6 +25,7 @@ export function formatGoal(goal) {
     dailyFat: goal.dailyFat || 0,
     dailySaturatedFat: goal.dailySaturatedFat,
     dailyTransFat: goal.dailyTransFat,
+    dailySugar: goal.dailySugar || 0,
     dailyFiber: goal.dailyFiber || 0,
     dailySodium: goal.dailySodium,
     dailyPotassium: goal.dailyPotassium || 0,
