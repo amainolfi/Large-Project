@@ -42,6 +42,7 @@ class FoodEntry {
   final double fat;
   final double saturatedFat;
   final double transFat;
+  final double sugar;
   final double fiber;
   final double sodium;
   final double potassium;
@@ -66,6 +67,7 @@ class FoodEntry {
     required this.fat,
     required this.saturatedFat,
     required this.transFat,
+    required this.sugar
     required this.fiber,
     required this.sodium,
     required this.potassium,
@@ -94,6 +96,7 @@ class FoodEntry {
       fat: number(json['fat']),
       saturatedFat: number(json['saturatedFat']),
       transFat: number(json['transFat']),
+      sugar: number(json['sugar']),
       fiber: number(json['fiber']),
       sodium: number(json['sodium']),
       potassium: number(json['potassium']),
@@ -120,6 +123,7 @@ class FoodEntryInput {
   final double fat;
   final double saturatedFat;
   final double transFat;
+  final double sugar;
   final double fiber;
   final double sodium;
   final double potassium;
@@ -140,6 +144,7 @@ class FoodEntryInput {
     required this.fat,
     this.saturatedFat = 0,
     this.transFat = 0,
+    this.sugar = 0,
     this.fiber = 0,
     this.sodium = 0,
     this.potassium = 0,
@@ -162,6 +167,7 @@ class FoodEntryInput {
       'fat': fat,
       'saturatedFat': saturatedFat,
       'transFat': transFat,
+      'sugar': sugar,
       'fiber': fiber,
       'sodium': sodium,
       'potassium': potassium,
@@ -189,6 +195,7 @@ class PresetFood {
   final double fat;
   final double saturatedFat;
   final double transFat;
+  final double sugar;
   final double fiber;
   final double sodium;
   final double potassium;
@@ -209,6 +216,7 @@ class PresetFood {
     required this.fat,
     required this.saturatedFat,
     required this.transFat,
+    required this.sugar,
     required this.fiber,
     required this.sodium,
     required this.potassium,
@@ -234,6 +242,7 @@ class PresetFood {
       fat: number(json['fat']),
       saturatedFat: number(json['saturatedFat']),
       transFat: number(json['transFat']),
+      sugar: number(json['sugar']),
       fiber: number(json['fiber']),
       sodium: number(json['sodium']),
       potassium: number(json['potassium']),
@@ -258,6 +267,7 @@ class PresetFood {
       fat: fat,
       saturatedFat: saturatedFat,
       transFat: transFat,
+      sugar: sugar,
       fiber: fiber,
       sodium: sodium,
       potassium: potassium,
