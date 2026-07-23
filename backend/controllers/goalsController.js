@@ -12,6 +12,7 @@ const goalSchema = z.object({
   dailyFat: goalWithDefault,
   dailySaturatedFat: goalValue,
   dailyTransFat: goalValue,
+  dailySugar: goalWithDefault,
   dailyFiber: goalWithDefault,
   dailySodium: goalValue,
   dailyPotassium: goalWithDefault,
