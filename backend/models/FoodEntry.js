@@ -56,6 +56,12 @@ const foodEntrySchema = new mongoose.Schema(
       required: true,
       min: 0
     },
+    sugar: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: 0
+    },
     fiber: {
       type: Number,
       required: true,
