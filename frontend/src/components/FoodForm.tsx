@@ -23,7 +23,8 @@ const primaryFields: { key: NumericField; label: string; unit: string }[] = [
   { key: "protein", label: "Protein", unit: "g" },
   { key: "carbs", label: "Carbohydrates", unit: "g" },
   { key: "fat", label: "Total fat", unit: "g" },
-  { key: "fiber", label: "Fiber", unit: "g" }
+  { key: "fiber", label: "Fiber", unit: "g" },
+  { key: "sugar", label: "Sugar", unit: "g" }
 ];
 
 const micronutrientFields: { key: NumericField; label: string; unit: string }[] = [

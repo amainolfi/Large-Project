@@ -22,6 +22,7 @@ void main() {
         'saturatedFat': 0.1,
         'transFat': 0,
         'fiber': 3.1,
+        'sugar': 14.4,
         'sodium': 1,
         'potassium': 422,
         'calcium': 6,
@@ -36,6 +37,7 @@ void main() {
       expect(entry.mealType, MealType.lunch);
       expect(entry.source, FoodSource.ai);
       expect(entry.fiber, 3.1);
+      expect(entry.sugar, 14.4);
       expect(entry.potassium, 422);
       expect(entry.vitaminC, 10.3);
     });
@@ -49,12 +51,14 @@ void main() {
         protein: 12,
         carbs: 18,
         fat: 4,
+        sugar: 17,
         calcium: 200,
         vitaminD: 2,
         date: '2026-07-21',
       );
 
       expect(input.toJson()['mealType'], 'Breakfast');
+      expect(input.toJson()['sugar'], 17);
       expect(input.toJson()['calcium'], 200);
       expect(input.toJson()['vitaminD'], 2);
       expect(input.toJson()['source'], 'manual');
@@ -74,6 +78,7 @@ void main() {
         'saturatedFat': 0.1,
         'transFat': 0,
         'fiber': 2.6,
+        'sugar': 12.2,
         'sodium': 1,
         'potassium': 358,
         'calcium': 5,
@@ -90,6 +95,7 @@ void main() {
       expect(input.foodName, 'Banana, raw');
       expect(input.source, FoodSource.usda);
       expect(input.mealType, MealType.lunch);
+      expect(input.sugar, 12.2);
       expect(input.potassium, 358);
       expect(input.toJson()['source'], 'usda');
     });
@@ -100,8 +106,10 @@ void main() {
     final goals = MacroGoal.fromJson({'id': 'goal-1', 'dailyCalories': 2000});
 
     expect(nutrients.fat, 0);
+    expect(nutrients.sugar, 0);
     expect(nutrients.potassium, 0);
     expect(goals.dailyFiber, 0);
+    expect(goals.dailySugar, 0);
     expect(goals.dailyVitaminD, 0);
   });
 

@@ -15,6 +15,7 @@ const columns: { key: keyof NutritionValues; label: string; unit: string }[] = [
   { key: "carbs", label: "Carbs", unit: "g" },
   { key: "fat", label: "Fat", unit: "g" },
   { key: "fiber", label: "Fiber", unit: "g" },
+  { key: "sugar", label: "Sugar", unit: "g" },
   { key: "saturatedFat", label: "Sat. fat", unit: "g" },
   { key: "transFat", label: "Trans fat", unit: "g" },
   { key: "sodium", label: "Sodium", unit: "mg" },
@@ -58,6 +59,9 @@ export default function HistoryPage() {
     ...(summary?.days.map((day) => day.totals.calories) || [0]),
     1
   );
+  // The chart stays chronological (oldest left) so the week reads as a trend,
+  // while the table lists the most recent day first.
+  const daysNewestFirst = summary ? [...summary.days].reverse() : [];
 
   return (
     <Layout>
@@ -123,7 +127,9 @@ export default function HistoryPage() {
             <div className="section-heading">
               <div>
                 <h2 id="daily-totals-heading">Daily nutrition totals</h2>
-                <p className="card-note">Scroll horizontally to compare every tracked nutrient.</p>
+                <p className="card-note">
+                  Most recent day first. Scroll horizontally to compare every tracked nutrient.
+                </p>
               </div>
             </div>
             <div className="table-wrap">
@@ -137,7 +143,7 @@ export default function HistoryPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {summary.days.map((day) => (
+                  {daysNewestFirst.map((day) => (
                     <tr key={day.date}>
                       <td>{formatShortDate(day.date)}</td>
                       {columns.map((column) => (

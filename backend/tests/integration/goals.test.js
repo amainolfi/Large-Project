@@ -44,6 +44,7 @@ describe("PUT /api/goals", () => {
       dailySaturatedFat: 20,
       dailyTransFat: 2,
       dailyFiber: 28,
+      dailySugar: 50,
       dailySodium: 2300,
       dailyPotassium: 4700,
       dailyCalcium: 1300,

@@ -9,6 +9,7 @@
     "start": "node server.js",
     "seed": "node scripts/seed.js",
     "seed:demo": "node scripts/seedDemoData.js",
+    "seed:test-users": "node scripts/seedTestUsers.js",
     "make-users": "node scripts/makeTestUsers.js"
   },
   "keywords": [],

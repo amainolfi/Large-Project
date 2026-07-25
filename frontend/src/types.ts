@@ -22,6 +22,7 @@ export interface NutritionValues {
   saturatedFat: number;
   transFat: number;
   fiber: number;
+  sugar: number;
   sodium: number;
   potassium: number;
   calcium: number;
@@ -67,6 +68,7 @@ export interface MacroGoal {
   dailySaturatedFat: number;
   dailyTransFat: number;
   dailyFiber: number;
+  dailySugar: number;
   dailySodium: number;
   dailyPotassium: number;
   dailyCalcium: number;

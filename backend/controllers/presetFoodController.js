@@ -12,7 +12,7 @@ const NUTRIENT_IDS = {
   fat: [1004],
   saturatedFat: [1258],
   transFat: [1257],
-  sugar: [2000],
+  sugar: [2000, 1063],
   fiber: [1079],
   sodium: [1093],
   potassium: [1092],

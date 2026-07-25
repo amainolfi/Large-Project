@@ -217,6 +217,9 @@ class _DailyTotalsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    // The chart above stays chronological so the week reads as a trend; this
+    // list starts with the most recent day and counts back.
+    final newestFirst = days.reversed.toList();
 
     return Card(
       child: Padding(
@@ -224,12 +227,22 @@ class _DailyTotalsList extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Padding(
-              padding: EdgeInsets.fromLTRB(16, 8, 16, 4),
-              child: Text('Daily nutrition totals',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Daily nutrition totals',
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 2),
+                  Text('Most recent day first.',
+                      style:
+                          TextStyle(fontSize: 13, color: colors.onSurfaceVariant)),
+                ],
+              ),
             ),
-            ...days.map((day) {
+            ...newestFirst.map((day) {
               final totals = day.totals;
               return ExpansionTile(
                 title: Text(
@@ -239,7 +252,8 @@ class _DailyTotalsList extends StatelessWidget {
                 subtitle: Text(
                   '${_format(totals.calories)} kcal · P ${_format(totals.protein)}g · '
                   'C ${_format(totals.carbs)}g · F ${_format(totals.fat)}g · '
-                  'Fiber ${_format(totals.fiber)}g',
+                  'Fiber ${_format(totals.fiber)}g · '
+                  'Sugar ${_format(totals.sugar)}g',
                   style:
                       TextStyle(fontSize: 13, color: colors.onSurfaceVariant),
                 ),

@@ -23,6 +23,7 @@ const defaultForm: GoalForm = {
   dailySaturatedFat: "20",
   dailyTransFat: "2",
   dailyFiber: "28",
+  dailySugar: "50",
   dailySodium: "2300",
   dailyPotassium: "4700",
   dailyCalcium: "1300",
@@ -36,7 +37,8 @@ const primaryFields: GoalField[] = [
   { key: "dailyProtein", label: "Protein", unit: "g", note: "Macro target" },
   { key: "dailyCarbs", label: "Carbohydrates", unit: "g", note: "Macro target" },
   { key: "dailyFat", label: "Total fat", unit: "g", note: "Macro target" },
-  { key: "dailyFiber", label: "Fiber", unit: "g", note: "Daily target" }
+  { key: "dailyFiber", label: "Fiber", unit: "g", note: "Daily target" },
+  { key: "dailySugar", label: "Sugar", unit: "g", note: "Daily limit" }
 ];
 
 const detailFields: GoalField[] = [
@@ -169,7 +171,7 @@ export default function GoalsPage() {
         <section className="card goals-card">
           <div className="section-heading">
             <div>
-              <h2>Macros and fiber</h2>
+              <h2>Macros, fiber, and sugar</h2>
               <p className="card-note">The main goals shown at the top of your dashboard.</p>
             </div>
           </div>

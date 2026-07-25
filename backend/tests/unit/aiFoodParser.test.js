@@ -68,6 +68,7 @@ describe("AI food parser request", () => {
       strict: true
     });
     expect(body.text.format.schema.additionalProperties).toBe(false);
+    expect(body.text.format.schema.properties.items.items.required).toContain("sugar");
     expect(body.safety_identifier).toMatch(/^[a-f0-9]{64}$/);
     expect(body.input[1].content).toContain("I had a banana for lunch");
   });

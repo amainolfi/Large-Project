@@ -41,6 +41,7 @@ describe("POST /api/foods", () => {
       saturatedFat: 1.5,
       transFat: 0,
       fiber: 0,
+      sugar: 0,
       sodium: 130,
       potassium: 450,
       calcium: 20,

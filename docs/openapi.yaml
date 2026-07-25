@@ -1527,7 +1527,7 @@ components:
 
     FoodEntry:
       type: object
-      required: [id, foodName, servingSize, mealType, calories, protein, carbs, fat, saturatedFat, transFat, fiber, sodium, potassium, calcium, iron, vitaminC, vitaminD, source, confidence, date, createdAt, updatedAt]
+      required: [id, foodName, servingSize, mealType, calories, protein, carbs, fat, saturatedFat, transFat, fiber, sugar, sodium, potassium, calcium, iron, vitaminC, vitaminD, source, confidence, date, createdAt, updatedAt]
       properties:
         id:
           type: string
@@ -1559,6 +1559,9 @@ components:
           type: number
           example: 0
         fiber:
+          type: number
+          example: 0
+        sugar:
           type: number
           example: 0
         sodium:
@@ -1639,6 +1642,10 @@ components:
           allOf:
             - $ref: "#/components/schemas/NonNegativeNumberInput"
             - description: Grams; defaults to zero when omitted
+        sugar:
+          allOf:
+            - $ref: "#/components/schemas/NonNegativeNumberInput"
+            - description: Total sugars in grams; defaults to zero when omitted
         sodium:
           allOf:
             - $ref: "#/components/schemas/NonNegativeNumberInput"
@@ -1698,6 +1705,8 @@ components:
         transFat:
           $ref: "#/components/schemas/NonNegativeNumberInput"
         fiber:
+          $ref: "#/components/schemas/NonNegativeNumberInput"
+        sugar:
           $ref: "#/components/schemas/NonNegativeNumberInput"
         sodium:
           $ref: "#/components/schemas/NonNegativeNumberInput"
@@ -1782,7 +1791,7 @@ components:
 
     PresetFood:
       type: object
-      required: [fdcId, foodName, brand, dataType, servingSize, calories, protein, carbs, fat, saturatedFat, transFat, fiber, sodium, potassium, calcium, iron, vitaminC, vitaminD]
+      required: [fdcId, foodName, brand, dataType, servingSize, calories, protein, carbs, fat, saturatedFat, transFat, fiber, sugar, sodium, potassium, calcium, iron, vitaminC, vitaminD]
       properties:
         fdcId:
           type: integer
@@ -1818,6 +1827,9 @@ components:
           type: number
           example: 0
         fiber:
+          type: number
+          example: 0
+        sugar:
           type: number
           example: 0
         sodium:
@@ -1887,6 +1899,10 @@ components:
           allOf:
             - $ref: "#/components/schemas/NonNegativeNumberInput"
             - description: Grams; defaults to zero when omitted
+        dailySugar:
+          allOf:
+            - $ref: "#/components/schemas/NonNegativeNumberInput"
+            - description: Total sugars in grams; defaults to zero when omitted
         dailySodium:
           allOf:
             - $ref: "#/components/schemas/NonNegativeNumberInput"
@@ -1914,7 +1930,7 @@ components:
 
     MacroGoal:
       type: object
-      required: [id, dailyCalories, dailyProtein, dailyCarbs, dailyFat, dailySaturatedFat, dailyTransFat, dailyFiber, dailySodium, dailyPotassium, dailyCalcium, dailyIron, dailyVitaminC, dailyVitaminD, createdAt, updatedAt]
+      required: [id, dailyCalories, dailyProtein, dailyCarbs, dailyFat, dailySaturatedFat, dailyTransFat, dailyFiber, dailySugar, dailySodium, dailyPotassium, dailyCalcium, dailyIron, dailyVitaminC, dailyVitaminD, createdAt, updatedAt]
       properties:
         id:
           type: string
@@ -1940,6 +1956,9 @@ components:
         dailyFiber:
           type: number
           example: 28
+        dailySugar:
+          type: number
+          example: 50
         dailySodium:
           type: number
           example: 2300
@@ -1973,7 +1992,7 @@ components:
 
     MacroTotals:
       type: object
-      required: [calories, protein, carbs, fat, saturatedFat, transFat, fiber, sodium, potassium, calcium, iron, vitaminC, vitaminD]
+      required: [calories, protein, carbs, fat, saturatedFat, transFat, fiber, sugar, sodium, potassium, calcium, iron, vitaminC, vitaminD]
       properties:
         calories:
           type: number
@@ -1996,6 +2015,9 @@ components:
         fiber:
           type: number
           example: 24
+        sugar:
+          type: number
+          example: 42
         sodium:
           type: number
           example: 1900

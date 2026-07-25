@@ -100,6 +100,7 @@ describe("POST /api/foods/ai-log", () => {
     expect(saved.foodName).toBe("Banana");
     expect(saved.source).toBe("ai");
     expect(saved.potassium).toBe(422);
+    expect(saved.sugar).toBe(14.4);
 
     const requestBody = JSON.parse(global.fetch.mock.calls[0][1].body);
     expect(requestBody.store).toBe(false);

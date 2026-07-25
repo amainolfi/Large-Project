@@ -186,7 +186,7 @@ export default function DashboardPage() {
             <div className="section-heading">
               <div>
                 <p className="eyebrow">At a glance</p>
-                <h2 id="macro-heading">Macros and fiber</h2>
+                <h2 id="macro-heading">Macros, fiber, and sugar</h2>
               </div>
             </div>
             <div className="macro-grid">
@@ -195,6 +195,7 @@ export default function DashboardPage() {
               <MacroProgress label="Carbohydrates" total={totals.carbs} goal={goals.carbs} percent={progress.carbs} unit="g" kind="target" />
               <MacroProgress label="Total fat" total={totals.fat} goal={goals.fat} percent={progress.fat} unit="g" kind="target" />
               <MacroProgress label="Fiber" total={totals.fiber} goal={goals.fiber} percent={progress.fiber} unit="g" kind="target" />
+              <MacroProgress label="Sugar" total={totals.sugar} goal={goals.sugar} percent={progress.sugar} unit="g" kind="limit" />
             </div>
           </section>
 
@@ -251,7 +252,7 @@ export default function DashboardPage() {
                           </div>
                           <span className="entry-serving">{entry.servingSize}</span>
                           <span className="entry-macros">
-                            {round(entry.calories)} kcal · P {round(entry.protein)}g · C {round(entry.carbs)}g · F {round(entry.fat)}g · Fiber {round(entry.fiber)}g
+                            {round(entry.calories)} kcal · P {round(entry.protein)}g · C {round(entry.carbs)}g · F {round(entry.fat)}g · Fiber {round(entry.fiber)}g · Sugar {round(entry.sugar)}g
                           </span>
                           <details className="entry-nutrients">
                             <summary>Micronutrients</summary>

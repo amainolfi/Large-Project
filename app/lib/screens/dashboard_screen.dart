@@ -61,7 +61,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   onRetry: () => context.read<DashboardProvider>().load(),
                 )
               else if (summary != null) ...[
-                const Text('Macros and fiber',
+                const Text('Macros, fiber, and sugar',
                     style:
                         TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 12),
@@ -123,6 +123,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
           goal: summary.goals.fiber,
           percent: summary.progress.fiber,
           unit: 'g'),
+      MacroProgressBar(
+          label: 'Sugar',
+          value: summary.totals.sugar,
+          goal: summary.goals.sugar,
+          percent: summary.progress.sugar,
+          unit: 'g',
+          isLimit: true),
     ];
     return [
       for (final bar in bars) ...[bar, const SizedBox(height: 10)]

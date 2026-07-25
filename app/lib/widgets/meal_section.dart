@@ -144,7 +144,8 @@ class _EntryRow extends StatelessWidget {
                     Text(
                       '${_format(entry.calories)} kcal · P ${_format(entry.protein)}g · '
                       'C ${_format(entry.carbs)}g · F ${_format(entry.fat)}g · '
-                      'Fiber ${_format(entry.fiber)}g',
+                      'Fiber ${_format(entry.fiber)}g · '
+                      'Sugar ${_format(entry.sugar)}g',
                       style: TextStyle(
                           fontSize: 13, color: colors.onSurfaceVariant),
                     ),

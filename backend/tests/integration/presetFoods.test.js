@@ -39,6 +39,7 @@ const fdcSearchResult = {
         { nutrientId: 1258, value: 1.01 },
         { nutrientId: 1257, value: 0.045 },
         { nutrientId: 1079, value: 0 },
+        { nutrientId: 2000, value: 0 },
         { nutrientId: 1093, value: 74 },
         { nutrientId: 1092, value: 256 },
         { nutrientId: 1087, value: 15 },
@@ -63,6 +64,7 @@ const fdcSearchResult = {
         { nutrientId: 1258, value: 10 },
         { nutrientId: 1257, value: 0.2 },
         { nutrientId: 1079, value: 4 },
+        { nutrientId: 2000, value: 40 },
         { nutrientId: 1093, value: 350 },
         { nutrientId: 1092, value: 200 },
         { nutrientId: 1087, value: 40 },
@@ -82,6 +84,7 @@ const fdcSearchResult = {
       foodNutrients: [
         { nutrientId: 1008, value: 42 },
         { nutrientId: 1005, value: 11 },
+        { nutrientId: 1063, value: 11 },
         { nutrientId: 1093, value: 4 }
       ]
     }
@@ -130,6 +133,7 @@ describe("GET /api/preset-foods/search", () => {
       saturatedFat: 1,
       transFat: 0,
       fiber: 0,
+      sugar: 0,
       sodium: 74,
       potassium: 256,
       calcium: 15,
@@ -161,6 +165,7 @@ describe("GET /api/preset-foods/search", () => {
       saturatedFat: 5,
       transFat: 0.1,
       fiber: 2,
+      sugar: 20,
       sodium: 175,
       potassium: 100,
       calcium: 20,
@@ -185,6 +190,7 @@ describe("GET /api/preset-foods/search", () => {
       servingSize: "100 g",
       calories: 42,
       carbs: 11,
+      sugar: 11,
       sodium: 4
     });
   });
