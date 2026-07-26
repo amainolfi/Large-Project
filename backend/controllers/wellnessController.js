@@ -13,7 +13,6 @@ import {
   formatSleepEntry,
   formatWaterEntry,
   formatWellnessGoals,
-  getIsoWeekRange,
   percentage
 } from "../utils/wellness.js";
 
@@ -94,7 +93,7 @@ const goalsSchema = z
   .object({
     dailyWaterMl: z.coerce.number().finite().int().min(0).max(20000),
     nightlySleepMinutes: z.coerce.number().finite().int().min(0).max(1440),
-    weeklyCardioMinutes: z.coerce.number().finite().int().min(0).max(10080)
+    dailyCardioMinutes: z.coerce.number().finite().int().min(0).max(1440)
   })
   .strict();
 
@@ -262,7 +261,10 @@ export async function upsertWellnessGoals(req, res) {
   const data = parse(goalsSchema, req.body);
   const goal = await WellnessGoal.findOneAndUpdate(
     { userId: req.user._id },
-    { ...data, userId: req.user._id },
+    {
+      $set: { ...data, userId: req.user._id },
+      $unset: { weeklyCardioMinutes: "" }
+    },
     { returnDocument: "after", upsert: true, runValidators: true, setDefaultsOnInsert: true }
   );
 
@@ -271,20 +273,14 @@ export async function upsertWellnessGoals(req, res) {
 
 export async function getWellnessSummary(req, res) {
   const date = selectedDate(req);
-  const week = getIsoWeekRange(date);
   const userId = req.user._id;
 
-  const [waterEntries, sleepEntries, cardioEntries, weeklyCardioEntries, goal] =
-    await Promise.all([
-      WaterEntry.find({ userId, date }),
-      SleepEntry.find({ userId, date }),
-      CardioEntry.find({ userId, date }),
-      CardioEntry.find({
-        userId,
-        date: { $gte: week.startDate, $lte: week.endDate }
-      }),
-      WellnessGoal.findOne({ userId })
-    ]);
+  const [waterEntries, sleepEntries, cardioEntries, goal] = await Promise.all([
+    WaterEntry.find({ userId, date }),
+    SleepEntry.find({ userId, date }),
+    CardioEntry.find({ userId, date }),
+    WellnessGoal.findOne({ userId })
+  ]);
 
   const goals = formatWellnessGoals(goal);
   const totals = {
@@ -296,23 +292,14 @@ export async function getWellnessSummary(req, res) {
       0
     )
   };
-  const weeklyCardioMinutes = weeklyCardioEntries.reduce(
-    (sum, entry) => sum + entry.durationMinutes,
-    0
-  );
-
   res.json({
     date,
     totals,
-    weekly: { ...week, cardioMinutes: weeklyCardioMinutes },
     goals,
     progress: {
       waterPercent: percentage(totals.waterMl, goals.dailyWaterMl),
       sleepPercent: percentage(totals.sleepMinutes, goals.nightlySleepMinutes),
-      weeklyCardioPercent: percentage(
-        weeklyCardioMinutes,
-        goals.weeklyCardioMinutes
-      )
+      cardioPercent: percentage(totals.cardioMinutes, goals.dailyCardioMinutes)
     }
   });
 }

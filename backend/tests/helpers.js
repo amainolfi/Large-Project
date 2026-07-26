@@ -109,7 +109,7 @@ export function wellnessGoalsPayload(overrides = {}) {
   return {
     dailyWaterMl: 2500,
     nightlySleepMinutes: 480,
-    weeklyCardioMinutes: 150,
+    dailyCardioMinutes: 30,
     ...overrides
   };
 }

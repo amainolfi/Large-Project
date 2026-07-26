@@ -22,10 +22,16 @@ const wellnessGoalSchema = new mongoose.Schema(
       min: 0,
       max: 1440
     },
-    weeklyCardioMinutes: {
+    dailyCardioMinutes: {
       type: Number,
       required: true,
-      default: 150,
+      min: 0,
+      max: 1440
+    },
+    // Retained temporarily so saved goals from older releases can be
+    // converted to a daily target when they are read.
+    weeklyCardioMinutes: {
+      type: Number,
       min: 0,
       max: 10080
     }

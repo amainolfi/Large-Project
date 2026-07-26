@@ -60,7 +60,7 @@ class _WellnessScreenState extends State<WellnessScreen> {
     if (_goalsPrefilled || summary == null) return;
     _waterGoalController.text = summary.goals.dailyWaterMl.toString();
     _sleepGoalController.text = summary.goals.nightlySleepMinutes.toString();
-    _cardioGoalController.text = summary.goals.weeklyCardioMinutes.toString();
+    _cardioGoalController.text = summary.goals.dailyCardioMinutes.toString();
     _goalsPrefilled = true;
   }
 
@@ -184,7 +184,7 @@ class _WellnessScreenState extends State<WellnessScreen> {
         sleep > 1440 ||
         cardio == null ||
         cardio < 0 ||
-        cardio > 10080) {
+        cardio > 1440) {
       _showMessage('Enter wellness goals within the displayed ranges.',
           error: true);
       return;
@@ -194,7 +194,7 @@ class _WellnessScreenState extends State<WellnessScreen> {
       WellnessGoal(
         dailyWaterMl: water,
         nightlySleepMinutes: sleep,
-        weeklyCardioMinutes: cardio,
+        dailyCardioMinutes: cardio,
       ),
     );
     _showMessage(
@@ -295,11 +295,11 @@ class _WellnessScreenState extends State<WellnessScreen> {
                 const SizedBox(height: 10),
                 _summaryCard(
                   icon: Icons.directions_run,
-                  label: 'Cardio this week',
-                  value: '${summary.weeklyCardioMinutes} min',
+                  label: 'Cardio today',
+                  value: '${summary.cardioMinutes} min',
                   supporting:
-                      'of ${summary.goals.weeklyCardioMinutes} min · ${summary.cardioMinutes} today',
-                  percent: summary.weeklyCardioPercent,
+                      'of ${summary.goals.dailyCardioMinutes} min today',
+                  percent: summary.cardioPercent,
                 ),
                 const SizedBox(height: 18),
                 _waterCard(provider),
@@ -642,14 +642,14 @@ class _WellnessScreenState extends State<WellnessScreen> {
         child: ExpansionTile(
           title: const Text('Wellness goals',
               style: TextStyle(fontWeight: FontWeight.w700)),
-          subtitle: const Text('Water, sleep, and weekly cardio targets'),
+          subtitle: const Text('Daily water, sleep, and cardio targets'),
           childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           children: [
             _numberField(_waterGoalController, 'Daily water (mL)'),
             const SizedBox(height: 10),
             _numberField(_sleepGoalController, 'Nightly sleep (minutes)'),
             const SizedBox(height: 10),
-            _numberField(_cardioGoalController, 'Weekly cardio (minutes)'),
+            _numberField(_cardioGoalController, 'Daily cardio (minutes)'),
             const SizedBox(height: 10),
             const Text(
               'General tracking targets only; use professional guidance for personal health needs.',

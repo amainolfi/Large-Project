@@ -967,7 +967,7 @@ paths:
     get:
       tags: [Wellness]
       summary: Get wellness summary
-      description: Returns daily hydration, sleep, and cardio totals plus ISO-week cardio progress.
+      description: Returns hydration, sleep, and cardio totals and goal progress for the selected day.
       operationId: getWellnessSummary
       security:
         - bearerAuth: []
@@ -2325,7 +2325,7 @@ components:
     WellnessGoalInput:
       type: object
       additionalProperties: false
-      required: [dailyWaterMl, nightlySleepMinutes, weeklyCardioMinutes]
+      required: [dailyWaterMl, nightlySleepMinutes, dailyCardioMinutes]
       properties:
         dailyWaterMl:
           type: integer
@@ -2337,15 +2337,15 @@ components:
           minimum: 0
           maximum: 1440
           example: 480
-        weeklyCardioMinutes:
+        dailyCardioMinutes:
           type: integer
           minimum: 0
-          maximum: 10080
-          example: 150
+          maximum: 1440
+          example: 30
 
     WellnessGoal:
       type: object
-      required: [id, dailyWaterMl, nightlySleepMinutes, weeklyCardioMinutes, createdAt, updatedAt]
+      required: [id, dailyWaterMl, nightlySleepMinutes, dailyCardioMinutes, createdAt, updatedAt]
       properties:
         id:
           type: string
@@ -2358,10 +2358,10 @@ components:
           type: integer
           minimum: 0
           maximum: 1440
-        weeklyCardioMinutes:
+        dailyCardioMinutes:
           type: integer
           minimum: 0
-          maximum: 10080
+          maximum: 1440
         createdAt:
           type: string
           format: date-time
@@ -2390,7 +2390,7 @@ components:
 
     WellnessProgress:
       type: object
-      required: [waterPercent, sleepPercent, weeklyCardioPercent]
+      required: [waterPercent, sleepPercent, cardioPercent]
       properties:
         waterPercent:
           type: number
@@ -2398,32 +2398,18 @@ components:
         sleepPercent:
           type: number
           example: 93.8
-        weeklyCardioPercent:
+        cardioPercent:
           type: number
-          example: 50
-
-    WellnessWeek:
-      type: object
-      required: [startDate, endDate, cardioMinutes]
-      properties:
-        startDate:
-          $ref: "#/components/schemas/DateString"
-        endDate:
-          $ref: "#/components/schemas/DateString"
-        cardioMinutes:
-          type: integer
-          example: 75
+          example: 100
 
     WellnessSummary:
       type: object
-      required: [date, totals, weekly, goals, progress]
+      required: [date, totals, goals, progress]
       properties:
         date:
           $ref: "#/components/schemas/DateString"
         totals:
           $ref: "#/components/schemas/WellnessTotals"
-        weekly:
-          $ref: "#/components/schemas/WellnessWeek"
         goals:
           $ref: "#/components/schemas/WellnessGoal"
         progress:

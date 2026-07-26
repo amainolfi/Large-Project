@@ -13,6 +13,8 @@ class AppTheme {
   static const primaryText = Color(0xFFF8FAFC);
   static const mutedText = Color(0xFF94A3B8);
   static const success = Color(0xFF4ADE80);
+  static const _warningDark = Color(0xFFFBBF24);
+  static const _warningLight = Color(0xFFB45309);
 
   static const _lightBackground = Color(0xFFF7F8FC);
   static const _lightNavbar = Color(0xFFFFFFFF);
@@ -36,6 +38,9 @@ class AppTheme {
       brightness == Brightness.dark
           ? const Color(0xFF67E8F9)
           : const Color(0xFF0E7490);
+
+  static Color warning(Brightness brightness) =>
+      brightness == Brightness.dark ? _warningDark : _warningLight;
 
   static ThemeData _build(Brightness brightness) {
     final darkMode = brightness == Brightness.dark;

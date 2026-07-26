@@ -1,24 +1,35 @@
-import { getIsoWeekRange, percentage } from "../../utils/wellness.js";
+import { formatWellnessGoals, percentage } from "../../utils/wellness.js";
 
-describe("getIsoWeekRange", () => {
-  test("returns Monday through Sunday for a weekday", () => {
-    expect(getIsoWeekRange("2026-07-21")).toEqual({
-      startDate: "2026-07-20",
-      endDate: "2026-07-26"
+describe("formatWellnessGoals", () => {
+  test("returns daily defaults when no goals have been saved", () => {
+    expect(formatWellnessGoals(null)).toMatchObject({
+      id: null,
+      dailyWaterMl: 2500,
+      nightlySleepMinutes: 480,
+      dailyCardioMinutes: 30
     });
   });
 
-  test("keeps Sunday in the week that started six days earlier", () => {
-    expect(getIsoWeekRange("2026-07-26")).toEqual({
-      startDate: "2026-07-20",
-      endDate: "2026-07-26"
+  test("returns the saved daily cardio target", () => {
+    const goals = formatWellnessGoals({
+      _id: { toString: () => "goal-1" },
+      dailyWaterMl: 3000,
+      nightlySleepMinutes: 450,
+      dailyCardioMinutes: 40
     });
+
+    expect(goals.dailyCardioMinutes).toBe(40);
+    expect(goals).not.toHaveProperty("weeklyCardioMinutes");
   });
 
-  test("handles month and year boundaries", () => {
-    expect(getIsoWeekRange("2027-01-01")).toEqual({
-      startDate: "2026-12-28",
-      endDate: "2027-01-03"
+  test("converts a legacy weekly target to a daily equivalent", () => {
+    expect(formatWellnessGoals({
+      _id: { toString: () => "goal-1" },
+      dailyWaterMl: 2500,
+      nightlySleepMinutes: 480,
+      weeklyCardioMinutes: 150
+    })).toMatchObject({
+      dailyCardioMinutes: 21
     });
   });
 });

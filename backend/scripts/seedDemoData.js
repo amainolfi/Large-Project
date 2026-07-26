@@ -51,7 +51,7 @@ const nutritionGoal = {
 const wellnessGoal = {
   dailyWaterMl: 2500,
   nightlySleepMinutes: 480,
-  weeklyCardioMinutes: 150
+  dailyCardioMinutes: 30
 };
 
 const mealTemplates = [

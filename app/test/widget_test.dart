@@ -4,8 +4,10 @@ import 'package:macrovanta/config/app_theme.dart';
 import 'package:macrovanta/models/daily_summary.dart';
 import 'package:macrovanta/models/food_entry.dart';
 import 'package:macrovanta/models/macro_goal.dart';
+import 'package:macrovanta/models/weekly_summary.dart';
 import 'package:macrovanta/models/wellness.dart';
 import 'package:macrovanta/widgets/macro_progress_bar.dart';
+import 'package:macrovanta/widgets/weekly_macro_chart.dart';
 
 void main() {
   group('food entry contract', () {
@@ -114,7 +116,7 @@ void main() {
   });
 
   group('wellness API contract', () {
-    test('parses daily and weekly wellness progress', () {
+    test('parses daily wellness progress', () {
       final summary = WellnessSummary.fromJson({
         'date': '2026-07-21',
         'totals': {
@@ -123,26 +125,22 @@ void main() {
           'cardioMinutes': 30,
           'cardioCaloriesBurned': 320,
         },
-        'weekly': {
-          'startDate': '2026-07-20',
-          'endDate': '2026-07-26',
-          'cardioMinutes': 75,
-        },
         'goals': {
           'dailyWaterMl': 2500,
           'nightlySleepMinutes': 480,
-          'weeklyCardioMinutes': 150,
+          'dailyCardioMinutes': 30,
         },
         'progress': {
           'waterPercent': 50,
           'sleepPercent': 93.8,
-          'weeklyCardioPercent': 50,
+          'cardioPercent': 100,
         },
       });
 
       expect(summary.waterMl, 1250);
       expect(summary.sleepMinutes, 450);
-      expect(summary.weeklyCardioMinutes, 75);
+      expect(summary.cardioMinutes, 30);
+      expect(summary.cardioPercent, 100);
       expect(summary.sleepPercent, 93.8);
       expect(summary.goals.nightlySleepMinutes, 480);
     });
@@ -178,11 +176,11 @@ void main() {
       const goals = WellnessGoal(
         dailyWaterMl: 2500,
         nightlySleepMinutes: 480,
-        weeklyCardioMinutes: 150,
+        dailyCardioMinutes: 30,
       );
 
       expect(water.amountMl, 500);
-      expect(goals.toJson()['weeklyCardioMinutes'], 150);
+      expect(goals.toJson()['dailyCardioMinutes'], 30);
     });
   });
 
@@ -246,5 +244,97 @@ void main() {
 
     expect(await progressColor(50), AppTheme.primary);
     expect(await progressColor(100), AppTheme.success);
+  });
+
+  testWidgets(
+      'weekly macro chart averages tracked days and exposes empty states',
+      (tester) async {
+    NutrientSet nutrients({
+      double calories = 0,
+      double protein = 0,
+      double carbs = 0,
+      double fat = 0,
+    }) {
+      return NutrientSet(
+        calories: calories,
+        protein: protein,
+        carbs: carbs,
+        fat: fat,
+        saturatedFat: 0,
+        transFat: 0,
+        sugar: 0,
+        fiber: 0,
+        sodium: 0,
+        potassium: 0,
+        calcium: 0,
+        iron: 0,
+        vitaminC: 0,
+        vitaminD: 0,
+      );
+    }
+
+    final days = [
+      DayTotals(
+        date: '2026-07-19',
+        totals: nutrients(
+          calories: 2000,
+          protein: 100,
+          carbs: 200,
+          fat: 60,
+        ),
+      ),
+      DayTotals(
+        date: '2026-07-20',
+        totals: nutrients(
+          calories: 2400,
+          protein: 140,
+          carbs: 260,
+          fat: 80,
+        ),
+      ),
+      DayTotals(date: '2026-07-21', totals: nutrients()),
+    ];
+    final goals = MacroGoal.fromJson({
+      'id': 'goal-1',
+      'dailyCalories': 2200,
+      'dailyProtein': 150,
+      'dailyCarbs': 250,
+      'dailyFat': 75,
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.dark,
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: WeeklyMacroChart(days: days, goals: goals),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('2 of 3 days tracked'), findsOneWidget);
+    expect(find.textContaining('120 g average'), findsOneWidget);
+    expect(find.textContaining('230 g average'), findsOneWidget);
+    expect(find.textContaining('70 g average'), findsOneWidget);
+    expect(find.text('No data'), findsOneWidget);
+    expect(find.text('Calorie share'), findsOneWidget);
+    expect(
+      find.byTooltip(
+        'Sun, Jul 19\n'
+        'Protein: 100 g\n'
+        'Calorie share: 23%\n'
+        'Goal: 150 g (66.7%)',
+      ),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.text('Grams'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining('Goal markers use your saved daily protein'),
+      findsOneWidget,
+    );
   });
 }

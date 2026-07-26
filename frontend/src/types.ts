@@ -169,14 +169,14 @@ export interface WellnessGoal {
   id: string | null;
   dailyWaterMl: number;
   nightlySleepMinutes: number;
-  weeklyCardioMinutes: number;
+  dailyCardioMinutes: number;
   createdAt: string | null;
   updatedAt: string | null;
 }
 
 export type WellnessGoalInput = Pick<
   WellnessGoal,
-  "dailyWaterMl" | "nightlySleepMinutes" | "weeklyCardioMinutes"
+  "dailyWaterMl" | "nightlySleepMinutes" | "dailyCardioMinutes"
 >;
 
 export interface WellnessSummary {
@@ -187,15 +187,10 @@ export interface WellnessSummary {
     cardioMinutes: number;
     cardioCaloriesBurned: number;
   };
-  weekly: {
-    startDate: string;
-    endDate: string;
-    cardioMinutes: number;
-  };
   goals: WellnessGoal;
   progress: {
     waterPercent: number;
     sleepPercent: number;
-    weeklyCardioPercent: number;
+    cardioPercent: number;
   };
 }

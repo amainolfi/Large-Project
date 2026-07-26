@@ -15,23 +15,8 @@ export const SLEEP_QUALITIES = ["poor", "fair", "good", "excellent"];
 export const DEFAULT_WELLNESS_GOALS = {
   dailyWaterMl: 2500,
   nightlySleepMinutes: 480,
-  weeklyCardioMinutes: 150
+  dailyCardioMinutes: 30
 };
-
-export function getIsoWeekRange(dateString) {
-  const date = new Date(`${dateString}T00:00:00.000Z`);
-  const day = date.getUTCDay();
-  const daysFromMonday = day === 0 ? 6 : day - 1;
-  const start = new Date(date);
-  start.setUTCDate(start.getUTCDate() - daysFromMonday);
-  const end = new Date(start);
-  end.setUTCDate(end.getUTCDate() + 6);
-
-  return {
-    startDate: start.toISOString().slice(0, 10),
-    endDate: end.toISOString().slice(0, 10)
-  };
-}
 
 export function formatCardioEntry(entry) {
   return {
@@ -75,11 +60,17 @@ export function formatWellnessGoals(goal) {
     return { id: null, ...DEFAULT_WELLNESS_GOALS, createdAt: null, updatedAt: null };
   }
 
+  const dailyCardioMinutes = Number.isFinite(goal.dailyCardioMinutes)
+    ? goal.dailyCardioMinutes
+    : Number.isFinite(goal.weeklyCardioMinutes)
+      ? Math.round(goal.weeklyCardioMinutes / 7)
+      : DEFAULT_WELLNESS_GOALS.dailyCardioMinutes;
+
   return {
     id: goal._id.toString(),
     dailyWaterMl: goal.dailyWaterMl,
     nightlySleepMinutes: goal.nightlySleepMinutes,
-    weeklyCardioMinutes: goal.weeklyCardioMinutes,
+    dailyCardioMinutes,
     createdAt: goal.createdAt,
     updatedAt: goal.updatedAt
   };

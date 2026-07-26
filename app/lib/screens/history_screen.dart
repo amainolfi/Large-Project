@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../config/app_date.dart';
 import '../models/weekly_summary.dart';
 import '../providers/history_provider.dart';
+import '../widgets/weekly_macro_chart.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -57,6 +58,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 )
               else if (summary != null) ...[
                 _CaloriesChart(days: summary.days, goal: history.calorieGoal),
+                const SizedBox(height: 16),
+                WeeklyMacroChart(
+                  days: summary.days,
+                  goals: history.goals,
+                ),
                 const SizedBox(height: 16),
                 _DailyTotalsList(days: summary.days),
               ],
@@ -237,8 +243,8 @@ class _DailyTotalsList extends StatelessWidget {
                           TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 2),
                   Text('Most recent day first.',
-                      style:
-                          TextStyle(fontSize: 13, color: colors.onSurfaceVariant)),
+                      style: TextStyle(
+                          fontSize: 13, color: colors.onSurfaceVariant)),
                 ],
               ),
             ),

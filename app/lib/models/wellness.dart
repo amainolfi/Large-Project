@@ -202,26 +202,26 @@ class WellnessGoal {
   final String? id;
   final int dailyWaterMl;
   final int nightlySleepMinutes;
-  final int weeklyCardioMinutes;
+  final int dailyCardioMinutes;
 
   const WellnessGoal({
     this.id,
     required this.dailyWaterMl,
     required this.nightlySleepMinutes,
-    required this.weeklyCardioMinutes,
+    required this.dailyCardioMinutes,
   });
 
   factory WellnessGoal.fromJson(Map<String, dynamic> json) => WellnessGoal(
         id: json['id'] as String?,
         dailyWaterMl: _integer(json['dailyWaterMl']),
         nightlySleepMinutes: _integer(json['nightlySleepMinutes']),
-        weeklyCardioMinutes: _integer(json['weeklyCardioMinutes']),
+        dailyCardioMinutes: _integer(json['dailyCardioMinutes']),
       );
 
   Map<String, dynamic> toJson() => {
         'dailyWaterMl': dailyWaterMl,
         'nightlySleepMinutes': nightlySleepMinutes,
-        'weeklyCardioMinutes': weeklyCardioMinutes,
+        'dailyCardioMinutes': dailyCardioMinutes,
       };
 }
 
@@ -231,13 +231,10 @@ class WellnessSummary {
   final int sleepMinutes;
   final int cardioMinutes;
   final double cardioCaloriesBurned;
-  final String weekStartDate;
-  final String weekEndDate;
-  final int weeklyCardioMinutes;
   final WellnessGoal goals;
   final double waterPercent;
   final double sleepPercent;
-  final double weeklyCardioPercent;
+  final double cardioPercent;
 
   const WellnessSummary({
     required this.date,
@@ -245,18 +242,14 @@ class WellnessSummary {
     required this.sleepMinutes,
     required this.cardioMinutes,
     required this.cardioCaloriesBurned,
-    required this.weekStartDate,
-    required this.weekEndDate,
-    required this.weeklyCardioMinutes,
     required this.goals,
     required this.waterPercent,
     required this.sleepPercent,
-    required this.weeklyCardioPercent,
+    required this.cardioPercent,
   });
 
   factory WellnessSummary.fromJson(Map<String, dynamic> json) {
     final totals = json['totals'] as Map<String, dynamic>? ?? {};
-    final weekly = json['weekly'] as Map<String, dynamic>? ?? {};
     final progress = json['progress'] as Map<String, dynamic>? ?? {};
     final goals = json['goals'] as Map<String, dynamic>? ?? {};
 
@@ -266,13 +259,10 @@ class WellnessSummary {
       sleepMinutes: _integer(totals['sleepMinutes']),
       cardioMinutes: _integer(totals['cardioMinutes']),
       cardioCaloriesBurned: _number(totals['cardioCaloriesBurned']),
-      weekStartDate: weekly['startDate'] as String? ?? '',
-      weekEndDate: weekly['endDate'] as String? ?? '',
-      weeklyCardioMinutes: _integer(weekly['cardioMinutes']),
       goals: WellnessGoal.fromJson(goals),
       waterPercent: _number(progress['waterPercent']),
       sleepPercent: _number(progress['sleepPercent']),
-      weeklyCardioPercent: _number(progress['weeklyCardioPercent']),
+      cardioPercent: _number(progress['cardioPercent']),
     );
   }
 }

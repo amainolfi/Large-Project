@@ -1,4 +1,5 @@
 import request from "supertest";
+import mongoose from "mongoose";
 import app from "../../app.js";
 import CardioEntry from "../../models/CardioEntry.js";
 import SleepEntry from "../../models/SleepEntry.js";
@@ -43,7 +44,7 @@ describe("wellness authentication and goals", () => {
       id: null,
       dailyWaterMl: 2500,
       nightlySleepMinutes: 480,
-      weeklyCardioMinutes: 150
+      dailyCardioMinutes: 30
     });
   });
 
@@ -60,13 +61,38 @@ describe("wellness authentication and goals", () => {
     expect(second.status).toBe(200);
     expect(second.body.goals.id).toBe(first.body.goals.id);
     expect(second.body.goals.dailyWaterMl).toBe(3000);
+    expect(second.body.goals.dailyCardioMinutes).toBe(30);
     expect(await WellnessGoal.countDocuments()).toBe(1);
+  });
+
+  test("converts a saved weekly cardio target and removes it on the next save", async () => {
+    const { token, user } = await registerVerifiedUser();
+    await WellnessGoal.collection.insertOne({
+      userId: new mongoose.Types.ObjectId(user.id),
+      dailyWaterMl: 2500,
+      nightlySleepMinutes: 480,
+      weeklyCardioMinutes: 150,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
+
+    const legacy = await authorized("get", "/api/wellness/goals", token);
+    const saved = await authorized("put", "/api/wellness/goals", token).send(
+      wellnessGoalsPayload({ dailyCardioMinutes: 35 })
+    );
+    const stored = await WellnessGoal.findOne({ userId: user.id }).lean();
+
+    expect(legacy.body.goals.dailyCardioMinutes).toBe(21);
+    expect(legacy.body.goals).not.toHaveProperty("weeklyCardioMinutes");
+    expect(saved.body.goals.dailyCardioMinutes).toBe(35);
+    expect(stored.dailyCardioMinutes).toBe(35);
+    expect(stored.weeklyCardioMinutes).toBeUndefined();
   });
 
   test("rejects out-of-range goals and unknown fields", async () => {
     const { token } = await registerVerifiedUser();
     const invalid = await authorized("put", "/api/wellness/goals", token).send(
-      wellnessGoalsPayload({ nightlySleepMinutes: 1500 })
+      wellnessGoalsPayload({ dailyCardioMinutes: 1441 })
     );
     const extra = await authorized("put", "/api/wellness/goals", token).send({
       ...wellnessGoalsPayload(),
@@ -242,7 +268,7 @@ describe("sleep tracking", () => {
 });
 
 describe("wellness summary and cleanup", () => {
-  test("aggregates daily hydration and sleep with ISO-week cardio progress", async () => {
+  test("aggregates hydration, sleep, and cardio progress for the selected day", async () => {
     const { token } = await registerVerifiedUser();
     await authorized("put", "/api/wellness/goals", token).send(wellnessGoalsPayload());
     await authorized("post", "/api/wellness/water", token).send(waterPayload({ amountMl: 500 }));
@@ -269,15 +295,11 @@ describe("wellness summary and cleanup", () => {
       cardioMinutes: 30,
       cardioCaloriesBurned: 320
     });
-    expect(response.body.weekly).toEqual({
-      startDate: "2026-07-20",
-      endDate: "2026-07-26",
-      cardioMinutes: 75
-    });
+    expect(response.body).not.toHaveProperty("weekly");
     expect(response.body.progress).toEqual({
       waterPercent: 50,
       sleepPercent: 93.8,
-      weeklyCardioPercent: 50
+      cardioPercent: 100
     });
   });
 

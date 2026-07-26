@@ -149,7 +149,7 @@ export default function WellnessPage() {
   const [goalForm, setGoalForm] = useState({
     dailyWaterMl: "2500",
     nightlySleepMinutes: "480",
-    weeklyCardioMinutes: "150"
+    dailyCardioMinutes: "30"
   });
 
   function changeDate(nextDate: string) {
@@ -175,7 +175,7 @@ export default function WellnessPage() {
       setGoalForm({
         dailyWaterMl: String(bundle.summary.goals.dailyWaterMl),
         nightlySleepMinutes: String(bundle.summary.goals.nightlySleepMinutes),
-        weeklyCardioMinutes: String(bundle.summary.goals.weeklyCardioMinutes)
+        dailyCardioMinutes: String(bundle.summary.goals.dailyCardioMinutes)
       });
     }
   }
@@ -327,18 +327,18 @@ export default function WellnessPage() {
     event.preventDefault();
     const dailyWaterMl = Number(goalForm.dailyWaterMl);
     const nightlySleepMinutes = Number(goalForm.nightlySleepMinutes);
-    const weeklyCardioMinutes = Number(goalForm.weeklyCardioMinutes);
+    const dailyCardioMinutes = Number(goalForm.dailyCardioMinutes);
 
     if (
       !Number.isInteger(dailyWaterMl) ||
       !Number.isInteger(nightlySleepMinutes) ||
-      !Number.isInteger(weeklyCardioMinutes) ||
+      !Number.isInteger(dailyCardioMinutes) ||
       dailyWaterMl < 0 ||
       dailyWaterMl > 20000 ||
       nightlySleepMinutes < 0 ||
       nightlySleepMinutes > 1440 ||
-      weeklyCardioMinutes < 0 ||
-      weeklyCardioMinutes > 10080
+      dailyCardioMinutes < 0 ||
+      dailyCardioMinutes > 1440
     ) {
       setError("Wellness goals must be whole numbers within the displayed ranges.");
       return;
@@ -352,7 +352,7 @@ export default function WellnessPage() {
       const response = await saveWellnessGoals({
         dailyWaterMl,
         nightlySleepMinutes,
-        weeklyCardioMinutes
+        dailyCardioMinutes
       });
       await refreshAfterMutation();
       setMessage(response.message);
@@ -473,11 +473,11 @@ export default function WellnessPage() {
                 percent={summary.progress.sleepPercent}
               />
               <ProgressCard
-                label="Cardio this week"
-                value={`${summary.weekly.cardioMinutes} min`}
-                goal={summary.goals.weeklyCardioMinutes}
-                goalText={`${summary.goals.weeklyCardioMinutes} min`}
-                percent={summary.progress.weeklyCardioPercent}
+                label="Cardio today"
+                value={`${summary.totals.cardioMinutes} min`}
+                goal={summary.goals.dailyCardioMinutes}
+                goalText={`${summary.goals.dailyCardioMinutes} min`}
+                percent={summary.progress.cardioPercent}
               />
             </div>
           </section>
@@ -648,7 +648,7 @@ export default function WellnessPage() {
               <div>
                 <h2>Log cardio</h2>
                 <p className="card-note">
-                  Duration drives the weekly goal; distance and calories are optional.
+                  Duration drives today&apos;s goal; distance and calories are optional.
                 </p>
               </div>
               <span className="meal-calories">{countLabel(cardioEntries.length, "session")}</span>
@@ -834,18 +834,18 @@ export default function WellnessPage() {
                   />
                 </div>
                 <div className="field">
-                  <label htmlFor="cardio-goal">Weekly cardio (min)</label>
+                  <label htmlFor="cardio-goal">Daily cardio (min)</label>
                   <input
                     id="cardio-goal"
                     type="number"
                     min="0"
-                    max="10080"
+                    max="1440"
                     step="1"
-                    value={goalForm.weeklyCardioMinutes}
+                    value={goalForm.dailyCardioMinutes}
                     onChange={(event) =>
                       setGoalForm((previous) => ({
                         ...previous,
-                        weeklyCardioMinutes: event.target.value
+                        dailyCardioMinutes: event.target.value
                       }))
                     }
                     required
