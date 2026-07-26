@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Layout from "../components/Layout";
 import Message from "../components/Message";
+import WeeklyMacroChart from "../components/WeeklyMacroChart";
 import { getGoals, getWeeklySummary } from "../lib/api";
 import { addDays, formatShortDate, todayString } from "../lib/dates";
 import type { MacroGoal, NutritionValues, WeeklySummary } from "../types";
@@ -122,6 +123,8 @@ export default function HistoryPage() {
               <p className="card-note">Daily goal: {calorieGoal} kcal. Red bars are over goal.</p>
             )}
           </section>
+
+          <WeeklyMacroChart days={summary.days} goals={goals} />
 
           <section className="card" aria-labelledby="daily-totals-heading">
             <div className="section-heading">
