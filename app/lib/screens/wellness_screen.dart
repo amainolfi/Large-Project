@@ -500,7 +500,7 @@ class _WellnessScreenState extends State<WellnessScreen> {
           initiallyExpanded: provider.sleepEntries.isEmpty,
           title: _heading('Recovery', 'Log sleep',
               '${provider.sleepEntries.length} sessions'),
-          childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          childrenPadding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
           children: [
             Row(
               children: [
@@ -557,7 +557,7 @@ class _WellnessScreenState extends State<WellnessScreen> {
           initiallyExpanded: provider.cardioEntries.isEmpty,
           title: _heading('Movement', 'Log cardio',
               '${provider.cardioEntries.length} sessions'),
-          childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          childrenPadding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
           children: [
             DropdownButtonFormField<ActivityType>(
               initialValue: _activity,
@@ -643,7 +643,7 @@ class _WellnessScreenState extends State<WellnessScreen> {
           title: const Text('Wellness goals',
               style: TextStyle(fontWeight: FontWeight.w700)),
           subtitle: const Text('Daily water, sleep, and cardio targets'),
-          childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          childrenPadding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
           children: [
             _numberField(_waterGoalController, 'Daily water (mL)'),
             const SizedBox(height: 10),
