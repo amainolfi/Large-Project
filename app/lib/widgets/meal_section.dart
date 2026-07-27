@@ -7,20 +7,16 @@ class MealSection extends StatelessWidget {
   final MealType meal;
   final List<FoodEntry> entries;
   final double totalCalories;
-  final String? pendingDeleteId;
   final void Function(FoodEntry entry) onEdit;
   final void Function(FoodEntry entry) onDelete;
-  final VoidCallback onCancelDelete;
 
   const MealSection({
     super.key,
     required this.meal,
     required this.entries,
     required this.totalCalories,
-    required this.pendingDeleteId,
     required this.onEdit,
     required this.onDelete,
-    required this.onCancelDelete,
   });
 
   String _format(double number) => number == number.roundToDouble()
@@ -53,10 +49,8 @@ class MealSection extends StatelessWidget {
               const Divider(height: 24),
               ...entries.map((entry) => _EntryRow(
                     entry: entry,
-                    confirmingDelete: entry.id == pendingDeleteId,
                     onEdit: () => onEdit(entry),
                     onDelete: () => onDelete(entry),
-                    onCancelDelete: onCancelDelete,
                   )),
             ],
           ),
@@ -68,17 +62,13 @@ class MealSection extends StatelessWidget {
 
 class _EntryRow extends StatelessWidget {
   final FoodEntry entry;
-  final bool confirmingDelete;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
-  final VoidCallback onCancelDelete;
 
   const _EntryRow({
     required this.entry,
-    required this.confirmingDelete,
     required this.onEdit,
     required this.onDelete,
-    required this.onCancelDelete,
   });
 
   String _format(double number) => number == number.roundToDouble()
@@ -160,37 +150,21 @@ class _EntryRow extends StatelessWidget {
             child: Wrap(
               spacing: 4,
               runSpacing: 4,
-              children: confirmingDelete
-                  ? [
-                      TextButton(
-                        onPressed: onCancelDelete,
-                        child: const Text('Cancel'),
-                      ),
-                      OutlinedButton.icon(
-                        onPressed: onDelete,
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: colors.error,
-                          side: BorderSide(color: colors.error),
-                        ),
-                        icon: const Icon(Icons.delete_forever_outlined),
-                        label: const Text('Confirm delete'),
-                      ),
-                    ]
-                  : [
-                      TextButton.icon(
-                        onPressed: onEdit,
-                        icon: const Icon(Icons.edit_outlined),
-                        label: const Text('Edit'),
-                      ),
-                      TextButton.icon(
-                        onPressed: onDelete,
-                        style: TextButton.styleFrom(
-                          foregroundColor: colors.error,
-                        ),
-                        icon: const Icon(Icons.delete_outline),
-                        label: const Text('Delete'),
-                      ),
-                    ],
+              children: [
+                TextButton.icon(
+                  onPressed: onEdit,
+                  icon: const Icon(Icons.edit_outlined),
+                  label: const Text('Edit'),
+                ),
+                TextButton.icon(
+                  onPressed: onDelete,
+                  style: TextButton.styleFrom(
+                    foregroundColor: colors.error,
+                  ),
+                  icon: const Icon(Icons.delete_outline),
+                  label: const Text('Delete'),
+                ),
+              ],
             ),
           ),
           ExpansionTile(

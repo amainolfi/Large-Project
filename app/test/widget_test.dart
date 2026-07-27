@@ -7,6 +7,7 @@ import 'package:macrovanta/models/macro_goal.dart';
 import 'package:macrovanta/models/weekly_summary.dart';
 import 'package:macrovanta/models/wellness.dart';
 import 'package:macrovanta/widgets/macro_progress_bar.dart';
+import 'package:macrovanta/widgets/meal_section.dart';
 import 'package:macrovanta/widgets/weekly_macro_chart.dart';
 
 void main() {
@@ -182,6 +183,51 @@ void main() {
       expect(water.amountMl, 500);
       expect(goals.toJson()['dailyCardioMinutes'], 30);
     });
+  });
+
+  testWidgets('food delete invokes its callback on the first tap',
+      (tester) async {
+    var deleteCount = 0;
+    const entry = FoodEntry(
+      id: 'food-1',
+      foodName: 'Greek yogurt',
+      servingSize: '1 cup',
+      mealType: MealType.breakfast,
+      calories: 150,
+      protein: 12,
+      carbs: 18,
+      fat: 4,
+      saturatedFat: 2,
+      transFat: 0,
+      sugar: 12,
+      fiber: 0,
+      sodium: 70,
+      potassium: 240,
+      calcium: 200,
+      iron: 0,
+      vitaminC: 0,
+      vitaminD: 2,
+      source: FoodSource.manual,
+      date: '2026-07-27',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MealSection(
+            meal: MealType.breakfast,
+            entries: const [entry],
+            totalCalories: entry.calories,
+            onEdit: (_) {},
+            onDelete: (_) => deleteCount += 1,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Confirm delete'), findsNothing);
+    await tester.tap(find.text('Delete'));
+    expect(deleteCount, 1);
   });
 
   testWidgets('progress component renders in both light and dark themes',

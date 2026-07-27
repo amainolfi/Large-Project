@@ -29,7 +29,6 @@ class _WellnessScreenState extends State<WellnessScreen> {
   ActivityType _activity = ActivityType.running;
   Intensity _intensity = Intensity.moderate;
   SleepQuality _sleepQuality = SleepQuality.good;
-  String _pendingDelete = '';
   bool _goalsPrefilled = false;
 
   @override
@@ -85,7 +84,6 @@ class _WellnessScreenState extends State<WellnessScreen> {
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
     if (selected == null) return;
-    setState(() => _pendingDelete = '');
     await provider.setDate(AppDate.toApi(selected));
   }
 
@@ -209,13 +207,6 @@ class _WellnessScreenState extends State<WellnessScreen> {
     String kind,
     String id,
   ) async {
-    final key = '$kind:$id';
-    if (_pendingDelete != key) {
-      setState(() => _pendingDelete = key);
-      _showMessage('Tap Confirm delete to remove this $kind entry.');
-      return;
-    }
-
     bool deleted;
     if (kind == 'water') {
       deleted = await provider.deleteWater(id);
@@ -224,7 +215,6 @@ class _WellnessScreenState extends State<WellnessScreen> {
     } else {
       deleted = await provider.deleteSleep(id);
     }
-    if (mounted) setState(() => _pendingDelete = '');
     _showMessage(
         deleted
             ? '${_capitalize(kind)} entry deleted.'
@@ -715,8 +705,6 @@ class _WellnessScreenState extends State<WellnessScreen> {
     required String title,
     required String subtitle,
   }) {
-    final key = '$kind:$id';
-    final confirming = _pendingDelete == key;
     return Column(
       children: [
         const Divider(),
@@ -739,9 +727,8 @@ class _WellnessScreenState extends State<WellnessScreen> {
               onPressed: provider.submitting
                   ? null
                   : () => _delete(provider, kind, id),
-              icon:
-                  Icon(confirming ? Icons.warning_amber : Icons.delete_outline),
-              label: Text(confirming ? 'Confirm delete' : 'Delete'),
+              icon: const Icon(Icons.delete_outline),
+              label: const Text('Delete'),
             ),
           ],
         ),

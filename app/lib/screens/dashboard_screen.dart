@@ -17,8 +17,6 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  String? _pendingDeleteId;
-
   @override
   void initState() {
     super.initState();
@@ -211,9 +209,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           meal: meal,
           entries: dashboard.foodsForMeal(meal),
           totalCalories: dashboard.caloriesForMeal(meal),
-          pendingDeleteId: _pendingDeleteId,
           onEdit: (entry) async {
-            setState(() => _pendingDeleteId = null);
             await Navigator.of(context).push(
               MaterialPageRoute(
                   builder: (_) => AddEditFoodScreen(existing: entry)),
@@ -222,7 +218,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
             await context.read<DashboardProvider>().load();
           },
           onDelete: (entry) => _deleteFood(dashboard, entry),
-          onCancelDelete: () => setState(() => _pendingDeleteId = null),
         ),
     ];
   }
@@ -231,23 +226,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     DashboardProvider dashboard,
     FoodEntry entry,
   ) async {
-    if (_pendingDeleteId != entry.id) {
-      setState(() => _pendingDeleteId = entry.id);
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          SnackBar(
-            content: Text(
-              'Review "${entry.foodName}", then tap Confirm delete.',
-            ),
-          ),
-        );
-      return;
-    }
-
     final deleted = await dashboard.deleteFood(entry.id);
     if (!mounted) return;
-    setState(() => _pendingDeleteId = null);
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(

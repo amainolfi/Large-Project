@@ -130,7 +130,6 @@ export default function WellnessPage() {
   const [busy, setBusy] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [pendingDelete, setPendingDelete] = useState("");
   const [waterAmount, setWaterAmount] = useState("500");
   const [cardioForm, setCardioForm] = useState({
     activityType: "running" as ActivityType,
@@ -157,7 +156,6 @@ export default function WellnessPage() {
 
     setError("");
     setMessage("");
-    setPendingDelete("");
 
     if (nextDate === date) return;
 
@@ -374,7 +372,6 @@ export default function WellnessPage() {
       if (kind === "cardio") await deleteCardioEntry(id);
       if (kind === "sleep") await deleteSleepEntry(id);
       await refreshAfterMutation();
-      setPendingDelete("");
       setMessage(`${titleCase(kind)} entry deleted.`);
     } catch (actionError) {
       setError(actionError instanceof Error ? actionError.message : "Could not delete entry.");
@@ -385,22 +382,15 @@ export default function WellnessPage() {
 
   function deleteButton(kind: DeleteKind, id: string) {
     const key = `${kind}:${id}`;
-    const isConfirming = pendingDelete === key;
 
     return (
       <button
         type="button"
         className="btn btn-danger btn-sm"
         disabled={Boolean(busy)}
-        onClick={() => {
-          if (isConfirming) {
-            void removeEntry(kind, id);
-          } else {
-            setPendingDelete(key);
-          }
-        }}
+        onClick={() => void removeEntry(kind, id)}
       >
-        {busy === key ? "Deleting…" : isConfirming ? "Confirm delete" : "Delete"}
+        {busy === key ? "Deleting…" : "Delete"}
       </button>
     );
   }
