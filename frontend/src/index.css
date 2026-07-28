@@ -597,14 +597,6 @@ summary:focus-visible,
   transition: width 0.3s ease;
 }
 
-.progress-complete {
-  background: var(--success);
-}
-
-.progress-warn {
-  background: var(--warn);
-}
-
 .progress-over {
   background: var(--danger);
 }
@@ -689,7 +681,7 @@ summary:focus-visible,
   flex-shrink: 0;
 }
 
-/* ---- Goals ---- */
+/* ---- Macros ---- */
 
 .goals-card {
   max-width: 100%;
@@ -882,7 +874,7 @@ summary:focus-visible,
 
 .macro-legend-dot.macro-protein,
 .macro-chart-bar.macro-protein {
-  background: var(--ai);
+  background: var(--brand);
 }
 
 .macro-legend-dot.macro-carbs,
@@ -892,7 +884,12 @@ summary:focus-visible,
 
 .macro-legend-dot.macro-fat,
 .macro-chart-bar.macro-fat {
-  background: var(--warn);
+  background: var(--brand);
+}
+
+.macro-legend-dot.macro-over,
+.macro-chart-bar.macro-over {
+  background: var(--danger);
 }
 
 .macro-goal-legend {

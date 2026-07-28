@@ -1,14 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
 import 'package:macrovanta/config/app_theme.dart';
 import 'package:macrovanta/models/daily_summary.dart';
 import 'package:macrovanta/models/food_entry.dart';
 import 'package:macrovanta/models/macro_goal.dart';
 import 'package:macrovanta/models/weekly_summary.dart';
 import 'package:macrovanta/models/wellness.dart';
+import 'package:macrovanta/providers/dashboard_provider.dart';
+import 'package:macrovanta/providers/food_entry_provider.dart';
+import 'package:macrovanta/screens/home_shell.dart';
+import 'package:macrovanta/services/api_service.dart';
+import 'package:macrovanta/widgets/food_entry_form.dart';
 import 'package:macrovanta/widgets/macro_progress_bar.dart';
 import 'package:macrovanta/widgets/meal_section.dart';
 import 'package:macrovanta/widgets/weekly_macro_chart.dart';
+
+class _RecordingFoodApi extends ApiService {
+  FoodEntryInput? createdInput;
+
+  @override
+  Future<FoodEntry> createFood(FoodEntryInput input) async {
+    createdInput = input;
+    return FoodEntry.fromJson({'id': 'created-food', ...input.toJson()});
+  }
+
+  @override
+  Future<DailySummary> getDailySummary(String date) async {
+    return DailySummary.fromJson({'date': date});
+  }
+
+  @override
+  Future<List<FoodEntry>> getFoods(String date) async => [];
+}
 
 void main() {
   group('food entry contract', () {
@@ -265,8 +289,7 @@ void main() {
     expect(theme.colorScheme.onSurfaceVariant, AppTheme.mutedText);
   });
 
-  testWidgets(
-      'completed targets use success green while active goals use indigo',
+  testWidgets('progress bars stay purple through target and turn red only over',
       (tester) async {
     Future<Color?> progressColor(double percent) async {
       await tester.pumpWidget(
@@ -289,7 +312,73 @@ void main() {
     }
 
     expect(await progressColor(50), AppTheme.primary);
-    expect(await progressColor(100), AppTheme.success);
+    expect(await progressColor(100), AppTheme.primary);
+    expect(await progressColor(101), AppTheme.dark.colorScheme.error);
+  });
+
+  test('mobile navigation keeps Add Food and uses the required tab order', () {
+    expect(
+      homeNavigationLabels,
+      const [
+        'Dashboard',
+        'Add Food',
+        'Macros',
+        'History',
+        'Wellness',
+        'Profile',
+      ],
+    );
+  });
+
+  testWidgets('manual food logging follows the latest selected dashboard date',
+      (tester) async {
+    final api = _RecordingFoodApi();
+    var selectedDate = '2026-07-27';
+    late StateSetter updateDate;
+
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(
+            create: (_) => DashboardProvider(api: api),
+          ),
+          ChangeNotifierProvider(
+            create: (_) => FoodEntryProvider(api: api),
+          ),
+        ],
+        child: MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: StatefulBuilder(
+                builder: (context, setState) {
+                  updateDate = setState;
+                  return FoodEntryForm(selectedDate: selectedDate);
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Food name'),
+      'Forgotten oatmeal',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Serving size'),
+      '1 bowl',
+    );
+
+    updateDate(() => selectedDate = '2026-07-20');
+    await tester.pump();
+
+    final addButton = find.widgetWithText(FilledButton, 'Add food');
+    await tester.ensureVisible(addButton);
+    await tester.tap(addButton);
+    await tester.pumpAndSettle();
+
+    expect(api.createdInput?.date, '2026-07-20');
   });
 
   testWidgets(
@@ -370,7 +459,7 @@ void main() {
         'Sun, Jul 19\n'
         'Protein: 100 g\n'
         'Calorie share: 23%\n'
-        'Goal: 150 g (66.7%)',
+        'Target: 150 g (66.7%)',
       ),
       findsOneWidget,
     );
@@ -379,7 +468,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.textContaining('Goal markers use your saved daily protein'),
+      find.textContaining('Target markers use your saved daily protein'),
       findsOneWidget,
     );
   });

@@ -100,13 +100,13 @@ function ProgressCard({
         aria-valuenow={hasGoal ? Math.round(width) : undefined}
       >
         <div
-          className={`progress-fill${hasGoal && percent >= 100 ? " progress-complete" : ""}`}
+          className={`progress-fill${hasGoal && percent > 100 ? " progress-over" : ""}`}
           style={{ width: `${width}%` }}
         />
       </div>
       <div className="macro-values">
         {value}
-        <span className="macro-goal"> / {hasGoal ? goalText : "no goal"}</span>
+        <span className="macro-goal"> / {hasGoal ? goalText : "no target"}</span>
       </div>
     </article>
   );
@@ -338,7 +338,7 @@ export default function WellnessPage() {
       dailyCardioMinutes < 0 ||
       dailyCardioMinutes > 1440
     ) {
-      setError("Wellness goals must be whole numbers within the displayed ranges.");
+      setError("Wellness targets must be whole numbers within the displayed ranges.");
       return;
     }
 
@@ -347,15 +347,15 @@ export default function WellnessPage() {
     setMessage("");
 
     try {
-      const response = await saveWellnessGoals({
+      await saveWellnessGoals({
         dailyWaterMl,
         nightlySleepMinutes,
         dailyCardioMinutes
       });
       await refreshAfterMutation();
-      setMessage(response.message);
+      setMessage("Wellness targets saved successfully.");
     } catch (actionError) {
-      setError(actionError instanceof Error ? actionError.message : "Could not save goals.");
+      setError(actionError instanceof Error ? actionError.message : "Could not save wellness targets.");
     } finally {
       setBusy("");
     }
@@ -638,7 +638,7 @@ export default function WellnessPage() {
               <div>
                 <h2>Log cardio</h2>
                 <p className="card-note">
-                  Duration drives today&apos;s goal; distance and calories are optional.
+                  Duration drives today&apos;s target; distance and calories are optional.
                 </p>
               </div>
               <span className="meal-calories">{countLabel(cardioEntries.length, "session")}</span>
@@ -781,7 +781,7 @@ export default function WellnessPage() {
           <section className="card wellness-goals-card">
             <div className="section-heading">
               <div>
-                <h2>Wellness goals</h2>
+                <h2>Wellness targets</h2>
                 <p className="card-note">Set zero to disable a progress target.</p>
               </div>
             </div>
@@ -846,7 +846,7 @@ export default function WellnessPage() {
                 These are general tracking targets, not medical recommendations.
               </p>
               <button type="submit" className="btn" disabled={Boolean(busy)}>
-                {busy === "goals" ? "Saving…" : "Save wellness goals"}
+                {busy === "goals" ? "Saving…" : "Save wellness targets"}
               </button>
             </form>
           </section>

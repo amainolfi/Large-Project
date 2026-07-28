@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../config/app_date.dart';
-import '../config/app_theme.dart';
 import '../models/wellness.dart';
 import '../providers/wellness_provider.dart';
 
@@ -183,7 +182,7 @@ class _WellnessScreenState extends State<WellnessScreen> {
         cardio == null ||
         cardio < 0 ||
         cardio > 1440) {
-      _showMessage('Enter wellness goals within the displayed ranges.',
+      _showMessage('Enter wellness targets within the displayed ranges.',
           error: true);
       return;
     }
@@ -197,8 +196,8 @@ class _WellnessScreenState extends State<WellnessScreen> {
     );
     _showMessage(
         saved
-            ? 'Wellness goals saved.'
-            : provider.error ?? 'Could not save goals.',
+            ? 'Wellness targets saved.'
+            : provider.error ?? 'Could not save wellness targets.',
         error: !saved);
   }
 
@@ -373,9 +372,8 @@ class _WellnessScreenState extends State<WellnessScreen> {
     required double percent,
   }) {
     final progress = (percent / 100).clamp(0.0, 1.0);
-    final color = percent >= 100
-        ? AppTheme.success
-        : Theme.of(context).colorScheme.primary;
+    final colors = Theme.of(context).colorScheme;
+    final color = percent > 100 ? colors.error : colors.primary;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -630,7 +628,7 @@ class _WellnessScreenState extends State<WellnessScreen> {
 
   Widget _goalsCard(WellnessProvider provider) => Card(
         child: ExpansionTile(
-          title: const Text('Wellness goals',
+          title: const Text('Wellness targets',
               style: TextStyle(fontWeight: FontWeight.w700)),
           subtitle: const Text('Daily water, sleep, and cardio targets'),
           childrenPadding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
@@ -651,7 +649,7 @@ class _WellnessScreenState extends State<WellnessScreen> {
               child: FilledButton(
                 onPressed:
                     provider.submitting ? null : () => _saveGoals(provider),
-                child: const Text('Save wellness goals'),
+                child: const Text('Save wellness targets'),
               ),
             ),
           ],

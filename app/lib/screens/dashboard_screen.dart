@@ -126,8 +126,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           value: summary.totals.sugar,
           goal: summary.goals.sugar,
           percent: summary.progress.sugar,
-          unit: 'g',
-          isLimit: true),
+          unit: 'g'),
     ];
     return [
       for (final bar in bars) ...[bar, const SizedBox(height: 10)]
@@ -141,22 +140,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
           value: summary.totals.saturatedFat,
           goal: summary.goals.saturatedFat,
           percent: summary.progress.saturatedFat,
-          unit: 'g',
-          isLimit: true),
+          unit: 'g'),
       MacroProgressBar(
           label: 'Trans fat',
           value: summary.totals.transFat,
           goal: summary.goals.transFat,
           percent: summary.progress.transFat,
-          unit: 'g',
-          isLimit: true),
+          unit: 'g'),
       MacroProgressBar(
           label: 'Sodium',
           value: summary.totals.sodium,
           goal: summary.goals.sodium,
           percent: summary.progress.sodium,
-          unit: 'mg',
-          isLimit: true),
+          unit: 'mg'),
       MacroProgressBar(
           label: 'Potassium',
           value: summary.totals.potassium,

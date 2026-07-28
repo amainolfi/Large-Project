@@ -105,7 +105,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title: const Text('Delete account?'),
         content: const Text(
             'This permanently removes your account, nutrition history, '
-            'hydration, sleep, cardio, and goals. This cannot be undone.'),
+            'hydration, sleep, cardio, and targets. This cannot be undone.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -236,7 +236,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 8),
               Text(
                 'This permanently removes your account, nutrition history, '
-                'hydration, sleep, cardio, and goals. This cannot be undone.',
+                'hydration, sleep, cardio, and targets. This cannot be undone.',
                 style: TextStyle(color: colors.onSurfaceVariant),
               ),
               const SizedBox(height: 12),

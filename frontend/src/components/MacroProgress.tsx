@@ -4,7 +4,6 @@ interface MacroProgressProps {
   goal: number;
   percent: number;
   unit: string;
-  kind: "target" | "limit";
 }
 
 function round(value: number): number {
@@ -16,20 +15,10 @@ export default function MacroProgress({
   total,
   goal,
   percent,
-  unit,
-  kind
+  unit
 }: MacroProgressProps) {
   const width = Math.max(0, Math.min(percent, 100));
-
-  let fillClass = "progress-fill";
-
-  if (kind === "limit" && percent >= 100) {
-    fillClass += " progress-over";
-  } else if (kind === "limit" && percent >= 85) {
-    fillClass += " progress-warn";
-  } else if (kind === "target" && percent >= 100) {
-    fillClass += " progress-complete";
-  }
+  const fillClass = `progress-fill${goal > 0 && percent > 100 ? " progress-over" : ""}`;
 
   return (
     <div className="card macro-card">
@@ -49,7 +38,7 @@ export default function MacroProgress({
       </div>
       <div className="macro-values">
         {round(total)} {unit}
-        <span className="macro-goal"> / {goal > 0 ? `${round(goal)} ${unit}` : "no goal"}</span>
+        <span className="macro-goal"> / {goal > 0 ? `${round(goal)} ${unit}` : "no target"}</span>
       </div>
     </div>
   );

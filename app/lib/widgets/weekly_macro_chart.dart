@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../config/app_date.dart';
-import '../config/app_theme.dart';
 import '../models/daily_summary.dart';
 import '../models/macro_goal.dart';
 import '../models/weekly_summary.dart';
@@ -35,12 +34,6 @@ extension on _MacroKind {
         _MacroKind.protein => goals.dailyProtein,
         _MacroKind.carbs => goals.dailyCarbs,
         _MacroKind.fat => goals.dailyFat,
-      };
-
-  Color color(BuildContext context) => switch (this) {
-        _MacroKind.protein => AppTheme.aiAccent,
-        _MacroKind.carbs => Theme.of(context).colorScheme.primary,
-        _MacroKind.fat => AppTheme.warning(Theme.of(context).brightness),
       };
 }
 
@@ -149,7 +142,7 @@ class _WeeklyMacroChartState extends State<WeeklyMacroChart> {
 
     if (goal != null) {
       final progress = goal > 0 ? ' (${_format(grams / goal * 100)}%)' : '';
-      lines.add('Goal: ${_format(goal)} g$progress');
+      lines.add('Target: ${_format(goal)} g$progress');
     }
     return lines.join('\n');
   }
@@ -244,14 +237,14 @@ class _WeeklyMacroChartState extends State<WeeklyMacroChart> {
               (macro) => Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: _AverageRow(
-                  color: macro.color(context),
+                  color: colors.primary,
                   label: macro.label,
                   average: trackedDays.isEmpty
                       ? 'No tracked days'
                       : '${_format(averages[macro]!)} g average',
                   goal: widget.goals == null
                       ? null
-                      : '${_format(macro.goalFrom(widget.goals!))} g goal',
+                      : '${_format(macro.goalFrom(widget.goals!))} g target',
                 ),
               ),
             ),
@@ -296,7 +289,7 @@ class _WeeklyMacroChartState extends State<WeeklyMacroChart> {
               _mode == _MacroChartMode.calorieShare
                   ? 'Calorie share uses 4 calories per gram of protein or '
                       'carbohydrates and 9 per gram of fat.'
-                  : 'Goal markers use your saved daily protein, carbohydrate, '
+                  : 'Target markers use your saved daily protein, carbohydrate, '
                       'and fat targets.',
               style: TextStyle(fontSize: 12, color: colors.onSurfaceVariant),
             ),
@@ -386,10 +379,11 @@ class _ChartLegend extends StatelessWidget {
       children: [
         ..._MacroKind.values.map(
           (macro) => _LegendItem(
-            color: macro.color(context),
+            color: colors.primary,
             label: macro.label,
           ),
         ),
+        _LegendItem(color: colors.error, label: 'Over target'),
         if (hasGoals)
           Row(
             mainAxisSize: MainAxisSize.min,
@@ -401,7 +395,7 @@ class _ChartLegend extends StatelessWidget {
               ),
               const SizedBox(width: 6),
               Text(
-                'Saved goal',
+                'Saved target',
                 style: TextStyle(
                   fontSize: 12,
                   color: colors.onSurfaceVariant,
@@ -593,26 +587,26 @@ class _DayBars extends StatelessWidget {
                 ? Row(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.end,
-                    children: _MacroKind.values
-                        .map(
-                          (macro) => Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 3),
-                            child: _MacroBar(
-                              color: macro.color(context),
-                              fraction: (rawValue(day, macro) / axisMaximum)
-                                  .clamp(0.0, 1.0),
-                              goalFraction: goalValue(macro) == null
-                                  ? null
-                                  : (goalValue(macro)! / axisMaximum)
-                                      .clamp(0.0, 1.0),
-                              tooltip: tooltipMessage(day, macro),
-                              semanticsLabel:
-                                  '${DateFormat('EEE, MMM d').format(AppDate.parse(day.date))}, '
-                                  '${macro.label}, ${mode == _MacroChartMode.calorieShare ? 'calorie share' : 'grams'}',
-                            ),
-                          ),
-                        )
-                        .toList(),
+                    children: _MacroKind.values.map((macro) {
+                      final value = rawValue(day, macro);
+                      final target = goalValue(macro);
+                      final overTarget =
+                          target != null && target > 0 && value > target;
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 3),
+                        child: _MacroBar(
+                          color: overTarget ? colors.error : colors.primary,
+                          fraction: (value / axisMaximum).clamp(0.0, 1.0),
+                          goalFraction: target == null
+                              ? null
+                              : (target / axisMaximum).clamp(0.0, 1.0),
+                          tooltip: tooltipMessage(day, macro),
+                          semanticsLabel:
+                              '${DateFormat('EEE, MMM d').format(AppDate.parse(day.date))}, '
+                              '${macro.label}, ${mode == _MacroChartMode.calorieShare ? 'calorie share' : 'grams'}',
+                        ),
+                      );
+                    }).toList(),
                   )
                 : Container(
                     width: 60,
