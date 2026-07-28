@@ -8,8 +8,6 @@ import '../models/daily_summary.dart';
 import '../models/macro_goal.dart';
 import '../models/weekly_summary.dart';
 
-enum _MacroChartMode { calorieShare, grams }
-
 enum _MacroKind { protein, carbs, fat }
 
 extension on _MacroKind {
@@ -17,11 +15,6 @@ extension on _MacroKind {
         _MacroKind.protein => 'Protein',
         _MacroKind.carbs => 'Carbohydrates',
         _MacroKind.fat => 'Fat',
-      };
-
-  double get caloriesPerGram => switch (this) {
-        _MacroKind.protein || _MacroKind.carbs => 4,
-        _MacroKind.fat => 9,
       };
 
   double valueFrom(NutrientSet totals) => switch (this) {
@@ -52,40 +45,8 @@ class WeeklyMacroChart extends StatefulWidget {
 }
 
 class _WeeklyMacroChartState extends State<WeeklyMacroChart> {
-  _MacroChartMode _mode = _MacroChartMode.calorieShare;
-
   bool _hasMacroData(DayTotals day) {
     return _MacroKind.values.any((macro) => macro.valueFrom(day.totals) > 0);
-  }
-
-  double _macroCalories(DayTotals day) {
-    return _MacroKind.values.fold(
-      0,
-      (total, macro) =>
-          total + macro.valueFrom(day.totals) * macro.caloriesPerGram,
-    );
-  }
-
-  double _calorieShare(DayTotals day, _MacroKind macro) {
-    final macroCalories = _macroCalories(day);
-    if (macroCalories <= 0) return 0;
-    return macro.valueFrom(day.totals) *
-        macro.caloriesPerGram *
-        100 /
-        macroCalories;
-  }
-
-  double? _goalCalorieShare(_MacroKind macro) {
-    final goals = widget.goals;
-    if (goals == null) return null;
-
-    final goalCalories = _MacroKind.values.fold(
-      0.0,
-      (total, kind) => total + kind.goalFrom(goals) * kind.caloriesPerGram,
-    );
-    if (goalCalories <= 0) return null;
-
-    return macro.goalFrom(goals) * macro.caloriesPerGram * 100 / goalCalories;
   }
 
   double _niceAxisMaximum(double value) {
@@ -132,12 +93,10 @@ class _WeeklyMacroChartState extends State<WeeklyMacroChart> {
 
   String _tooltipMessage(DayTotals day, _MacroKind macro) {
     final grams = macro.valueFrom(day.totals);
-    final share = _calorieShare(day, macro);
     final goal = widget.goals == null ? null : macro.goalFrom(widget.goals!);
     final lines = [
       DateFormat('EEE, MMM d').format(AppDate.parse(day.date)),
       '${macro.label}: ${_format(grams)} g',
-      'Calorie share: ${_format(share)}%',
     ];
 
     if (goal != null) {
@@ -161,8 +120,7 @@ class _WeeklyMacroChartState extends State<WeeklyMacroChart> {
                 ) /
                 trackedDays.length,
     };
-    final axisMaximum =
-        _mode == _MacroChartMode.calorieShare ? 100.0 : _gramsAxisMaximum();
+    final axisMaximum = _gramsAxisMaximum();
 
     return Card(
       child: Padding(
@@ -170,67 +128,22 @@ class _WeeklyMacroChartState extends State<WeeklyMacroChart> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final heading = Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Macros by day',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      'Compare protein, carbohydrates, and fat across tracked days.',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: colors.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                );
-                final toggle = SegmentedButton<_MacroChartMode>(
-                  showSelectedIcon: false,
-                  segments: const [
-                    ButtonSegment(
-                      value: _MacroChartMode.calorieShare,
-                      label: Text('Calorie share'),
-                    ),
-                    ButtonSegment(
-                      value: _MacroChartMode.grams,
-                      label: Text('Grams'),
-                    ),
-                  ],
-                  selected: {_mode},
-                  onSelectionChanged: (selection) {
-                    setState(() => _mode = selection.first);
-                  },
-                  style: const ButtonStyle(
-                    visualDensity: VisualDensity.compact,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Macros by day',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  'Compare protein, carbohydrates, and fat in grams across tracked days.',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: colors.onSurfaceVariant,
                   ),
-                );
-
-                if (constraints.maxWidth < 560) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      heading,
-                      const SizedBox(height: 14),
-                      SizedBox(width: double.infinity, child: toggle),
-                    ],
-                  );
-                }
-
-                return Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(child: heading),
-                    const SizedBox(width: 16),
-                    toggle,
-                  ],
-                );
-              },
+                ),
+              ],
             ),
             const SizedBox(height: 16),
             ..._MacroKind.values.map(
@@ -270,27 +183,18 @@ class _WeeklyMacroChartState extends State<WeeklyMacroChart> {
             const SizedBox(height: 12),
             _GroupedBars(
               days: widget.days,
-              mode: _mode,
               axisMaximum: axisMaximum,
               hasData: _hasMacroData,
-              rawValue: (day, macro) => _mode == _MacroChartMode.calorieShare
-                  ? _calorieShare(day, macro)
-                  : macro.valueFrom(day.totals),
-              goalValue: (macro) => _mode == _MacroChartMode.calorieShare
-                  ? _goalCalorieShare(macro)
-                  : widget.goals == null
-                      ? null
-                      : macro.goalFrom(widget.goals!),
+              rawValue: (day, macro) => macro.valueFrom(day.totals),
+              goalValue: (macro) =>
+                  widget.goals == null ? null : macro.goalFrom(widget.goals!),
               tooltipMessage: _tooltipMessage,
               format: _format,
             ),
             const SizedBox(height: 10),
             Text(
-              _mode == _MacroChartMode.calorieShare
-                  ? 'Calorie share uses 4 calories per gram of protein or '
-                      'carbohydrates and 9 per gram of fat.'
-                  : 'Target markers use your saved daily protein, carbohydrate, '
-                      'and fat targets.',
+              'Target markers use your saved daily protein, carbohydrate, '
+              'and fat targets.',
               style: TextStyle(fontSize: 12, color: colors.onSurfaceVariant),
             ),
             const SizedBox(height: 4),
@@ -444,7 +348,6 @@ class _GroupedBars extends StatelessWidget {
   static const _minimumPlotWidth = 630.0;
 
   final List<DayTotals> days;
-  final _MacroChartMode mode;
   final double axisMaximum;
   final bool Function(DayTotals day) hasData;
   final double Function(DayTotals day, _MacroKind macro) rawValue;
@@ -454,7 +357,6 @@ class _GroupedBars extends StatelessWidget {
 
   const _GroupedBars({
     required this.days,
-    required this.mode,
     required this.axisMaximum,
     required this.hasData,
     required this.rawValue,
@@ -495,7 +397,7 @@ class _GroupedBars extends StatelessWidget {
                     children: scaleValues
                         .map(
                           (value) => Text(
-                            '${format(value, 0)}${mode == _MacroChartMode.calorieShare ? '%' : ' g'}',
+                            '${format(value, 0)} g',
                             style: TextStyle(
                               fontSize: 10,
                               color: colors.onSurfaceVariant,
@@ -535,7 +437,6 @@ class _GroupedBars extends StatelessWidget {
                             child: _DayBars(
                               day: day,
                               hasData: hasData(day),
-                              mode: mode,
                               axisMaximum: axisMaximum,
                               rawValue: rawValue,
                               goalValue: goalValue,
@@ -558,7 +459,6 @@ class _GroupedBars extends StatelessWidget {
 class _DayBars extends StatelessWidget {
   final DayTotals day;
   final bool hasData;
-  final _MacroChartMode mode;
   final double axisMaximum;
   final double Function(DayTotals day, _MacroKind macro) rawValue;
   final double? Function(_MacroKind macro) goalValue;
@@ -567,7 +467,6 @@ class _DayBars extends StatelessWidget {
   const _DayBars({
     required this.day,
     required this.hasData,
-    required this.mode,
     required this.axisMaximum,
     required this.rawValue,
     required this.goalValue,
@@ -603,7 +502,7 @@ class _DayBars extends StatelessWidget {
                           tooltip: tooltipMessage(day, macro),
                           semanticsLabel:
                               '${DateFormat('EEE, MMM d').format(AppDate.parse(day.date))}, '
-                              '${macro.label}, ${mode == _MacroChartMode.calorieShare ? 'calorie share' : 'grams'}',
+                              '${macro.label}, grams',
                         ),
                       );
                     }).toList(),

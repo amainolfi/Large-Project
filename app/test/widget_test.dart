@@ -453,19 +453,16 @@ void main() {
     expect(find.textContaining('230 g average'), findsOneWidget);
     expect(find.textContaining('70 g average'), findsOneWidget);
     expect(find.text('No data'), findsOneWidget);
-    expect(find.text('Calorie share'), findsOneWidget);
+    expect(find.text('Calorie share'), findsNothing);
+    expect(find.text('Grams'), findsNothing);
     expect(
       find.byTooltip(
         'Sun, Jul 19\n'
         'Protein: 100 g\n'
-        'Calorie share: 23%\n'
         'Target: 150 g (66.7%)',
       ),
       findsOneWidget,
     );
-
-    await tester.tap(find.text('Grams'));
-    await tester.pumpAndSettle();
 
     expect(
       find.textContaining('Target markers use your saved daily protein'),

@@ -3,7 +3,6 @@ import { formatShortDate } from "../lib/dates";
 import type { MacroGoal, WeeklySummary } from "../types";
 
 type MacroKey = "protein" | "carbs" | "fat";
-type ChartMode = "share" | "grams";
 
 interface WeeklyMacroChartProps {
   days: WeeklySummary["days"];
@@ -16,7 +15,6 @@ interface TooltipState {
   dayLabel: string;
   macroLabel: string;
   grams: number;
-  share: number;
   goal: number | null;
 }
 
@@ -24,28 +22,24 @@ const macroDefinitions: {
   key: MacroKey;
   label: string;
   className: string;
-  caloriesPerGram: number;
   goalKey: "dailyProtein" | "dailyCarbs" | "dailyFat";
 }[] = [
   {
     key: "protein",
     label: "Protein",
     className: "macro-protein",
-    caloriesPerGram: 4,
     goalKey: "dailyProtein"
   },
   {
     key: "carbs",
     label: "Carbohydrates",
     className: "macro-carbs",
-    caloriesPerGram: 4,
     goalKey: "dailyCarbs"
   },
   {
     key: "fat",
     label: "Fat",
     className: "macro-fat",
-    caloriesPerGram: 9,
     goalKey: "dailyFat"
   }
 ];
@@ -59,50 +53,6 @@ function formatNumber(value: number, maximumFractionDigits = 1): string {
 
 function hasMacroData(day: WeeklySummary["days"][number]): boolean {
   return macroDefinitions.some(({ key }) => day.totals[key] > 0);
-}
-
-function macroCalorieTotal(day: WeeklySummary["days"][number]): number {
-  return macroDefinitions.reduce(
-    (total, macro) => total + day.totals[macro.key] * macro.caloriesPerGram,
-    0
-  );
-}
-
-function calorieShare(
-  day: WeeklySummary["days"][number],
-  macro: (typeof macroDefinitions)[number]
-): number {
-  const calorieTotal = macroCalorieTotal(day);
-
-  if (calorieTotal <= 0) {
-    return 0;
-  }
-
-  return (day.totals[macro.key] * macro.caloriesPerGram * 100) / calorieTotal;
-}
-
-function goalCalorieShare(
-  goals: MacroGoal | null,
-  macro: (typeof macroDefinitions)[number]
-): number | null {
-  if (!goals) {
-    return null;
-  }
-
-  const goalCalorieTotal = macroDefinitions.reduce(
-    (total, definition) =>
-      total + goals[definition.goalKey] * definition.caloriesPerGram,
-    0
-  );
-
-  if (goalCalorieTotal <= 0) {
-    return null;
-  }
-
-  return (
-    (goals[macro.goalKey] * macro.caloriesPerGram * 100) /
-    goalCalorieTotal
-  );
 }
 
 function niceAxisMaximum(value: number): number {
@@ -119,7 +69,6 @@ function niceAxisMaximum(value: number): number {
 }
 
 export default function WeeklyMacroChart({ days, goals }: WeeklyMacroChartProps) {
-  const [mode, setMode] = useState<ChartMode>("share");
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
 
   const trackedDays = useMemo(() => days.filter(hasMacroData), [days]);
@@ -148,7 +97,7 @@ export default function WeeklyMacroChart({ days, goals }: WeeklyMacroChartProps)
     return niceAxisMaximum(Math.max(...dailyValues, ...goalValues, 0));
   }, [days, goals]);
 
-  const axisMaximum = mode === "share" ? 100 : gramsMaximum;
+  const axisMaximum = gramsMaximum;
   const scaleValues = Array.from(
     { length: 5 },
     (_value, index) => (axisMaximum / 4) * index
@@ -169,7 +118,6 @@ export default function WeeklyMacroChart({ days, goals }: WeeklyMacroChartProps)
       dayLabel: formatShortDate(day.date),
       macroLabel: macro.label,
       grams: day.totals[macro.key],
-      share: calorieShare(day, macro),
       goal
     });
   }
@@ -180,26 +128,8 @@ export default function WeeklyMacroChart({ days, goals }: WeeklyMacroChartProps)
         <div>
           <h2 id="macro-chart-heading">Macros by day</h2>
           <p className="card-note">
-            Compare protein, carbohydrates, and fat across tracked days.
+            Compare protein, carbohydrates, and fat in grams across tracked days.
           </p>
-        </div>
-        <div className="macro-mode-toggle" role="group" aria-label="Macro chart display mode">
-          <button
-            type="button"
-            className={mode === "share" ? "active" : ""}
-            aria-pressed={mode === "share"}
-            onClick={() => setMode("share")}
-          >
-            Calorie share
-          </button>
-          <button
-            type="button"
-            className={mode === "grams" ? "active" : ""}
-            aria-pressed={mode === "grams"}
-            onClick={() => setMode("grams")}
-          >
-            Grams
-          </button>
         </div>
       </div>
 
@@ -250,15 +180,12 @@ export default function WeeklyMacroChart({ days, goals }: WeeklyMacroChartProps)
         <div
           className="weekly-macro-chart"
           role="group"
-          aria-label={`Seven-day grouped bar chart showing macros by ${
-            mode === "share" ? "calorie share" : "grams"
-          }`}
+          aria-label="Seven-day grouped bar chart showing macros in grams"
         >
           <div className="macro-axis" aria-hidden="true">
             {scaleValues.map((value) => (
               <span key={value}>
-                {formatNumber(value, 0)}
-                {mode === "share" ? "%" : " g"}
+                {formatNumber(value, 0)} g
               </span>
             ))}
           </div>
@@ -279,25 +206,16 @@ export default function WeeklyMacroChart({ days, goals }: WeeklyMacroChartProps)
                     <div className="macro-bars">
                       {tracked ? (
                         macroDefinitions.map((macro) => {
-                          const rawValue =
-                            mode === "share"
-                              ? calorieShare(day, macro)
-                              : day.totals[macro.key];
+                          const rawValue = day.totals[macro.key];
                           const height = Math.min((rawValue / axisMaximum) * 100, 100);
-                          const goalValue =
-                            mode === "share"
-                              ? goalCalorieShare(goals, macro)
-                              : goals?.[macro.goalKey] ?? null;
+                          const goalValue = goals?.[macro.goalKey] ?? null;
                           const goalPosition =
                             goalValue === null
                               ? null
                               : Math.min((goalValue / axisMaximum) * 100, 100);
                           const overTarget =
                             goalValue !== null && goalValue > 0 && rawValue > goalValue;
-                          const accessibleValue =
-                            mode === "share"
-                              ? `${formatNumber(rawValue)} percent of macro calories`
-                              : `${formatNumber(rawValue)} grams`;
+                          const accessibleValue = `${formatNumber(rawValue)} grams`;
 
                           return (
                             <div
@@ -345,9 +263,7 @@ export default function WeeklyMacroChart({ days, goals }: WeeklyMacroChartProps)
       </div>
 
       <p className="macro-chart-note">
-        {mode === "share"
-          ? "Calorie share uses 4 calories per gram of protein or carbohydrates and 9 per gram of fat."
-          : "Target markers use your saved daily protein, carbohydrate, and fat targets."}
+        Target markers use your saved daily protein, carbohydrate, and fat targets.
       </p>
 
       {tooltip && (
@@ -358,7 +274,6 @@ export default function WeeklyMacroChart({ days, goals }: WeeklyMacroChartProps)
         >
           <strong>{tooltip.dayLabel}</strong>
           <span>{tooltip.macroLabel}: {formatNumber(tooltip.grams)} g</span>
-          <span>Calorie share: {formatNumber(tooltip.share)}%</span>
           {tooltip.goal !== null && (
             <span>
               Target: {formatNumber(tooltip.goal)} g
