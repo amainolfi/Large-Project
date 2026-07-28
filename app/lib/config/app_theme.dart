@@ -13,8 +13,8 @@ class AppTheme {
   static const primaryText = Color(0xFFF8FAFC);
   static const mutedText = Color(0xFF94A3B8);
   static const success = Color(0xFF4ADE80);
-  static const _warningDark = Color(0xFFFBBF24);
-  static const _warningLight = Color(0xFFB45309);
+  // static const _warningDark = Color(0xFF6366F1);
+  // static const _warningLight = Color(0xFF6366F1);
 
   static const _lightBackground = Color(0xFFF7F8FC);
   static const _lightNavbar = Color(0xFFFFFFFF);
@@ -24,8 +24,9 @@ class AppTheme {
   static const _lightMuted = Color(0xFF64748B);
   static const _darkPrimaryContainer = Color(0xFF252956);
   static const _lightPrimaryContainer = Color(0xFFE8E9FF);
-  static const _errorDark = Color(0xFFF87171);
-  static const _errorLight = Color(0xFFB42318);
+  // static const _errorDark = Color(0xFFF87171);
+  // static const _errorLight = Color(0xFFB42318);
+  static const errorF = Color(0xFFB42318);
 
   static ThemeData get light => _build(Brightness.light);
   static ThemeData get dark => _build(Brightness.dark);
@@ -40,7 +41,7 @@ class AppTheme {
           : const Color(0xFF0E7490);
 
   static Color warning(Brightness brightness) =>
-      brightness == Brightness.dark ? _warningDark : _warningLight;
+      brightness == Brightness.dark ? primary : primary;
 
   static ThemeData _build(Brightness brightness) {
     final darkMode = brightness == Brightness.dark;
@@ -59,7 +60,7 @@ class AppTheme {
       onSecondary: Colors.white,
       tertiary: aiAccent,
       onTertiary: const Color(0xFF083344),
-      error: darkMode ? _errorDark : _errorLight,
+      error: darkMode ? errorF : errorF,
       onError: Colors.white,
       surface: darkMode ? card : _lightCard,
       onSurface: darkMode ? primaryText : _lightText,

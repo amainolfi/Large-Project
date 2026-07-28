@@ -30,7 +30,7 @@ class MacroProgressBar extends StatelessWidget {
     final fillFraction = goal > 0 ? (percent / 100).clamp(0.0, 1.0) : 0.0;
     final fillColor = switch ((isLimit, goal > 0 && percent >= 100)) {
       (true, true) => colors.error,
-      (false, true) => AppTheme.success,
+      (false, true) => AppTheme.errorF,
       _ => colors.primary,
     };
 

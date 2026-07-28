@@ -24,7 +24,7 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
   late final TextEditingController _serving;
   late final Map<String, TextEditingController> _nutrition;
   late MealType _meal;
-  late String _dateApi;
+  String? _editDate;
 
   @override
   void initState() {
@@ -49,7 +49,7 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
       'vitaminD': TextEditingController(text: _number(entry?.vitaminD)),
     };
     _meal = entry?.mealType ?? MealType.breakfast;
-    _dateApi = entry?.date ?? context.read<DashboardProvider>().date;
+    _editDate = entry?.date;
   }
 
   String _number(double? value) {
@@ -95,7 +95,7 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
       iron: _value('iron'),
       vitaminC: _value('vitaminC'),
       vitaminD: _value('vitaminD'),
-      date: _dateApi,
+      date: _editDate ?? context.read<DashboardProvider>().date,
     );
 
     final foods = context.read<FoodEntryProvider>();

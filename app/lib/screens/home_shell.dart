@@ -23,8 +23,8 @@ class _HomeShellState extends State<HomeShell> {
   late final List<Widget> _tabs = const [
     DashboardScreen(),
     AddFoodTab(),
-    WellnessScreen(),
     HistoryScreen(),
+    WellnessScreen(),
     GoalsScreen(),
     ProfileScreen(),
   ];
@@ -47,17 +47,17 @@ class _HomeShellState extends State<HomeShell> {
               selectedIcon: Icon(Icons.add_circle),
               label: 'Add Food'),
           NavigationDestination(
-              icon: Icon(Icons.favorite_border),
-              selectedIcon: Icon(Icons.favorite),
-              label: 'Wellness'),
-          NavigationDestination(
               icon: Icon(Icons.bar_chart_outlined),
               selectedIcon: Icon(Icons.bar_chart),
               label: 'History'),
           NavigationDestination(
+              icon: Icon(Icons.favorite_border),
+              selectedIcon: Icon(Icons.favorite),
+              label: 'Wellness'),
+          NavigationDestination(
               icon: Icon(Icons.flag_outlined),
               selectedIcon: Icon(Icons.flag),
-              label: 'Goals'),
+              label: 'Macros'),
           NavigationDestination(
               icon: Icon(Icons.person_outline),
               selectedIcon: Icon(Icons.person),
