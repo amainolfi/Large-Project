@@ -120,7 +120,7 @@ export default function HistoryPage() {
               })}
             </div>
             {calorieGoal > 0 && (
-              <p className="card-note">Daily goal: {calorieGoal} kcal. Red bars are over goal.</p>
+              <p className="card-note">Daily target: {calorieGoal} kcal. Red bars are over target.</p>
             )}
           </section>
 

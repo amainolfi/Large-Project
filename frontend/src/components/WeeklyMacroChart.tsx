@@ -216,7 +216,7 @@ export default function WeeklyMacroChart({ days, goals }: WeeklyMacroChartProps)
                   {trackedDays.length > 0
                     ? `${formatNumber(averages[macro.key])} g average`
                     : "No tracked days"}
-                  {goal !== null && ` · ${formatNumber(goal)} g goal`}
+                  {goal !== null && ` · ${formatNumber(goal)} g target`}
                 </span>
               </span>
             </div>
@@ -234,10 +234,14 @@ export default function WeeklyMacroChart({ days, goals }: WeeklyMacroChartProps)
             {macro.label}
           </span>
         ))}
+        <span>
+          <span className="macro-legend-dot macro-over" aria-hidden="true" />
+          Over target
+        </span>
         {goals && (
           <span>
             <span className="macro-goal-legend" aria-hidden="true" />
-            Saved goal
+            Saved target
           </span>
         )}
       </div>
@@ -288,6 +292,8 @@ export default function WeeklyMacroChart({ days, goals }: WeeklyMacroChartProps)
                             goalValue === null
                               ? null
                               : Math.min((goalValue / axisMaximum) * 100, 100);
+                          const overTarget =
+                            goalValue !== null && goalValue > 0 && rawValue > goalValue;
                           const accessibleValue =
                             mode === "share"
                               ? `${formatNumber(rawValue)} percent of macro calories`
@@ -314,7 +320,9 @@ export default function WeeklyMacroChart({ days, goals }: WeeklyMacroChartProps)
                                 />
                               )}
                               <span
-                                className={`macro-chart-bar ${macro.className}`}
+                                className={`macro-chart-bar ${macro.className}${
+                                  overTarget ? " macro-over" : ""
+                                }`}
                                 style={{ height: `${Math.max(height, 1.5)}%` }}
                                 aria-hidden="true"
                               />
@@ -339,7 +347,7 @@ export default function WeeklyMacroChart({ days, goals }: WeeklyMacroChartProps)
       <p className="macro-chart-note">
         {mode === "share"
           ? "Calorie share uses 4 calories per gram of protein or carbohydrates and 9 per gram of fat."
-          : "Goal markers use your saved daily protein, carbohydrate, and fat targets."}
+          : "Target markers use your saved daily protein, carbohydrate, and fat targets."}
       </p>
 
       {tooltip && (
@@ -353,7 +361,7 @@ export default function WeeklyMacroChart({ days, goals }: WeeklyMacroChartProps)
           <span>Calorie share: {formatNumber(tooltip.share)}%</span>
           {tooltip.goal !== null && (
             <span>
-              Goal: {formatNumber(tooltip.goal)} g
+              Target: {formatNumber(tooltip.goal)} g
               {tooltip.goal > 0 &&
                 ` (${formatNumber((tooltip.grams / tooltip.goal) * 100)}%)`}
             </span>

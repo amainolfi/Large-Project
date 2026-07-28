@@ -4,7 +4,7 @@ import ThemeToggle from "./components/ThemeToggle";
 import { AuthProvider, RequireAuth } from "./lib/auth";
 import DashboardPage from "./pages/DashboardPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
-import GoalsPage from "./pages/GoalsPage";
+import MacrosPage from "./pages/MacrosPage";
 import HistoryPage from "./pages/HistoryPage";
 import LoginPage from "./pages/LoginPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -42,13 +42,14 @@ function App() {
             }
           />
           <Route
-            path="/goals"
+            path="/macros"
             element={
               <RequireAuth>
-                <GoalsPage />
+                <MacrosPage />
               </RequireAuth>
             }
           />
+          <Route path="/goals" element={<Navigate to="/macros" replace />} />
           <Route
             path="/wellness"
             element={

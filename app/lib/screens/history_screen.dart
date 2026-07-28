@@ -200,8 +200,8 @@ class _CaloriesChart extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               goal != null
-                  ? 'Daily goal: ${goal!.toInt()} kcal. Red bars are over goal.'
-                  : 'Set a calorie goal to see over-goal days.',
+                  ? 'Daily target: ${goal!.toInt()} kcal. Red bars are over target.'
+                  : 'Set a calorie target to see over-target days.',
               style: TextStyle(fontSize: 13, color: colors.onSurfaceVariant),
             ),
           ],

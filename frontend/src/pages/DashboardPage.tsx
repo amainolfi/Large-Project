@@ -191,26 +191,26 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="macro-grid">
-              <MacroProgress label="Calories" total={totals.calories} goal={goals.calories} percent={progress.calories} unit="kcal" kind="target" />
-              <MacroProgress label="Protein" total={totals.protein} goal={goals.protein} percent={progress.protein} unit="g" kind="target" />
-              <MacroProgress label="Carbohydrates" total={totals.carbs} goal={goals.carbs} percent={progress.carbs} unit="g" kind="target" />
-              <MacroProgress label="Total fat" total={totals.fat} goal={goals.fat} percent={progress.fat} unit="g" kind="target" />
-              <MacroProgress label="Fiber" total={totals.fiber} goal={goals.fiber} percent={progress.fiber} unit="g" kind="target" />
-              <MacroProgress label="Sugar" total={totals.sugar} goal={goals.sugar} percent={progress.sugar} unit="g" kind="limit" />
+              <MacroProgress label="Calories" total={totals.calories} goal={goals.calories} percent={progress.calories} unit="kcal" />
+              <MacroProgress label="Protein" total={totals.protein} goal={goals.protein} percent={progress.protein} unit="g" />
+              <MacroProgress label="Carbohydrates" total={totals.carbs} goal={goals.carbs} percent={progress.carbs} unit="g" />
+              <MacroProgress label="Total fat" total={totals.fat} goal={goals.fat} percent={progress.fat} unit="g" />
+              <MacroProgress label="Fiber" total={totals.fiber} goal={goals.fiber} percent={progress.fiber} unit="g" />
+              <MacroProgress label="Sugar" total={totals.sugar} goal={goals.sugar} percent={progress.sugar} unit="g" />
             </div>
           </section>
 
           <details className="card nutrient-overview">
             <summary>Micronutrients and daily limits</summary>
             <div className="macro-grid nutrient-grid">
-              <MacroProgress label="Saturated fat" total={totals.saturatedFat} goal={goals.saturatedFat} percent={progress.saturatedFat} unit="g" kind="limit" />
-              <MacroProgress label="Trans fat" total={totals.transFat} goal={goals.transFat} percent={progress.transFat} unit="g" kind="limit" />
-              <MacroProgress label="Sodium" total={totals.sodium} goal={goals.sodium} percent={progress.sodium} unit="mg" kind="limit" />
-              <MacroProgress label="Potassium" total={totals.potassium} goal={goals.potassium} percent={progress.potassium} unit="mg" kind="target" />
-              <MacroProgress label="Calcium" total={totals.calcium} goal={goals.calcium} percent={progress.calcium} unit="mg" kind="target" />
-              <MacroProgress label="Iron" total={totals.iron} goal={goals.iron} percent={progress.iron} unit="mg" kind="target" />
-              <MacroProgress label="Vitamin C" total={totals.vitaminC} goal={goals.vitaminC} percent={progress.vitaminC} unit="mg" kind="target" />
-              <MacroProgress label="Vitamin D" total={totals.vitaminD} goal={goals.vitaminD} percent={progress.vitaminD} unit="mcg" kind="target" />
+              <MacroProgress label="Saturated fat" total={totals.saturatedFat} goal={goals.saturatedFat} percent={progress.saturatedFat} unit="g" />
+              <MacroProgress label="Trans fat" total={totals.transFat} goal={goals.transFat} percent={progress.transFat} unit="g" />
+              <MacroProgress label="Sodium" total={totals.sodium} goal={goals.sodium} percent={progress.sodium} unit="mg" />
+              <MacroProgress label="Potassium" total={totals.potassium} goal={goals.potassium} percent={progress.potassium} unit="mg" />
+              <MacroProgress label="Calcium" total={totals.calcium} goal={goals.calcium} percent={progress.calcium} unit="mg" />
+              <MacroProgress label="Iron" total={totals.iron} goal={goals.iron} percent={progress.iron} unit="mg" />
+              <MacroProgress label="Vitamin C" total={totals.vitaminC} goal={goals.vitaminC} percent={progress.vitaminC} unit="mg" />
+              <MacroProgress label="Vitamin D" total={totals.vitaminD} goal={goals.vitaminD} percent={progress.vitaminD} unit="mcg" />
             </div>
           </details>
         </>
@@ -296,7 +296,7 @@ export default function DashboardPage() {
             <p className="card-note">
               {editingEntry
                 ? "Correct any serving or nutrition estimate before saving."
-                : "Enter label values or your best-known serving details."}
+                : `Entries are saved to ${formatDisplayDate(date)}.`}
             </p>
             <FoodForm
               key={editingEntry?.id || "new-food"}
@@ -309,7 +309,7 @@ export default function DashboardPage() {
 
           <div className="card">
             <h2>Search your foods</h2>
-            <p className="card-note">Search past entries on the server and re-log one today.</p>
+            <p className="card-note">Search past entries and re-log one for the selected day.</p>
             <div className="field">
               <label className="sr-only" htmlFor="food-history-search">Search your previous foods</label>
               <input
@@ -341,7 +341,7 @@ export default function DashboardPage() {
 
           <div className="card">
             <h2>Recent foods</h2>
-            <p className="card-note">One tap to log something you have eaten before.</p>
+            <p className="card-note">One tap logs something you have eaten before to the selected day.</p>
             {recent.length === 0 ? (
               <p className="empty-note">Foods you log will show up here.</p>
             ) : (

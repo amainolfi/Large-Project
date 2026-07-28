@@ -8,9 +8,15 @@ import '../providers/food_entry_provider.dart';
 
 class FoodEntryForm extends StatefulWidget {
   final FoodEntry? existing;
+  final String? selectedDate;
   final VoidCallback? onSaved;
 
-  const FoodEntryForm({super.key, this.existing, this.onSaved});
+  const FoodEntryForm({
+    super.key,
+    this.existing,
+    this.selectedDate,
+    this.onSaved,
+  }) : assert(existing != null || selectedDate != null);
 
   bool get isEdit => existing != null;
 
@@ -24,7 +30,6 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
   late final TextEditingController _serving;
   late final Map<String, TextEditingController> _nutrition;
   late MealType _meal;
-  String? _editDate;
 
   @override
   void initState() {
@@ -49,7 +54,6 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
       'vitaminD': TextEditingController(text: _number(entry?.vitaminD)),
     };
     _meal = entry?.mealType ?? MealType.breakfast;
-    _editDate = entry?.date;
   }
 
   String _number(double? value) {
@@ -95,7 +99,7 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
       iron: _value('iron'),
       vitaminC: _value('vitaminC'),
       vitaminD: _value('vitaminD'),
-      date: _editDate ?? context.read<DashboardProvider>().date,
+      date: widget.existing?.date ?? widget.selectedDate!,
     );
 
     final foods = context.read<FoodEntryProvider>();

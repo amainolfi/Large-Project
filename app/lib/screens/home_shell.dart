@@ -2,13 +2,22 @@ import 'package:flutter/material.dart';
 
 import 'add_food_tab.dart';
 import 'dashboard_screen.dart';
-import 'goals_screen.dart';
+import 'macros_screen.dart';
 import 'history_screen.dart';
 import 'profile_screen.dart';
 import 'wellness_screen.dart';
 
+const homeNavigationLabels = [
+  'Dashboard',
+  'Add Food',
+  'Macros',
+  'History',
+  'Wellness',
+  'Profile',
+];
+
 /// The app shell after login: a bottom tab bar matching the mockups
-/// (Dashboard / Add Food / Wellness / History / Goals / Profile). All tabs are
+/// (Dashboard / Add Food / Macros / History / Wellness / Profile). All tabs are
 /// real screens.
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
@@ -23,9 +32,9 @@ class _HomeShellState extends State<HomeShell> {
   late final List<Widget> _tabs = const [
     DashboardScreen(),
     AddFoodTab(),
+    MacrosScreen(),
     HistoryScreen(),
     WellnessScreen(),
-    GoalsScreen(),
     ProfileScreen(),
   ];
 
@@ -37,31 +46,31 @@ class _HomeShellState extends State<HomeShell> {
         labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
         selectedIndex: _index,
         onDestinationSelected: (i) => setState(() => _index = i),
-        destinations: const [
+        destinations: [
           NavigationDestination(
-              icon: Icon(Icons.home_outlined),
-              selectedIcon: Icon(Icons.home),
-              label: 'Dashboard'),
+              icon: const Icon(Icons.home_outlined),
+              selectedIcon: const Icon(Icons.home),
+              label: homeNavigationLabels[0]),
           NavigationDestination(
-              icon: Icon(Icons.add_circle_outline),
-              selectedIcon: Icon(Icons.add_circle),
-              label: 'Add Food'),
+              icon: const Icon(Icons.add_circle_outline),
+              selectedIcon: const Icon(Icons.add_circle),
+              label: homeNavigationLabels[1]),
           NavigationDestination(
-              icon: Icon(Icons.bar_chart_outlined),
-              selectedIcon: Icon(Icons.bar_chart),
-              label: 'History'),
+              icon: const Icon(Icons.tune_outlined),
+              selectedIcon: const Icon(Icons.tune),
+              label: homeNavigationLabels[2]),
           NavigationDestination(
-              icon: Icon(Icons.favorite_border),
-              selectedIcon: Icon(Icons.favorite),
-              label: 'Wellness'),
+              icon: const Icon(Icons.bar_chart_outlined),
+              selectedIcon: const Icon(Icons.bar_chart),
+              label: homeNavigationLabels[3]),
           NavigationDestination(
-              icon: Icon(Icons.flag_outlined),
-              selectedIcon: Icon(Icons.flag),
-              label: 'Macros'),
+              icon: const Icon(Icons.favorite_border),
+              selectedIcon: const Icon(Icons.favorite),
+              label: homeNavigationLabels[4]),
           NavigationDestination(
-              icon: Icon(Icons.person_outline),
-              selectedIcon: Icon(Icons.person),
-              label: 'Profile'),
+              icon: const Icon(Icons.person_outline),
+              selectedIcon: const Icon(Icons.person),
+              label: homeNavigationLabels[5]),
         ],
       ),
     );

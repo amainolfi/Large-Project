@@ -6,11 +6,11 @@ import '../models/macro_goal.dart';
 import '../providers/dashboard_provider.dart';
 import '../providers/goals_provider.dart';
 
-class GoalsScreen extends StatefulWidget {
-  const GoalsScreen({super.key});
+class MacrosScreen extends StatefulWidget {
+  const MacrosScreen({super.key});
 
   @override
-  State<GoalsScreen> createState() => _GoalsScreenState();
+  State<MacrosScreen> createState() => _MacrosScreenState();
 }
 
 class _GoalField {
@@ -21,7 +21,7 @@ class _GoalField {
   const _GoalField(this.keyName, this.label, this.helper);
 }
 
-class _GoalsScreenState extends State<GoalsScreen> {
+class _MacrosScreenState extends State<MacrosScreen> {
   final _formKey = GlobalKey<FormState>();
 
   final _controllers = <String, TextEditingController>{
@@ -135,11 +135,11 @@ class _GoalsScreenState extends State<GoalsScreen> {
       await context.read<DashboardProvider>().load();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Goals saved')),
+        const SnackBar(content: Text('Macros saved')),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(provider.error ?? 'Could not save goals')),
+        SnackBar(content: Text(provider.error ?? 'Could not save macros')),
       );
     }
   }
@@ -161,7 +161,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                       ScrollViewKeyboardDismissBehavior.onDrag,
                   padding: const EdgeInsets.all(16),
                   children: [
-                    const Text('Daily goals',
+                    const Text('Macros',
                         style: TextStyle(
                             fontSize: 34, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 4),
@@ -188,7 +188,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                               width: 20,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('Save all goals'),
+                          : const Text('Save macros'),
                     ),
                   ],
                 ),

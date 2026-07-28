@@ -62,7 +62,7 @@ class _AddFoodTabState extends State<AddFoodTab> {
                   style: TextStyle(fontSize: 34, fontWeight: FontWeight.bold)),
               const SizedBox(height: 4),
               Text(
-                AppDate.display(date),
+                'Logging for ${AppDate.display(date)}',
                 style: TextStyle(color: colors.onSurfaceVariant),
               ),
               const SizedBox(height: 20),
@@ -85,7 +85,7 @@ class _AddFoodTabState extends State<AddFoodTab> {
                         style: TextStyle(color: colors.onSurfaceVariant),
                       ),
                       const SizedBox(height: 16),
-                      const FoodEntryForm(),
+                      FoodEntryForm(selectedDate: date),
                     ],
                   ),
                 ),

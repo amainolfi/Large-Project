@@ -87,7 +87,7 @@ function GoalInputs({
   );
 }
 
-export default function GoalsPage() {
+export default function MacrosPage() {
   const [form, setForm] = useState<GoalForm>(defaultForm);
   const [hasGoals, setHasGoals] = useState(false);
   const [message, setMessage] = useState("");
@@ -110,7 +110,7 @@ export default function GoalsPage() {
       })
       .catch((loadError: unknown) => {
         if (current) {
-          setError(loadError instanceof Error ? loadError.message : "Could not load goals.");
+          setError(loadError instanceof Error ? loadError.message : "Could not load macros.");
         }
       });
 
@@ -130,7 +130,7 @@ export default function GoalsPage() {
       const value = Number(form[field.key]);
 
       if (!Number.isFinite(value) || value < 0) {
-        setError("All goals must be numbers that are zero or greater.");
+        setError("All macro targets must be numbers that are zero or greater.");
         return;
       }
 
@@ -140,11 +140,11 @@ export default function GoalsPage() {
     setSaving(true);
 
     try {
-      const data = await saveGoals(values);
+      await saveGoals(values);
       setHasGoals(true);
-      setMessage(data.message);
+      setMessage("Macros saved successfully.");
     } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : "Could not save goals.");
+      setError(saveError instanceof Error ? saveError.message : "Could not save macros.");
     } finally {
       setSaving(false);
     }
@@ -155,7 +155,7 @@ export default function GoalsPage() {
       <div className="page-head">
         <div>
           <p className="eyebrow">Personal targets</p>
-          <h1>Daily goals</h1>
+          <h1>Macros</h1>
           <p className="page-subtitle">
             {hasGoals
               ? "Update the targets and limits used on your dashboard."
@@ -172,7 +172,7 @@ export default function GoalsPage() {
           <div className="section-heading">
             <div>
               <h2>Macros, fiber, and sugar</h2>
-              <p className="card-note">The main goals shown at the top of your dashboard.</p>
+              <p className="card-note">The main macro and nutrition targets shown on your dashboard.</p>
             </div>
           </div>
           <GoalInputs
@@ -201,7 +201,7 @@ export default function GoalsPage() {
           targets recommended by a qualified professional for your needs.
         </p>
         <button type="submit" className="btn" disabled={saving}>
-          {saving ? "Saving…" : "Save all goals"}
+          {saving ? "Saving…" : "Save macros"}
         </button>
       </form>
     </Layout>
